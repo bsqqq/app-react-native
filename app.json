@@ -17,13 +17,19 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.parceria-engenharia.mais-parceria",
+      "buildNumber": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.parceria-engenharia.mais-parceria"
+
+
     },
     "web": {
       "favicon": "./assets/favicon.png"
