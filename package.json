@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^12.0.0",
+    "@react-native-async-storage/async-storage": "github:react-native-community/async-storage",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/slider": "3.0.3",
     "@react-navigation/native": "^5.9.4",
@@ -17,6 +18,7 @@
     "@types/react-icons": "^3.0.0",
     "dotenv": "^9.0.2",
     "expo": "~41.0.1",
+    "expo-app-auth": "~10.1.2",
     "expo-av": "~9.1.2",
     "expo-file-system": "~11.0.2",
     "expo-font": "~9.1.0",
@@ -33,8 +35,8 @@
     "react-native-reanimated": "~2.1.0",
     "react-native-safe-area-context": "3.2.0",
     "react-native-screens": "~3.0.0",
-    "react-native-web": "~0.13.12",
-    "expo-app-auth": "~10.1.2"
+    "react-native-toast-message": "^1.4.9",
+    "react-native-web": "~0.13.12"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",

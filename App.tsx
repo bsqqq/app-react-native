@@ -1,20 +1,17 @@
+import 'react-native-gesture-handler'
 import * as React from 'react';
-import { StyleSheet, SafeAreaView } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native'
+import { AuthProvider } from './contexts/auth'
 import Routes from './routes/'
 
 const App: React.FC = () => {
   return (
-    <SafeAreaView style={styles.container}>
-      <Routes/>
-    </SafeAreaView>
+    <NavigationContainer >
+      <AuthProvider>
+        <Routes/>
+      </AuthProvider>
+    </NavigationContainer>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignContent: 'space-between',
-    marginBottom: 10
-  }
-})
+export default App
