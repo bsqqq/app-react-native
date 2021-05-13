@@ -11,7 +11,7 @@ export default function ItemMenu({ titulo, icone, ...resto }: ItemProps) {
     return (
         <TouchableOpacity style={ styles.item } { ...resto }>
             <Entypo name={ icone } style={{fontSize: 70}}/>
-            <Text style={{ fontSize: 50 }}> { titulo } </Text>
+            <Text style={{ fontSize: 40 }}> { titulo } </Text>
         </TouchableOpacity>
     )
 }

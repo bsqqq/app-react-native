@@ -18,7 +18,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.parceria-engenharia.mais-parceria",
+      "bundleIdentifier": "com.parceriaengenharia.maisparceria",
       "buildNumber": "1.0.0"
     },
     "android": {
@@ -27,9 +27,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "softwareKeyboardLayoutMode": "pan",
-      "package": "com.parceria-engenharia.mais-parceria"
-
-
+      "package": "com.parceriaengenharia.maisparceria"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -5,21 +5,17 @@ import Itens from '../components/ItemMenu'
 import AuthContext from '../contexts/auth';
 export default function Menu() {
     const { signOut } = useContext(AuthContext)
-
     const navigation = useNavigation()
-    function handleAPR() {
-        navigation.navigate('APR')
-    }
     return(
         <SafeAreaView style={styles.container}>
             <Text>Menu Principal</Text>
                 <View style={styles.session}>
-                    <Itens titulo="Segurança" icone="shield" />
+                    <Itens titulo="Segurança" icone="shield" onPress={() => navigation.navigate('MenuDeSeguranca')}/>
                     <Itens titulo="Obras" icone="instagram" />
-                    <Itens titulo="APR" icone="mic" onPress={handleAPR}/>
-                    <Itens titulo="Frota" icone="car" />
+                    <Itens titulo="Manutenção" icone="tools" />
+                    <Itens titulo="Frota" icone="globe" />
                 </View>
-                <Button title="Sair" onPress={() => signOut()}/>
+            <Button title="Sair" onPress={() => signOut()}/>
         </SafeAreaView>
     )
 }

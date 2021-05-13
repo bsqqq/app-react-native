@@ -15,9 +15,9 @@ import * as Font from "expo-font";
 import * as Icons from "../components/Icons";
 
 const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = Dimensions.get("window");
-const BACKGROUND_COLOR = "#FFF8ED";
+const BACKGROUND_COLOR = "white";
 const LIVE_COLOR = "#FF0000";
-const DISABLED_OPACITY = 0.5;
+const DISABLED_OPACITY = 0.3;
 const RATE_SCALE = 3.0;
 
 type Props = {};

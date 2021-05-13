@@ -3,6 +3,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import AudioRecPlay from '../pages/AudioRecPlay'
 import Menu from '../pages/Menu'
+import MenuDeSeguranca from '../pages/MenuDeSeguranca'
+import Inspecao from '../pages/Inspecao';
 
 const AppStack = createStackNavigator()
 
@@ -22,6 +24,16 @@ const AppRoutes: React.FC = () => (
         <AppStack.Screen
             name="APR"
             component={AudioRecPlay}
+        />
+
+        <AppStack.Screen
+            name="MenuDeSeguranca"
+            component={MenuDeSeguranca}
+        />
+
+        <AppStack.Screen
+            name="Inspecao"
+            component={Inspecao}
         />
     </AppStack.Navigator>
 )
