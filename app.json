@@ -31,6 +31,17 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "TESTE": "CHAVE DE CONEXÂO DATABASE",
+      "REACT_APP_API_URL": "https://mais-parceria-dev.herokuapp.com/",
+      "REACT_APP_FB_API_KEY": "AIzaSyATsVnknZ7ZIiBy6mFn8Cz_dL_sPTwY9Xk",
+      "REACT_APP_FB_AUTH_DOMAIN": "parceria-dev.firebaseapp.com",
+      "REACT_APP_FB_DATABASE_URL":"https://parceria-dev-default-rtdb.firebaseio.com",
+      "REACT_APP_FB_PROJECT_ID":"parceria-dev",
+      "REACT_APP_FB_STORAGE_BUCKET":"parceria-dev.appspot.com",
+      "REACT_APP_FB_MESSAGING_SENDER_ID":804963726711,
+      "REACT_APP_APP_ID":"1:804963726711:web:399e73bc9f793895dc1d72"
     }
   }
 }

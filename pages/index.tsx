@@ -11,6 +11,7 @@ import {
     View } from "react-native";
 import { useNavigation } from '@react-navigation/core';
 import Button from '../components/NextButton'
+import Constants from "expo-constants"
 
 import AuthContext from '../contexts/auth'
 
@@ -52,6 +53,7 @@ export default function Login() {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View style={style.content}>
                         <View style={style.form}>
+                        <Text>{Constants.manifest.extra?.TESTE}</Text>
                             <Text style={style.titulo}>Login</Text>
                             <TextInput 
                                 placeholder="CPF" 

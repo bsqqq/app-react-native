@@ -56,5 +56,4 @@ const style = StyleSheet.create({
         paddingHorizontal: Dimensions.get('window').width * 0.36,
         paddingVertical: 100,
     },
-
 })
