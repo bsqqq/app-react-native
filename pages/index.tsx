@@ -9,9 +9,9 @@ import {
     Platform, 
     Text, 
     View } from "react-native";
-import { useNavigation } from '@react-navigation/core';
 import Button from '../components/NextButton'
 import Constants from "expo-constants"
+import cpfMask from '../utils/CpfMask'
 
 import AuthContext from '../contexts/auth'
 
@@ -20,15 +20,14 @@ export default function Login() {
     const [isFocusedSenha, setIsFocusedSenha] = useState(false)
     const [isFilledCPF, setIsFilledCPF] = useState(false)
     const [isFilledSenha, setIsFilledSenha] = useState(false)
-    const [cpf, setCpf] = useState<string>()
-    const [senha, setSenha] = useState<string>()
-    const navigation = useNavigation()
+    const [cpf, setCpf] = useState("")
+    const [senha, setSenha] = useState("")
 
     const { signIn } = useContext(AuthContext)
 
     async function handleSignIn(): Promise<void> {
-        if ( (isFilledCPF && isFilledSenha) && (cpf == '01587063310' && senha == '999999') ) 
-           await signIn();
+        if ( (isFilledCPF && isFilledSenha) ) 
+           await signIn(cpf, senha)
     }
     function handleInputBlurCPF(): void {
         setIsFocusedCPF(false)
@@ -40,7 +39,7 @@ export default function Login() {
     }
     function handleInputChangeCPF(value: string): void {
         setIsFilledCPF(!!value)
-        setCpf(value)
+        setCpf(cpfMask(value))
     }
     function handleInputChangeSenha(value: string): void {
         setIsFilledSenha(!!value)
@@ -53,7 +52,7 @@ export default function Login() {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View style={style.content}>
                         <View style={style.form}>
-                        <Text>{Constants.manifest.extra?.TESTE}</Text>
+                        <Text style={{fontSize: 30, position: 'relative', top: 0}}>Bem Vindo!</Text>
                             <Text style={style.titulo}>Login</Text>
                             <TextInput 
                                 placeholder="CPF" 

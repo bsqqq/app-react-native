@@ -4,18 +4,17 @@ import * as auth from '../services/auth'
 
 interface AuthContextData {
     signed:  boolean,
-    user: object | null,
+    user: object | null | undefined,
     loading: boolean,
-    signIn(): Promise<void>,
+    signIn(cpf: string, senha: string): Promise<void>,
     signOut(): void    
 }
-
 const AuthContext = createContext<AuthContextData> ( {} as AuthContextData )
-
 export default AuthContext
 
+
 export const AuthProvider: React.FC = ({ children }) => {
-    const [user, setUser] = useState<object | null>(null)
+    const [user, setUser] = useState<object | null | undefined>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -31,15 +30,15 @@ export const AuthProvider: React.FC = ({ children }) => {
         loadStorageData()
     }, [])
 
-    async function signIn() {
-        const response = await auth.signIn()
-        setUser(response.user)
-        await AsyncStorage.setItem('@mais-parceria:user', JSON.stringify(response.user))
-        await AsyncStorage.setItem('@mais-parceria:token', response.token)
+    async function signIn(cpf: string, senha: string) {
+        const response = await auth.signIn(cpf, senha)
+        setUser(response?.user)
+        await AsyncStorage.setItem('@mais-parceria:user', JSON.stringify(response?.user))
+        await AsyncStorage.setItem('@mais-parceria:token', String(response?.token))
     }
     async function signOut() {
         AsyncStorage.clear().then(() => {
-            setUser(null)
+            setUser(undefined)
         })
     }
 

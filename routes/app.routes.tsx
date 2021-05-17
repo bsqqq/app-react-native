@@ -5,6 +5,7 @@ import AudioRecPlay from '../pages/AudioRecPlay'
 import Menu from '../pages/Menu'
 import MenuDeSeguranca from '../pages/MenuDeSeguranca'
 import Inspecao from '../pages/Inspecao';
+import NovaInspecao from '../pages/NovaInspecao';
 
 const AppStack = createStackNavigator()
 
@@ -34,6 +35,10 @@ const AppRoutes: React.FC = () => (
         <AppStack.Screen
             name="Inspecao"
             component={Inspecao}
+        />
+        <AppStack.Screen
+            name="NovaInspeção"
+            component={NovaInspecao}
         />
     </AppStack.Navigator>
 )

@@ -1,7 +1,9 @@
 import React from 'react';
 import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Dimensions, ScrollView } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
 
 export default function Inspecao() {
+    const navigation = useNavigation()
     return (
         <SafeAreaView style={style.container}>
             <ScrollView>
@@ -13,7 +15,7 @@ export default function Inspecao() {
                 <Text style={style.cards}>Inspeção.tsx</Text>
             </ScrollView> 
             <View style={style.buttonPosition}>
-                <TouchableOpacity style={style.button} >
+                <TouchableOpacity style={style.button} onPress={() => navigation.navigate('NovaInspeção')}>
                     <Text style={style.buttonText}>
                         +
                     </Text>
@@ -55,5 +57,6 @@ const style = StyleSheet.create({
         borderWidth: 2,
         paddingHorizontal: Dimensions.get('window').width * 0.36,
         paddingVertical: 100,
+        marginVertical: 5
     },
 })

@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 import { SafeAreaView, StyleSheet, Text, View, Button } from 'react-native'
 import Itens from '../components/ItemMenu'
 import AuthContext from '../contexts/auth';
+
 export default function Menu() {
     const { signOut } = useContext(AuthContext)
     const navigation = useNavigation()
@@ -30,6 +31,6 @@ const styles = StyleSheet.create({
     session: {
         flex: 1,
         justifyContent: 'space-around',
-        maxHeight: 800
+        maxHeight: 750
     }
 })

@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps } from 'react-native'
-import { Entypo,  } from '@expo/vector-icons'
+import { Entypo } from '@expo/vector-icons'
 
 interface ItemProps extends TouchableOpacityProps {
     titulo: string;

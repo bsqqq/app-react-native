@@ -28,6 +28,6 @@ const styles = StyleSheet.create({
     session: {
         flex: 1,
         justifyContent: 'space-around',
-        maxHeight: 800
+        maxHeight: 750
     }
 })
