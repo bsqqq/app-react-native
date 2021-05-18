@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import api from '../services/auth'
 import * as auth from '../services/auth' 
 
 interface AuthContextData {
@@ -21,8 +22,9 @@ export const AuthProvider: React.FC = ({ children }) => {
         async function loadStorageData() {
            const storagedUser = await AsyncStorage.getItem('@mais-parceria:user')
            const storagedToken = await AsyncStorage.getItem('@mais-parceria:token')
-           await new Promise(resolve => setTimeout(resolve, 2000))
+           setLoading(true)
            if(storagedUser && storagedToken) {
+            api.defaults.headers.Authorization = `Bearer ${storagedToken}`
             setUser(JSON.parse(storagedUser))
             setLoading(false)
            }
@@ -33,13 +35,16 @@ export const AuthProvider: React.FC = ({ children }) => {
     async function signIn(cpf: string, senha: string) {
         const response = await auth.signIn(cpf, senha)
         setUser(response?.user)
+        api.defaults.headers['Authorization'] = `Bearer ${response?.token}`
         await AsyncStorage.setItem('@mais-parceria:user', JSON.stringify(response?.user))
         await AsyncStorage.setItem('@mais-parceria:token', String(response?.token))
+        console.log(`logado como ${response?.user.name}`)
     }
     async function signOut() {
         AsyncStorage.clear().then(() => {
-            setUser(undefined)
+            setUser(null)
         })
+        console.log(`Deslogou`)
     }
 
     return (

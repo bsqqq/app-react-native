@@ -6,7 +6,7 @@ import Routes from './routes/'
 
 const App: React.FC = () => {
   return (
-    <NavigationContainer >
+    <NavigationContainer>
       <AuthProvider>
         <Routes/>
       </AuthProvider>

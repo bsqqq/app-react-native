@@ -10,6 +10,7 @@ export default function Menu() {
     return(
         <SafeAreaView style={styles.container}>
             <Text>Menu Principal</Text>
+            {/* <Text>Bem Vindo {user?.name}</Text> */}
                 <View style={styles.session}>
                     <Itens titulo="Segurança" icone="shield" onPress={() => navigation.navigate('MenuDeSeguranca')}/>
                     <Itens titulo="Obras" icone="instagram" />

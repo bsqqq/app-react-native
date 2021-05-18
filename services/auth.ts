@@ -1,5 +1,11 @@
-import authentication from './authentication'
-import {AxiosResponse} from 'axios'
+import Constants from 'expo-constants'
+import axios, { AxiosResponse, AxiosInstance } from 'axios'
+
+const authentication: AxiosInstance = axios.create({
+    baseURL: Constants.manifest.extra?.REACT_APP_API_URL
+})
+
+export default authentication
 interface Response {
     token: string,
     user: {
