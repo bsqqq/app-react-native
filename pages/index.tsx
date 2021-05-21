@@ -10,7 +10,6 @@ import {
     Text, 
     View } from "react-native";
 import Button from '../components/NextButton'
-import Constants from "expo-constants"
 import cpfMask from '../utils/CpfMask'
 
 import AuthContext from '../contexts/auth'
@@ -33,13 +32,13 @@ export default function Login() {
         setIsFocusedCPF(false)
         setIsFilledCPF(!!cpf)
     }
-    function handleInputBlurSenha(): void {
-        setIsFocusedSenha(false)
-        setIsFilledSenha(!!senha)
-    }
     function handleInputChangeCPF(value: string): void {
         setIsFilledCPF(!!value)
         setCpf(cpfMask(value))
+    }
+    function handleInputBlurSenha(): void {
+        setIsFocusedSenha(false)
+        setIsFilledSenha(!!senha)
     }
     function handleInputChangeSenha(value: string): void {
         setIsFilledSenha(!!value)
@@ -52,33 +51,30 @@ export default function Login() {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View style={style.content}>
                         <View style={style.form}>
-                        <Text style={{fontSize: 30, position: 'relative', top: 0}}>Bem Vindo!</Text>
-                            <Text style={style.titulo}>Login</Text>
-                            <TextInput 
-                                placeholder="CPF" 
-                                style={[
-                                    style.input,
-                                    (isFocusedCPF || isFilledCPF) && { borderColor: 'lightblue'}
-                                ]} 
-                                keyboardType='number-pad' 
-                                onBlur={handleInputBlurCPF}
-                                onFocus={() => setIsFocusedCPF(true)}
-                                returnKeyType='next'
-                                onChangeText={handleInputChangeCPF}
-                                blurOnSubmit={false}
-                            />
-                            <TextInput  
-                                placeholder="Senha" 
-                                style={[
-                                    style.input,
-                                    (isFocusedSenha || isFilledSenha) && { borderColor: 'lightblue'}
-                                ]} 
-                                onFocus={() => setIsFocusedSenha(true)}
-                                onBlur={handleInputBlurSenha}
-                                onChangeText={handleInputChangeSenha}
-                                secureTextEntry={true}
-                            />
-                            
+                            <Text style={{fontSize: 30, position: 'relative', top: 0}}>Bem Vindo!</Text>
+                                <Text style={style.titulo}>Login</Text>
+                                    <TextInput 
+                                        placeholder="CPF" 
+                                        style={[
+                                            style.input,
+                                            (isFocusedCPF || isFilledCPF) && { borderColor: 'lightblue'}
+                                        ]} 
+                                        keyboardType='number-pad' 
+                                        onBlur={handleInputBlurCPF}
+                                        onFocus={() => setIsFocusedCPF(true)}
+                                        onChangeText={handleInputChangeCPF}
+                                    />
+                                    <TextInput  
+                                        placeholder="Senha" 
+                                        style={[
+                                            style.input,
+                                            (isFocusedSenha || isFilledSenha) && { borderColor: 'lightblue'}
+                                        ]} 
+                                        onFocus={() => setIsFocusedSenha(true)}
+                                        onBlur={handleInputBlurSenha}
+                                        onChangeText={handleInputChangeSenha}
+                                        secureTextEntry={true}
+                                    />
                             <Button texto={"Entrar"} onPress={handleSignIn}/>
                         </View>
                     </View>

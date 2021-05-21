@@ -6,6 +6,7 @@ import Menu from '../pages/Menu'
 import MenuDeSeguranca from '../pages/MenuDeSeguranca'
 import Inspecao from '../pages/Inspecao';
 import NovaInspecao from '../pages/NovaInspecao';
+import TelaDePerguntas from '../pages/telaDePerguntas'
 
 const AppStack = createStackNavigator()
 
@@ -36,9 +37,15 @@ const AppRoutes: React.FC = () => (
             name="Inspecao"
             component={Inspecao}
         />
+
         <AppStack.Screen
             name="NovaInspeção"
             component={NovaInspecao}
+        />
+        
+        <AppStack.Screen
+            name="TelaDePerguntas"
+            component={TelaDePerguntas}
         />
     </AppStack.Navigator>
 )
