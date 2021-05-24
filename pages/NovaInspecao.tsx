@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { 
     Text, 
     View, 
@@ -6,35 +6,43 @@ import {
     TextInput, 
     KeyboardAvoidingView, 
     Platform, 
-    Dimensions } from 'react-native'
-import Button from '../components/NextButton'
+    Dimensions,
+    Button } from 'react-native'
+import Botao from '../components/NextButton'
 import fb from '../services/firebase'
-import { InspecaoContext } from '../contexts/inspecao'
+import { InspecaoContextData } from '../contexts/inspecao'
 import { useNavigation } from '@react-navigation/native'
 import FilterPicker, { ModalFilterPickerOption } from 'react-native-modal-filter-picker'
-import { searchMunicipiosById } from '../services/apiIBGE'
 import municipios from '../municipios.json'
+import * as Location from 'expo-location'
+import AuthContext from '../contexts/auth'
 
 export default function NovaInspecao() {
     const navigation = useNavigation()
+    const [location, setLocation] = useState<Location.LocationObject>()
     const [municipioId, setMunicipioId] = useState<number>()
     const [numInsepcao, setNumInspecao] = useState<number>()
     const [localidade, setLocalidade] = useState<string>()
     const [municipio, setMunicipio] = useState<string>()
     const [dataHora, setDataHora] = useState<string>() 
-    const [visible, setVisible] = useState(false)
+    const [errorMsg, setErrorMsg] = useState<string>()
     const [OtOsSi, setOtOsSi] = useState<number>()
+    const [visible, setVisible] = useState(false)
+    const { user } = useContext(AuthContext)
     const db = fb.database()
 
     async function handleNewInspecao() {
         try {
-            const newInspecao: InspecaoContext = {
+            const newInspecao: InspecaoContextData = {
                 id: new Date().getTime(),
                 NumeroDeInspecao: numInsepcao,
                 DataEHoraDaInspecao: dataHora,
                 OT_OS_SI: OtOsSi,
                 MunicipioId: municipioId,
-                Localidade: localidade
+                Localidade: localidade,
+                CoordenadaX: location?.coords.latitude,
+                CoordenadaY: location?.coords.longitude,
+                Inspetor: user?.name
             }
             console.log(newInspecao)
             await db.ref(`/inspecoes/${newInspecao.id}`).set(newInspecao)
@@ -42,16 +50,29 @@ export default function NovaInspecao() {
         } catch (error) {
             console.log(error)
         }
-}
+    }
 
     useEffect(() => {
         const date = new Date()
-        setDataHora(`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${new Date().toLocaleTimeString()}`)
-    }, [])
+        setDataHora(`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${new Date().toLocaleTimeString()}`);
+        (async (): Promise<void> => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+              setErrorMsg('Permission to access location was denied');
+              return;
+            }
+            let location = await Location.getCurrentPositionAsync({});
+            setLocation(location);
+            Location.Accuracy.Highest
+          })()
+    },[])
     
     let municipioFormatado: ModalFilterPickerOption[] = []
     municipios.forEach(item => {
-        municipioFormatado.push({key: String(item.id), label: item.nome})
+        municipioFormatado.push({
+            key: item.id, 
+            label: item.nome
+        })
     })
     return (
         <>
@@ -78,25 +99,26 @@ export default function NovaInspecao() {
                         keyboardType='numeric'
                         onChangeText={value => setOtOsSi(parseInt(value))}
                     />
-
-                    <Text style={styles.titulo}>Município:</Text>
-                    <TextInput 
-                        style={styles.input} 
-                        keyboardType='default'
-                        value={municipio}
-                        onChangeText={value => setMunicipio(value)}
-                    />
+                    
+                    <View style={{flexDirection: 'row'}}>
+                        <Text style={styles.titulo}>Município:</Text>
+                        <Text style={{fontStyle: 'italic', marginLeft: 10, fontSize: 20}}>{municipio}</Text>
+                    </View>
+                    <View style={styles.municipio}>
+                        <Button 
+                            title="Pressione aqui para escolher o município" 
+                            onPress={() => setVisible(true)}
+                        />
+                    </View>
                     <FilterPicker
                         visible={visible}
-                        onSelect={(picked) => {
-                            setMunicipioId(picked.key); 
-                            setVisible(false)
-                            // console.log(picked)
-                        }}
-                        onCancel={() => {
-                            setMunicipioId(undefined)
+                        onSelect={(item: any) => {
+                            console.log(item)
+                            setMunicipioId(item.key)
+                            setMunicipio(item.label)
                             setVisible(false)
                         }}
+                        onCancel={() => setVisible(false)}
                         options={municipioFormatado}
                     />
                     
@@ -109,9 +131,9 @@ export default function NovaInspecao() {
                 </View>
             </KeyboardAvoidingView>
             
-                <View style={styles.centralizarBotao}>
-                    <Button texto='Iniciar' onPress={handleNewInspecao}/>
-                </View>
+            <View style={styles.centralizarBotao}>
+                <Botao texto='Iniciar' onPress={handleNewInspecao}/>
+            </View>
         </>
     )   
 }
@@ -138,5 +160,9 @@ const styles = StyleSheet.create({
     centralizarBotao: {
         alignItems: 'center',
         bottom: 130
+    },
+    municipio: {
+        marginVertical: 10,
+        flexDirection: 'row'
     }
 })

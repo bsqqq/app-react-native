@@ -33,7 +33,6 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "TESTE": "CHAVE DE CONEXÂO DATABASE",
       "REACT_APP_API_URL": "https://mais-parceria-dev.herokuapp.com/",
       "REACT_APP_FB_API_KEY": "AIzaSyATsVnknZ7ZIiBy6mFn8Cz_dL_sPTwY9Xk",
       "REACT_APP_FB_AUTH_DOMAIN": "parceria-dev.firebaseapp.com",

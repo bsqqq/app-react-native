@@ -5,12 +5,12 @@ import Itens from '../components/ItemMenu'
 import AuthContext from '../contexts/auth';
 
 export default function Menu() {
-    const { signOut } = useContext(AuthContext)
+    const { signOut, user } = useContext(AuthContext)
     const navigation = useNavigation()
     return(
         <SafeAreaView style={styles.container}>
+            <Text>Bem Vindo(a) {user?.name}</Text>
             <Text>Menu Principal</Text>
-            {/* <Text>Bem Vindo {user?.name}</Text> */}
                 <View style={styles.session}>
                     <Itens titulo="Segurança" icone="shield" onPress={() => navigation.navigate('MenuDeSeguranca')}/>
                     <Itens titulo="Obras" icone="instagram" />
@@ -32,6 +32,6 @@ const styles = StyleSheet.create({
     session: {
         flex: 1,
         justifyContent: 'space-around',
-        maxHeight: 750
+        maxHeight: 720
     }
 })
