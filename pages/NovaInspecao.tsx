@@ -7,46 +7,64 @@ import {
     KeyboardAvoidingView, 
     Platform, 
     Dimensions,
-    Button } from 'react-native'
+    Button,
+    ScrollView } from 'react-native'
 import Botao from '../components/NextButton'
 import fb from '../services/firebase'
 import { InspecaoContextData } from '../contexts/inspecao'
 import { useNavigation } from '@react-navigation/native'
 import FilterPicker, { ModalFilterPickerOption } from 'react-native-modal-filter-picker'
-import municipios from '../municipios.json'
+import municipios from '../json/municipios.json'
+import processos from '../processos.json'
 import * as Location from 'expo-location'
 import AuthContext from '../contexts/auth'
 
 export default function NovaInspecao() {
-    const navigation = useNavigation()
     const [location, setLocation] = useState<Location.LocationObject>()
     const [municipioId, setMunicipioId] = useState<number>()
-    const [numInsepcao, setNumInspecao] = useState<number>()
+    const [numInspecao, setNumInspecao] = useState<number>()
     const [localidade, setLocalidade] = useState<string>()
     const [municipio, setMunicipio] = useState<string>()
     const [dataHora, setDataHora] = useState<string>() 
     const [errorMsg, setErrorMsg] = useState<string>()
     const [OtOsSi, setOtOsSi] = useState<number>()
+    const [equipe, setEquipe] = useState<string>()
     const [visible, setVisible] = useState(false)
+    const [placa, setPlaca] = useState<string>()
     const { user } = useContext(AuthContext)
+    const navigation = useNavigation()
     const db = fb.database()
 
     async function handleNewInspecao() {
         try {
             const newInspecao: InspecaoContextData = {
                 id: new Date().getTime(),
-                NumeroDeInspecao: numInsepcao,
+                NumeroDeInspecao: numInspecao,
                 DataEHoraDaInspecao: dataHora,
                 OT_OS_SI: OtOsSi,
                 MunicipioId: municipioId,
                 Localidade: localidade,
                 CoordenadaX: location?.coords.latitude,
                 CoordenadaY: location?.coords.longitude,
-                Inspetor: user?.name
+                Inspetor: user?.name,
+                Equipe: equipe,
+                Placa: placa
             }
-            console.log(newInspecao)
-            await db.ref(`/inspecoes/${newInspecao.id}`).set(newInspecao)
-            navigation.navigate('TelaDePerguntas')            
+            if(
+                !newInspecao.NumeroDeInspecao?.toString().trim()
+                && !newInspecao.MunicipioId?.toString().trim()
+                && !newInspecao.OT_OS_SI?.toString().trim()
+                && !newInspecao.Localidade?.trim()
+                && !newInspecao.Equipe?.trim()
+                && !newInspecao.Placa?.trim()
+                ) {
+                    alert('Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
+                    console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
+                } else {
+                    console.log(newInspecao)
+                    await db.ref(`/inspecoes/${newInspecao.id}`).set(newInspecao)
+                    navigation.navigate('TelaDePerguntas')         
+                }
         } catch (error) {
             console.log(error)
         }
@@ -67,73 +85,101 @@ export default function NovaInspecao() {
           })()
     },[])
     
-    let municipioFormatado: ModalFilterPickerOption[] = []
-    municipios.forEach(item => {
+    let municipioFormatado: ModalFilterPickerOption[]
+    municipios.forEach(municipio => {
         municipioFormatado.push({
-            key: item.id, 
-            label: item.nome
+            key: municipio.id, 
+            label: municipio.nome
         })
     })
+
+    let processosFormatados: ModalFilterPickerOption[]
+    Object.keys(processos).forEach(processo => {
+        processosFormatados.push({
+            key: processo.id,
+            label: processo.nome
+        })
+    })
+
+    let contratosFormatados: ModalFilterPickerOption[]
+    // contratos.forEach(contrato...)...
+
     return (
         <>
-            <KeyboardAvoidingView behavior={Platform.OS === 'android' ? 'padding' : 'height'} style={styles.container} >
-                <View>
-                    <Text style={styles.titulo}>Número da inspeção:</Text>
-                    <TextInput 
-                        style={styles.input} 
-                        keyboardType='numeric' 
-                        onChangeText={value => setNumInspecao(parseInt(value))}
-                    />
+            <KeyboardAvoidingView behavior={ Platform.OS === 'android' ? 'padding' : 'height' } style={ styles.container } >
+                <ScrollView>
+                    <View>
+                        <Text style={styles.titulo}>Número da inspeção:</Text>
+                        <TextInput 
+                            style={styles.input} 
+                            keyboardType='numeric' 
+                            onChangeText={ value => setNumInspecao(parseInt(value)) }
+                        />
 
-                    <Text style={styles.titulo}>Data e hora da inspeção:</Text>
-                    <TextInput 
-                        style={styles.input} 
-                        value={dataHora} 
-                        editable={false}
-                        onChangeText={value => setDataHora(value)}
-                    />
+                        <Text style={styles.titulo}>Data e hora da inspeção:</Text>
+                        <TextInput 
+                            style={styles.input} 
+                            value={dataHora} 
+                            editable={false}
+                            onChangeText={ value => setDataHora(value) }
+                        />
 
-                    <Text style={styles.titulo}>OT / OS / SI:</Text>
-                    <TextInput 
-                        style={styles.input} 
-                        keyboardType='numeric'
-                        onChangeText={value => setOtOsSi(parseInt(value))}
-                    />
-                    
-                    <View style={{flexDirection: 'row'}}>
-                        <Text style={styles.titulo}>Município:</Text>
-                        <Text style={{fontStyle: 'italic', marginLeft: 10, fontSize: 20}}>{municipio}</Text>
-                    </View>
-                    <View style={styles.municipio}>
-                        <Button 
-                            title="Pressione aqui para escolher o município" 
-                            onPress={() => setVisible(true)}
+                        <Text style={styles.titulo}>OT / OS / SI:</Text>
+                        <TextInput 
+                            style={styles.input} 
+                            keyboardType='numeric'
+                            onChangeText={ value => setOtOsSi(parseInt(value)) }
+                        />
+                        
+                        <View style={{flexDirection: 'row'}}>
+                            <Text style={styles.titulo}>Município:</Text>
+                            <Text style={{fontStyle: 'italic', marginLeft: 10, fontSize: 20}}>{municipio}</Text>
+                        </View>
+                        <View style={styles.municipioBotao}>
+                            <Button 
+                                title="Pressione aqui para escolher o município" 
+                                onPress={ () => setVisible(true) }
+                            />
+                        </View>
+                        <FilterPicker
+                            visible={visible}
+                            onSelect={(item: any) => {
+                                console.log(item)
+                                setMunicipioId(item.key)
+                                setMunicipio(item.label)
+                                setVisible(false)
+                            }}
+                            onCancel={() => setVisible(false)}
+                            options={ municipioFormatado }
+                        />
+                        
+                        <Text style={styles.titulo}>Bairro / Localidade:</Text>
+                        <TextInput 
+                            style={styles.input} 
+                            keyboardType='default'
+                            onChangeText={ value => setLocalidade(value) }
+                        />
+
+                        <Text style={styles.titulo}>Placa do carro:</Text>
+                        <TextInput 
+                            style={styles.input} 
+                            keyboardType='default'
+                            onChangeText={ value => setPlaca(value) }
+                        />
+
+                        <Text style={styles.titulo}>Equipe:</Text>
+                        <TextInput 
+                            style={styles.input} 
+                            keyboardType='default'
+                            onChangeText={ value => setEquipe(value) }
                         />
                     </View>
-                    <FilterPicker
-                        visible={visible}
-                        onSelect={(item: any) => {
-                            console.log(item)
-                            setMunicipioId(item.key)
-                            setMunicipio(item.label)
-                            setVisible(false)
-                        }}
-                        onCancel={() => setVisible(false)}
-                        options={municipioFormatado}
-                    />
-                    
-                    <Text style={styles.titulo}>Bairro / Localidade:</Text>
-                    <TextInput 
-                        style={styles.input} 
-                        keyboardType='default'
-                        onChangeText={value => setLocalidade(value)}
-                    />
-                </View>
-            </KeyboardAvoidingView>
+                </ScrollView>
             
-            <View style={styles.centralizarBotao}>
-                <Botao texto='Iniciar' onPress={handleNewInspecao}/>
+            <View style={ styles.centralizarBotao }>
+                <Botao texto='Iniciar' onPress={ handleNewInspecao }/>
             </View>
+            </KeyboardAvoidingView>
         </>
     )   
 }
@@ -144,6 +190,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'flex-start',
         paddingHorizontal: 30,
+        marginTop: 100,
+        maxHeight: 475
     },
     titulo: {
         fontSize: 20,
@@ -152,17 +200,18 @@ const styles = StyleSheet.create({
     },
     input:{
         backgroundColor: 'lightgrey',
-        padding: 10,
+        paddingVertical: 3,
         width: Dimensions.get('window').width - 60,
         marginBottom: 20,
         fontStyle: 'italic'
     },
     centralizarBotao: {
         alignItems: 'center',
-        bottom: 130
+        bottom: -30,
+        left: 95
     },
-    municipio: {
-        marginVertical: 10,
+    municipioBotao: {
+        marginVertical: 7,
         flexDirection: 'row'
     }
 })
