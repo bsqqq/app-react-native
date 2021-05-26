@@ -15,21 +15,40 @@ import { InspecaoContextData } from '../contexts/inspecao'
 import { useNavigation } from '@react-navigation/native'
 import FilterPicker, { ModalFilterPickerOption } from 'react-native-modal-filter-picker'
 import municipios from '../json/municipios.json'
-import processos from '../processos.json'
+import processos from '../json/processos.json'
+import contratos from '../json/contratos.json'
 import * as Location from 'expo-location'
 import AuthContext from '../contexts/auth'
 
+interface ProcessosProps {
+    [index: string]: {
+        id: number,
+        nome: string,
+    }
+}
+
+interface ContratosProps {
+    id: number,
+    nome: number
+}
+
 export default function NovaInspecao() {
     const [location, setLocation] = useState<Location.LocationObject>()
+    const [municipioVisible, setMunicipioVisible] = useState(false)
+    const [contratoVisible, setContratoVisible] = useState(false)
+    const [processoVisible, setProcessoVisible] = useState(false)
     const [municipioId, setMunicipioId] = useState<number>()
     const [numInspecao, setNumInspecao] = useState<number>()
+    const [contratoId, setContratoId] = useState<number>()
+    const [processoId, setProcessoId] = useState<number>()
     const [localidade, setLocalidade] = useState<string>()
     const [municipio, setMunicipio] = useState<string>()
+    const [processo, setProcesso] = useState<string>()
+    const [contrato, setContrato] = useState<string>()
     const [dataHora, setDataHora] = useState<string>() 
     const [errorMsg, setErrorMsg] = useState<string>()
     const [OtOsSi, setOtOsSi] = useState<number>()
     const [equipe, setEquipe] = useState<string>()
-    const [visible, setVisible] = useState(false)
     const [placa, setPlaca] = useState<string>()
     const { user } = useContext(AuthContext)
     const navigation = useNavigation()
@@ -48,15 +67,20 @@ export default function NovaInspecao() {
                 CoordenadaY: location?.coords.longitude,
                 Inspetor: user?.name,
                 Equipe: equipe,
-                Placa: placa
+                Placa: placa,
+                ContratoId: contratoId,
+                ProcessoId: processoId
             }
+
             if(
-                !newInspecao.NumeroDeInspecao?.toString().trim()
-                && !newInspecao.MunicipioId?.toString().trim()
-                && !newInspecao.OT_OS_SI?.toString().trim()
-                && !newInspecao.Localidade?.trim()
-                && !newInspecao.Equipe?.trim()
-                && !newInspecao.Placa?.trim()
+                (!newInspecao.NumeroDeInspecao?.toString().trim() || newInspecao.NumeroDeInspecao?.toString() == "")
+                && (!newInspecao.MunicipioId?.toString().trim() || newInspecao.MunicipioId?.toString() == "")
+                && (!newInspecao.ContratoId?.toString().trim() || newInspecao.ContratoId?.toString() == "")
+                && (!newInspecao.ProcessoId?.toString().trim() || newInspecao.ProcessoId?.toString() == "")
+                && (!newInspecao.OT_OS_SI?.toString().trim() || newInspecao.OT_OS_SI?.toString() == "")
+                && (!newInspecao.Localidade?.trim() || newInspecao.Localidade?.toString() == "")
+                && (!newInspecao.Equipe?.trim() || newInspecao.Equipe?.toString() == "")
+                && (!newInspecao.Placa?.trim() || newInspecao.Placa?.toString() == "")
                 ) {
                     alert('Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
                     console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
@@ -85,7 +109,7 @@ export default function NovaInspecao() {
           })()
     },[])
     
-    let municipioFormatado: ModalFilterPickerOption[]
+    let municipioFormatado: ModalFilterPickerOption[] = []
     municipios.forEach(municipio => {
         municipioFormatado.push({
             key: municipio.id, 
@@ -93,16 +117,23 @@ export default function NovaInspecao() {
         })
     })
 
-    let processosFormatados: ModalFilterPickerOption[]
-    Object.keys(processos).forEach(processo => {
+    const processosTipados: ProcessosProps = processos
+    let processosFormatados: ModalFilterPickerOption[] = []
+    const chaves: string[] = Object.keys(processosTipados)
+    chaves.forEach(item => {
         processosFormatados.push({
-            key: processo.id,
-            label: processo.nome
+            key: processosTipados[item].id,
+            label:processosTipados[item].nome
         })
     })
 
-    let contratosFormatados: ModalFilterPickerOption[]
-    // contratos.forEach(contrato...)...
+    let contratosFormatados: ModalFilterPickerOption[] = []
+    contratos.forEach(contrato => {
+        contratosFormatados.push({
+            key: contrato.id,
+            label: contrato.nome
+        })
+    })
 
     return (
         <>
@@ -138,18 +169,18 @@ export default function NovaInspecao() {
                         <View style={styles.municipioBotao}>
                             <Button 
                                 title="Pressione aqui para escolher o município" 
-                                onPress={ () => setVisible(true) }
+                                onPress={ () => setMunicipioVisible(true) }
                             />
                         </View>
                         <FilterPicker
-                            visible={visible}
+                            visible={municipioVisible}
                             onSelect={(item: any) => {
                                 console.log(item)
                                 setMunicipioId(item.key)
                                 setMunicipio(item.label)
-                                setVisible(false)
+                                setMunicipioVisible(false)
                             }}
-                            onCancel={() => setVisible(false)}
+                            onCancel={() => setMunicipioVisible(false)}
                             options={ municipioFormatado }
                         />
                         
@@ -172,6 +203,50 @@ export default function NovaInspecao() {
                             style={styles.input} 
                             keyboardType='default'
                             onChangeText={ value => setEquipe(value) }
+                        />
+
+                        <View style={{flexDirection: 'row'}}>
+                            <Text style={styles.titulo}>Processo:</Text>
+                            <Text style={{fontStyle: 'italic', marginLeft: 10, fontSize: 20}}>{processo}</Text>
+                        </View>
+                        <View style={styles.municipioBotao}>
+                            <Button 
+                                title="Pressione aqui para escolher o processo" 
+                                onPress={ () => setProcessoVisible(true) }
+                            />
+                        </View>
+                        <FilterPicker
+                            visible={processoVisible}
+                            onSelect={(item: any) => {
+                                console.log(item)
+                                setProcessoId(item.key)
+                                setProcesso(item.label)
+                                setProcessoVisible(false)
+                            }}
+                            onCancel={() => setProcessoVisible(false)}
+                            options={ processosFormatados }
+                        />
+
+                        <View style={{flexDirection: 'row'}}>
+                            <Text style={styles.titulo}>Contrato:</Text>
+                            <Text style={{fontStyle: 'italic', marginLeft: 10, fontSize: 20}}>{contrato}</Text>
+                        </View>
+                        <View style={styles.municipioBotao}>
+                            <Button 
+                                title="Pressione aqui para escolher o contrato" 
+                                onPress={ () => setContratoVisible(true) }
+                            />
+                        </View>
+                        <FilterPicker
+                            visible={contratoVisible}
+                            onSelect={(item: any) => {
+                                console.log(item)
+                                setContratoId(item.key)
+                                setContrato(item.label)
+                                setContratoVisible(false)
+                            }}
+                            onCancel={() => setContratoVisible(false)}
+                            options={ contratosFormatados }
                         />
                     </View>
                 </ScrollView>
