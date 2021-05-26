@@ -12,8 +12,8 @@ export interface InspecaoContextData {
     Inspetor: string | null,
     Placa: string | undefined,
     Equipe: string | undefined,
-    Contrato: number | undefined,
-    Processo: number | undefined
+    ContratoId: number | undefined,
+    ProcessoId: number | undefined
 }
 
 const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContextData)
@@ -30,12 +30,12 @@ const [CoordenadaY, setCoordenadaY] = useState("")
 const [Inspetor, setInspetor] = useState("")
 const [Placa, setPlaca] = useState<string>()
 const [Equipe, setEquipe] = useState<string>()
-const [contrato, setContrato] = useState<number>(0)
-const [processo, setProcesso] = useState<number>(0)
+const [ContratoId, setContratoId] = useState<number>(0)
+const [ProcessoId, setProcessoId] = useState<number>(0)
 
 export const InspecaoProvider: React.FC = ({ children }) => {
     return (
-        <InspecaoContext.Provider value={{id, NumeroDeInspecao, DataEHoraDaInspecao, OT_OS_SI, MunicipioId, Localidade, CoordenadaX, CoordenadaY, Inspetor, Placa, Equipe, contrato, processo}}>
+        <InspecaoContext.Provider value={{id, NumeroDeInspecao, DataEHoraDaInspecao, OT_OS_SI, MunicipioId, Localidade, CoordenadaX, CoordenadaY, Inspetor, Placa, Equipe, ContratoId, ProcessoId}}>
             { children }
         </InspecaoContext.Provider>
     )
