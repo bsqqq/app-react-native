@@ -27,14 +27,6 @@ interface ProcessosProps {
     }
 }
 
-<<<<<<< HEAD
-=======
-interface ContratosProps {
-    id: number,
-    nome: number
-}
-
->>>>>>> d2c41fc41871baf41c2ad679ee158f044c7acd4f
 export default function NovaInspecao() {
     const [location, setLocation] = useState<Location.LocationObject>()
     const [municipioVisible, setMunicipioVisible] = useState(false)
@@ -61,25 +53,11 @@ export default function NovaInspecao() {
         try {
             const newInspecao: InspecaoContextData = {
                 id: new Date().getTime(),
-<<<<<<< HEAD
-                CoordenadaY: location?.coords.longitude,
-                CoordenadaX: location?.coords.latitude,
-=======
                 NumeroDeInspecao: numInspecao,
->>>>>>> d2c41fc41871baf41c2ad679ee158f044c7acd4f
                 DataEHoraDaInspecao: dataHora,
-                NumeroDeInspecao: numInspecao,
+                OT_OS_SI: OtOsSi,
                 MunicipioId: municipioId,
                 Localidade: localidade,
-<<<<<<< HEAD
-                ProcessoId: processoId,
-                ContratoId: contratoId,
-                Inspetor: user?.name,
-                OT_OS_SI: OtOsSi,
-                Equipe: equipe,
-                Placa: placa
-            }
-=======
                 CoordenadaX: location?.coords.latitude,
                 CoordenadaY: location?.coords.longitude,
                 Inspetor: user?.name,
@@ -89,7 +67,6 @@ export default function NovaInspecao() {
                 ProcessoId: processoId
             }
 
->>>>>>> d2c41fc41871baf41c2ad679ee158f044c7acd4f
             if(
                 (!newInspecao.NumeroDeInspecao?.toString().trim() || newInspecao.NumeroDeInspecao?.toString() == "")
                 && (!newInspecao.MunicipioId?.toString().trim() || newInspecao.MunicipioId?.toString() == "")
@@ -132,7 +109,6 @@ export default function NovaInspecao() {
         municipioFormatado.push({
             key: municipio.id, 
             label: municipio.nome
-<<<<<<< HEAD
         })
     })
 
@@ -154,29 +130,6 @@ export default function NovaInspecao() {
         })
     })
 
-=======
-        })
-    })
-
-    const processosTipados: ProcessosProps = processos
-    let processosFormatados: ModalFilterPickerOption[] = []
-    const chaves: string[] = Object.keys(processosTipados)
-    chaves.forEach(item => {
-        processosFormatados.push({
-            key: processosTipados[item].id,
-            label:processosTipados[item].nome
-        })
-    })
-
-    let contratosFormatados: ModalFilterPickerOption[] = []
-    contratos.forEach(contrato => {
-        contratosFormatados.push({
-            key: contrato.id,
-            label: contrato.nome
-        })
-    })
-
->>>>>>> d2c41fc41871baf41c2ad679ee158f044c7acd4f
     return (
         <>
             <KeyboardAvoidingView behavior={ Platform.OS === 'android' ? 'padding' : 'height' } style={ styles.container } >
@@ -308,11 +261,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         paddingHorizontal: 30,
         marginTop: 100,
-<<<<<<< HEAD
-        maxHeight: 500
-=======
         maxHeight: 475
->>>>>>> d2c41fc41871baf41c2ad679ee158f044c7acd4f
     },
     titulo: {
         fontSize: 20,
