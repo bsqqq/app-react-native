@@ -17,19 +17,22 @@ export interface Response {
 export async function signIn(cpf: string, senha: string): Promise<Response | null | undefined> {
     try {
         const data: AxiosResponse = await authentication.post('/login', { cpf, senha })
-        return {
-            token: data.data?.token,
-            user: {
-                name: data.data?.nome,
-                email: data.data?.email
-            }
-        } 
+            return {
+                token: data.data?.token,
+                user: {
+                    name: data.data?.nome,
+                    email: data.data?.email
+                }
+            } 
     } catch (error) {
         if(error.response?.status == 500) {
             console.log(`Erro interno no sistema... ${error}`)
+            alert("Algo deu errado, erro interno no sistema!")
             return null
         } else {
+            alert("Algo deu errado, por favor verifique seu CPF e senha e tente novamente")
             console.log(`Erro, verificar se suas entradas estão corretas. Ou ${error}`)
+            return null
         }
     }
 }

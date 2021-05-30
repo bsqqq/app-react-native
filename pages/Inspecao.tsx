@@ -1,24 +1,47 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Dimensions, ScrollView } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
+import ItemInspecao from '../components/itemInspecao';
+import fb from '../services/firebase'
+import { InspecaoContextData } from '../contexts/inspecao';
+const db = fb.database()
+var inspecoesKeys: string[]
+var inspecaoResolvida: InspecaoContextData
+
+interface InspecoesDataResolvidas {
+    [index: string]: InspecaoContextData
+}
 
 export default function Inspecao() {
+    useEffect(() => {
+        async function getInspecoes() {
+            const snap = await db.ref(`/inspecoes`).once('value')
+            const shot: InspecoesDataResolvidas = snap.exportVal()
+            console.log(shot)
+            inspecoesKeys = Object.keys(shot)
+            inspecoesKeys.forEach(key => {
+                console.log(shot[key])
+                inspecaoResolvida = shot[key]
+            })
+        }
+        getInspecoes()
+    }, [])
     const navigation = useNavigation()
     return (
         <SafeAreaView style={style.container}>
             <ScrollView>
-                <TouchableOpacity activeOpacity={0.1}>
-                    <Text style={style.cards}>Inspeção.tsx</Text>
-                </TouchableOpacity>
-                <Text style={style.cards}>Inspeção.tsx</Text> 
-                <Text style={style.cards}>Inspeção.tsx</Text>
-                <Text style={style.cards}>Inspeção.tsx</Text>
-            </ScrollView> 
+                <ItemInspecao
+                    DataEHoraDaInspecao={ inspecaoResolvida.DataEHoraDaInspecao }
+                    NumeroDeInspecao={ inspecaoResolvida.NumeroDeInspecao }
+                    OT_OS_SI={ inspecaoResolvida.OT_OS_SI }
+                    Inspetor={ inspecaoResolvida.Inspetor }
+                    ContratoId={ inspecaoResolvida.ContratoId }
+                    ProcessoId={ inspecaoResolvida.ProcessoId }
+                />
+            </ScrollView>
             <View style={style.buttonPosition}>
                 <TouchableOpacity style={style.button} onPress={() => navigation.navigate('NovaInspeção')}>
-                    <Text style={style.buttonText}>
-                        +
-                    </Text>
+                    <Text style={style.buttonText}>+</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
