@@ -41,7 +41,6 @@ export default function NovaInspecao() {
     const [processo, setProcesso] = useState<string>()
     const [contrato, setContrato] = useState<string>()
     const [dataHora, setDataHora] = useState<string>() 
-    const [errorMsg, setErrorMsg] = useState<string>()
     const [OtOsSi, setOtOsSi] = useState<number>()
     const [equipe, setEquipe] = useState<string>()
     const [placa, setPlaca] = useState<string>()
@@ -95,7 +94,6 @@ export default function NovaInspecao() {
         (async (): Promise<void> => {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-              setErrorMsg('Permission to access location was denied');
               return;
             }
             let location = await Location.getCurrentPositionAsync({});
@@ -107,7 +105,7 @@ export default function NovaInspecao() {
     let municipioFormatado: ModalFilterPickerOption[] = []
     municipios.forEach(municipio => {
         municipioFormatado.push({
-            key: municipio.id, 
+            key: String(municipio.id), 
             label: municipio.nome
         })
     })
@@ -117,7 +115,7 @@ export default function NovaInspecao() {
     const chaves: string[] = Object.keys(processosTipados)
     chaves.forEach(item => {
         processosFormatados.push({
-            key: processosTipados[item].id,
+            key: String(processosTipados[item].id),
             label:processosTipados[item].nome
         })
     })
@@ -125,7 +123,7 @@ export default function NovaInspecao() {
     let contratosFormatados: ModalFilterPickerOption[] = []
     contratos.forEach(contrato => {
         contratosFormatados.push({
-            key: contrato.id,
+            key: String(contrato.id),
             label: contrato.nome
         })
     })
@@ -171,7 +169,7 @@ export default function NovaInspecao() {
                             visible={municipioVisible}
                             onSelect={(item: any) => {
                                 console.log(item)
-                                setMunicipioId(item.key)
+                                setMunicipioId(Number(item.key))
                                 setMunicipio(item.label)
                                 setMunicipioVisible(false)
                             }}
@@ -214,7 +212,7 @@ export default function NovaInspecao() {
                             visible={processoVisible}
                             onSelect={(item: any) => {
                                 console.log(item)
-                                setProcessoId(item.key)
+                                setProcessoId(Number(item.key))
                                 setProcesso(item.label)
                                 setProcessoVisible(false)
                             }}
@@ -236,7 +234,7 @@ export default function NovaInspecao() {
                             visible={contratoVisible}
                             onSelect={(item: any) => {
                                 console.log(item)
-                                setContratoId(item.key)
+                                setContratoId(Number(item.key))
                                 setContrato(item.label)
                                 setContratoVisible(false)
                             }}

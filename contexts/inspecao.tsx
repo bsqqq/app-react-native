@@ -35,7 +35,22 @@ const [ProcessoId, setProcessoId] = useState<number>(0)
 
 export const InspecaoProvider: React.FC = ({ children }) => {
     return (
-        <InspecaoContext.Provider value={{id, NumeroDeInspecao, DataEHoraDaInspecao, OT_OS_SI, MunicipioId, Localidade, CoordenadaX, CoordenadaY, Inspetor, Placa, Equipe, ContratoId, ProcessoId}}>
+        <InspecaoContext.Provider 
+            value={{
+                id, 
+                NumeroDeInspecao, 
+                DataEHoraDaInspecao, 
+                OT_OS_SI, 
+                MunicipioId, 
+                Localidade, 
+                CoordenadaX, 
+                CoordenadaY, 
+                Inspetor, 
+                Placa, 
+                Equipe, 
+                ContratoId, 
+                ProcessoId
+                }}>
             { children }
         </InspecaoContext.Provider>
     )

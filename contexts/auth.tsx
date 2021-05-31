@@ -3,11 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import api from '../services/auth'
 import * as auth from '../services/auth'
 import fb from '../services/firebase'
-import { Response } from '../services/auth'
 
 interface AuthContextData {
     signed: boolean,
-    user: object | null | undefined,
+    user: any | null | undefined,
     loading: boolean,
     signIn(cpf: string, senha: string): Promise<void>,
     signOut(): void    

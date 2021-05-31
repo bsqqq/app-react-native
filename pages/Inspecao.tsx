@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Dimensions, ScrollView } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import ItemInspecao from '../components/itemInspecao';
@@ -6,23 +6,53 @@ import fb from '../services/firebase'
 import { InspecaoContextData } from '../contexts/inspecao';
 const db = fb.database()
 var inspecoesKeys: string[]
-var inspecaoResolvida: InspecaoContextData
+var contratosKeys: string[]
+var processosKeys: string[]
 
 interface InspecoesDataResolvidas {
     [index: string]: InspecaoContextData
 }
 
 export default function Inspecao() {
+    const [inspecoes, setInspecoes] = useState<Array<InspecaoContextData>>([])
     useEffect(() => {
         async function getInspecoes() {
             const snap = await db.ref(`/inspecoes`).once('value')
             const shot: InspecoesDataResolvidas = snap.exportVal()
-            console.log(shot)
+            const arrayDeTratamento: Array<InspecaoContextData> = []
             inspecoesKeys = Object.keys(shot)
-            inspecoesKeys.forEach(key => {
-                console.log(shot[key])
-                inspecaoResolvida = shot[key]
+
+            const snapDeContratos = await db.ref('/empresas').once('value')
+            const shotDeContratos = snapDeContratos.exportVal()
+            const arrayDeContratos: Array<any> = []
+            contratosKeys = Object.keys(shotDeContratos)
+            contratosKeys.forEach(key => {
+                arrayDeContratos.push(shotDeContratos[key])
             })
+
+            const snapDeProcessos = await db.ref('/processos').once('value')
+            const shotDeProcessos = snapDeProcessos.exportVal()
+            const arrayDeProcessos: Array<any> = []
+            processosKeys = Object.keys(shotDeProcessos)
+            processosKeys.forEach(key => {
+                arrayDeProcessos.push(shotDeProcessos[key])
+            })
+
+            inspecoesKeys.forEach(key => {
+                var tal = shot[key]
+                var contratoEncontrado = arrayDeContratos.find(contrato => {
+                    var contratoEncontrado = Number(contrato.id) === Number(tal.ContratoId)
+                    return contratoEncontrado
+                })
+                var ProcessoEncontrado = arrayDeProcessos.find(processo => {
+                    var processoEncontrado = Number(processo.id) === Number(tal.ProcessoId)
+                    return processoEncontrado
+                })
+                tal.ContratoId = contratoEncontrado ? contratoEncontrado.nome : '-'
+                tal.ProcessoId = ProcessoEncontrado ? ProcessoEncontrado.nome : '-'
+                arrayDeTratamento.push(tal)
+            })
+            setInspecoes(arrayDeTratamento)
         }
         getInspecoes()
     }, [])
@@ -30,14 +60,20 @@ export default function Inspecao() {
     return (
         <SafeAreaView style={style.container}>
             <ScrollView>
-                <ItemInspecao
-                    DataEHoraDaInspecao={ inspecaoResolvida.DataEHoraDaInspecao }
-                    NumeroDeInspecao={ inspecaoResolvida.NumeroDeInspecao }
-                    OT_OS_SI={ inspecaoResolvida.OT_OS_SI }
-                    Inspetor={ inspecaoResolvida.Inspetor }
-                    ContratoId={ inspecaoResolvida.ContratoId }
-                    ProcessoId={ inspecaoResolvida.ProcessoId }
-                />
+                {
+                    inspecoes.map(inspecao => {  
+                        return (
+                            <ItemInspecao
+                                key={ inspecao.id }
+                                DataEHoraDaInspecao={ inspecao.DataEHoraDaInspecao }
+                                NumeroDeInspecao={ inspecao.NumeroDeInspecao }
+                                OT_OS_SI={ inspecao.OT_OS_SI }
+                                Inspetor={ inspecao.Inspetor }
+                                ContratoId={ inspecao.ContratoId }
+                                ProcessoId={ inspecao.ProcessoId }
+                            />
+                        )
+                })}
             </ScrollView>
             <View style={style.buttonPosition}>
                 <TouchableOpacity style={style.button} onPress={() => navigation.navigate('NovaInspeção')}>

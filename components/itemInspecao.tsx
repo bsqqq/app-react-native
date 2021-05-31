@@ -6,13 +6,14 @@ export interface itemInspecaoProps {
     NumeroDeInspecao: number | undefined,
     OT_OS_SI: number | null | undefined,
     Inspetor: string | null | undefined,
-    ContratoId: number | undefined,
-    ProcessoId: number | undefined
+    ContratoId: number | string | undefined,
+    ProcessoId: number | string | undefined,
+    key: number | undefined
 }
 
 const itemInspecao = ({ ...tudo } : itemInspecaoProps) => {
     return (
-        <TouchableOpacity activeOpacity={0.1}>
+        <TouchableOpacity activeOpacity={0.1} style={style.cards}>
             <View style={style.textAlign}>
                 <Text>Data: </Text>
                 <Text>{tudo.DataEHoraDaInspecao}</Text>
@@ -46,12 +47,13 @@ const style = StyleSheet.create({
         borderRadius: 20,
         borderColor: 'black',
         borderWidth: 2,
-        paddingHorizontal: Dimensions.get('window').width * 0.36,
-        paddingVertical: 100,
-        marginVertical: 5
+        paddingHorizontal: Dimensions.get('window').width * 0.16,
+        paddingVertical: 15,
+        marginVertical: 10,
     },
     textAlign: {
-        flexDirection: 'row'
+        flexDirection: 'row',
+        justifyContent: 'flex-start'
     }
 })
 
