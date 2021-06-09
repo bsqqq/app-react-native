@@ -16,12 +16,12 @@ export interface Response {
 
 export async function signIn(cpf: string, senha: string): Promise<Response | null | undefined> {
     try {
-        const data: AxiosResponse = await authentication.post('/login', { cpf, senha })
+        const response: AxiosResponse = await authentication.post('/login', { cpf, senha })
             return {
-                token: data.data?.token,
+                token: response.data?.token,
                 user: {
-                    name: data.data?.nome,
-                    email: data.data?.email
+                    name: response.data?.nome,
+                    email: response.data?.email
                 }
             } 
     } catch (error) {

@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { 
-    Text, 
-    View, 
-    StyleSheet, 
-    TextInput, 
-    KeyboardAvoidingView, 
-    Platform, 
+import {
+    Text,
+    View,
+    StyleSheet,
+    TextInput,
+    KeyboardAvoidingView,
+    Platform,
     Dimensions,
     Button,
-    ScrollView } from 'react-native'
+    ScrollView
+} from 'react-native'
 import Botao from '../components/NextButton'
 import fb from '../services/firebase'
-import { InspecaoContextData } from '../contexts/inspecao'
+import InspecaoContext from '../contexts/inspecao'
 import { useNavigation } from '@react-navigation/native'
 import FilterPicker, { ModalFilterPickerOption } from 'react-native-modal-filter-picker'
 import municipios from '../json/municipios.json'
@@ -27,7 +28,24 @@ interface ProcessosProps {
     }
 }
 
+interface objetoDeInspecao {
+    id?: number | undefined,
+    NumeroDeInspecao: number | undefined,
+    DataEHoraDaInspecao: string | undefined,
+    OT_OS_SI: number | undefined,
+    MunicipioId: string | number | undefined,
+    Localidade: string | undefined,
+    CoordenadaX: string | number | undefined
+    CoordenadaY: string | number | undefined,
+    Inspetor: string | undefined,
+    Placa: string | undefined,
+    Equipe: string | undefined,
+    ContratoId: number | undefined,
+    ProcessoId: number | undefined,
+}
+
 export default function NovaInspecao() {
+    const { setProcessoContratoIdContextData, setInspecaoIdContextData } = useContext(InspecaoContext)
     const [location, setLocation] = useState<Location.LocationObject>()
     const [municipioVisible, setMunicipioVisible] = useState(false)
     const [contratoVisible, setContratoVisible] = useState(false)
@@ -40,7 +58,7 @@ export default function NovaInspecao() {
     const [municipio, setMunicipio] = useState<string>()
     const [processo, setProcesso] = useState<string>()
     const [contrato, setContrato] = useState<string>()
-    const [dataHora, setDataHora] = useState<string>() 
+    const [dataHora, setDataHora] = useState<string>()
     const [OtOsSi, setOtOsSi] = useState<number>()
     const [equipe, setEquipe] = useState<string>()
     const [placa, setPlaca] = useState<string>()
@@ -50,7 +68,7 @@ export default function NovaInspecao() {
 
     async function handleNewInspecao() {
         try {
-            const newInspecao: InspecaoContextData = {
+            const newInspecao: objetoDeInspecao = {
                 id: new Date().getTime(),
                 NumeroDeInspecao: numInspecao,
                 DataEHoraDaInspecao: dataHora,
@@ -65,8 +83,9 @@ export default function NovaInspecao() {
                 ContratoId: contratoId,
                 ProcessoId: processoId
             }
-
-            if(
+            setProcessoContratoIdContextData(Number(newInspecao?.ProcessoId), Number(newInspecao?.ContratoId))
+            setInspecaoIdContextData(Number(newInspecao.id))
+            if (
                 (!newInspecao.NumeroDeInspecao?.toString().trim() || newInspecao.NumeroDeInspecao?.toString() == "")
                 && (!newInspecao.MunicipioId?.toString().trim() || newInspecao.MunicipioId?.toString() == "")
                 && (!newInspecao.ContratoId?.toString().trim() || newInspecao.ContratoId?.toString() == "")
@@ -75,14 +94,13 @@ export default function NovaInspecao() {
                 && (!newInspecao.Localidade?.trim() || newInspecao.Localidade?.toString() == "")
                 && (!newInspecao.Equipe?.trim() || newInspecao.Equipe?.toString() == "")
                 && (!newInspecao.Placa?.trim() || newInspecao.Placa?.toString() == "")
-                ) {
-                    alert('Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
-                    console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
-                } else {
-                    console.log(newInspecao)
-                    await db.ref(`/inspecoes/${newInspecao.id}`).set(newInspecao)
-                    navigation.navigate('TelaDePerguntas')         
-                }
+            ) {
+                alert('Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
+                console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
+            } else {
+                // await db.ref(`/inspecoes/${newInspecao.id}`).set(newInspecao)
+                navigation.navigate('TelaDePerguntas')
+            }
         } catch (error) {
             console.log(error)
         }
@@ -94,18 +112,18 @@ export default function NovaInspecao() {
         (async (): Promise<void> => {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-              return;
+                return;
             }
             let location = await Location.getCurrentPositionAsync({});
             setLocation(location);
             Location.Accuracy.Highest
-          })()
-    },[])
-    
+        })()
+    }, [])
+
     let municipioFormatado: ModalFilterPickerOption[] = []
     municipios.forEach(municipio => {
         municipioFormatado.push({
-            key: String(municipio.id), 
+            key: String(municipio.id),
             label: municipio.nome
         })
     })
@@ -116,7 +134,7 @@ export default function NovaInspecao() {
     chaves.forEach(item => {
         processosFormatados.push({
             key: String(processosTipados[item].id),
-            label:processosTipados[item].nome
+            label: processosTipados[item].nome
         })
     })
 
@@ -130,39 +148,39 @@ export default function NovaInspecao() {
 
     return (
         <>
-            <KeyboardAvoidingView behavior={ Platform.OS === 'android' ? 'padding' : 'height' } style={ styles.container } >
+            <KeyboardAvoidingView behavior={Platform.OS === 'android' ? 'padding' : 'height'} style={styles.container} >
                 <ScrollView>
                     <View>
                         <Text style={styles.titulo}>Número da inspeção:</Text>
-                        <TextInput 
-                            style={styles.input} 
-                            keyboardType='numeric' 
-                            onChangeText={ value => setNumInspecao(parseInt(value)) }
+                        <TextInput
+                            style={styles.input}
+                            keyboardType='numeric'
+                            onChangeText={value => setNumInspecao(parseInt(value))}
                         />
 
                         <Text style={styles.titulo}>Data e hora da inspeção:</Text>
-                        <TextInput 
-                            style={styles.input} 
-                            value={dataHora} 
+                        <TextInput
+                            style={styles.input}
+                            value={dataHora}
                             editable={false}
-                            onChangeText={ value => setDataHora(value) }
+                            onChangeText={value => setDataHora(value)}
                         />
 
                         <Text style={styles.titulo}>OT / OS / SI:</Text>
-                        <TextInput 
-                            style={styles.input} 
+                        <TextInput
+                            style={styles.input}
                             keyboardType='numeric'
-                            onChangeText={ value => setOtOsSi(parseInt(value)) }
+                            onChangeText={value => setOtOsSi(parseInt(value))}
                         />
-                        
-                        <View style={{flexDirection: 'row'}}>
+
+                        <View style={{ flexDirection: 'row' }}>
                             <Text style={styles.titulo}>Município:</Text>
-                            <Text style={{fontStyle: 'italic', marginLeft: 10, fontSize: 20}}>{municipio}</Text>
+                            <Text style={{ fontStyle: 'italic', marginLeft: 10, fontSize: 20 }}>{municipio}</Text>
                         </View>
                         <View style={styles.municipioBotao}>
-                            <Button 
-                                title="Pressione aqui para escolher o município" 
-                                onPress={ () => setMunicipioVisible(true) }
+                            <Button
+                                title="Pressione aqui para escolher o município"
+                                onPress={() => setMunicipioVisible(true)}
                             />
                         </View>
                         <FilterPicker
@@ -174,38 +192,39 @@ export default function NovaInspecao() {
                                 setMunicipioVisible(false)
                             }}
                             onCancel={() => setMunicipioVisible(false)}
-                            options={ municipioFormatado }
+                            options={municipioFormatado}
                         />
-                        
+
                         <Text style={styles.titulo}>Bairro / Localidade:</Text>
-                        <TextInput 
-                            style={styles.input} 
+                        <TextInput
+                            style={styles.input}
                             keyboardType='default'
-                            onChangeText={ value => setLocalidade(value) }
+                            onChangeText={value => setLocalidade(value)}
                         />
 
                         <Text style={styles.titulo}>Placa do carro:</Text>
-                        <TextInput 
-                            style={styles.input} 
+                        <TextInput
+                            style={styles.input}
                             keyboardType='default'
-                            onChangeText={ value => setPlaca(value) }
+                            onChangeText={value => setPlaca(value)}
+                            maxLength={7}
                         />
 
                         <Text style={styles.titulo}>Equipe:</Text>
-                        <TextInput 
-                            style={styles.input} 
+                        <TextInput
+                            style={styles.input}
                             keyboardType='default'
-                            onChangeText={ value => setEquipe(value) }
+                            onChangeText={value => setEquipe(value)}
                         />
 
-                        <View style={{flexDirection: 'row'}}>
+                        <View style={{ flexDirection: 'row' }}>
                             <Text style={styles.titulo}>Processo:</Text>
-                            <Text style={{fontStyle: 'italic', marginLeft: 10, fontSize: 20}}>{processo}</Text>
+                            <Text style={{ fontStyle: 'italic', marginLeft: 10, fontSize: 20 }}>{processo}</Text>
                         </View>
                         <View style={styles.municipioBotao}>
-                            <Button 
-                                title="Pressione aqui para escolher o processo" 
-                                onPress={ () => setProcessoVisible(true) }
+                            <Button
+                                title="Pressione aqui para escolher o processo"
+                                onPress={() => setProcessoVisible(true)}
                             />
                         </View>
                         <FilterPicker
@@ -217,17 +236,17 @@ export default function NovaInspecao() {
                                 setProcessoVisible(false)
                             }}
                             onCancel={() => setProcessoVisible(false)}
-                            options={ processosFormatados }
+                            options={processosFormatados}
                         />
 
-                        <View style={{flexDirection: 'row'}}>
+                        <View style={{ flexDirection: 'row' }}>
                             <Text style={styles.titulo}>Contrato:</Text>
-                            <Text style={{fontStyle: 'italic', marginLeft: 10, fontSize: 20}}>{contrato}</Text>
+                            <Text style={{ fontStyle: 'italic', marginLeft: 10, fontSize: 20 }}>{contrato}</Text>
                         </View>
                         <View style={styles.municipioBotao}>
-                            <Button 
-                                title="Pressione aqui para escolher o contrato" 
-                                onPress={ () => setContratoVisible(true) }
+                            <Button
+                                title="Pressione aqui para escolher o contrato"
+                                onPress={() => setContratoVisible(true)}
                             />
                         </View>
                         <FilterPicker
@@ -239,17 +258,16 @@ export default function NovaInspecao() {
                                 setContratoVisible(false)
                             }}
                             onCancel={() => setContratoVisible(false)}
-                            options={ contratosFormatados }
+                            options={contratosFormatados}
                         />
                     </View>
                 </ScrollView>
-            
-            <View style={ styles.centralizarBotao }>
-                <Botao texto='Iniciar' onPress={ handleNewInspecao }/>
-            </View>
             </KeyboardAvoidingView>
+            <View style={styles.centralizarBotao}>
+                <Botao texto='Iniciar' onPress={handleNewInspecao} />
+            </View>
         </>
-    )   
+    )
 }
 
 const styles = StyleSheet.create({
@@ -259,14 +277,14 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         paddingHorizontal: 30,
         marginTop: 100,
-        maxHeight: 475
+        maxHeight: Dimensions.get('screen').height * 0.6
     },
     titulo: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 5
     },
-    input:{
+    input: {
         backgroundColor: 'lightgrey',
         paddingVertical: 3,
         width: Dimensions.get('window').width - 60,
@@ -274,9 +292,11 @@ const styles = StyleSheet.create({
         fontStyle: 'italic'
     },
     centralizarBotao: {
+        flex: 1,
         alignItems: 'center',
-        bottom: -30,
-        left: 95
+        justifyContent: 'center',
+        maxHeight: 120,
+
     },
     municipioBotao: {
         marginVertical: 7,

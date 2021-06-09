@@ -22,6 +22,7 @@ export const AuthProvider: React.FC = ({ children }) => {
   useEffect(() => {
     async function loadStorageData() {
       setLoading(true);
+      setTimeout(() => console.log(''), 1500)
       const storagedUser = await AsyncStorage.getItem("@mais-parceria:user");
       const storagedToken = await AsyncStorage.getItem("@mais-parceria:token");
       if (storagedUser && storagedToken) {

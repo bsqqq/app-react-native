@@ -9,48 +9,63 @@ export interface InspecaoContextData {
     Localidade: string | undefined,
     CoordenadaX: string | number | undefined
     CoordenadaY: string | number | undefined,
-    Inspetor: string | null,
+    Inspetor: string | undefined,
     Placa: string | undefined,
     Equipe: string | undefined,
     ContratoId: number | undefined,
-    ProcessoId: number | undefined
+    ProcessoId: number | undefined,
+    inspecaoId: number | undefined,
+    setProcessoContratoIdContextData(IdProcesso: number, idContrato: number): void,
+    setInspecaoIdContextData(inspecaoId: number):void
 }
 
 const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContextData)
 export default InspecaoContext
 
-const [id, setId] = useState<number>(0)
-const [NumeroDeInspecao, setNumeroDeInspecao] = useState<number>(0)
-const [DataEHoraDaInspecao, setDataEHoraDaInspecao] = useState<string>("")
-const [OT_OS_SI, setOT_OS_SI] = useState<number>(0)
-const [MunicipioId, setMunicipioId] = useState<number>(0)
-const [Localidade, setLocalidade] = useState<string>("")
-const [CoordenadaX, setCoordenadaX] = useState("")
-const [CoordenadaY, setCoordenadaY] = useState("")
-const [Inspetor, setInspetor] = useState("")
-const [Placa, setPlaca] = useState<string>()
-const [Equipe, setEquipe] = useState<string>()
-const [ContratoId, setContratoId] = useState<number>(0)
-const [ProcessoId, setProcessoId] = useState<number>(0)
-
 export const InspecaoProvider: React.FC = ({ children }) => {
+    const [id, setId] = useState<number>()
+    const [NumeroDeInspecao, setNumeroDeInspecao] = useState<number>()
+    const [DataEHoraDaInspecao, setDataEHoraDaInspecao] = useState<string>()
+    const [OT_OS_SI, setOT_OS_SI] = useState<number>()
+    const [MunicipioId, setMunicipioId] = useState<number>()
+    const [Localidade, setLocalidade] = useState<string>()
+    const [CoordenadaX, setCoordenadaX] = useState<string>()
+    const [CoordenadaY, setCoordenadaY] = useState<string>()
+    const [Inspetor, setInspetor] = useState<string>()
+    const [Placa, setPlaca] = useState<string>()
+    const [Equipe, setEquipe] = useState<string>()
+    const [ContratoId, setContratoId] = useState<number>()
+    const [ProcessoId, setProcessoId] = useState<number>()
+    const [inspecaoId, setInspecaoId] = useState<number>()
+
+    function setProcessoContratoIdContextData(processoId: number, contratoId: number) {
+        setProcessoId(processoId)
+        setContratoId(contratoId)
+    }
+    function setInspecaoIdContextData(inspecaoId: number) {
+        setInspecaoId(inspecaoId)
+    }
+
     return (
-        <InspecaoContext.Provider 
+        <InspecaoContext.Provider
             value={{
-                id, 
-                NumeroDeInspecao, 
-                DataEHoraDaInspecao, 
-                OT_OS_SI, 
-                MunicipioId, 
-                Localidade, 
-                CoordenadaX, 
-                CoordenadaY, 
-                Inspetor, 
-                Placa, 
-                Equipe, 
-                ContratoId, 
-                ProcessoId
-                }}>
+                id,
+                NumeroDeInspecao,
+                DataEHoraDaInspecao,
+                OT_OS_SI,
+                MunicipioId,
+                Localidade,
+                CoordenadaX,
+                CoordenadaY,
+                Inspetor,
+                Placa,
+                Equipe,
+                ContratoId,
+                ProcessoId,
+                setProcessoContratoIdContextData,
+                setInspecaoIdContextData,
+                inspecaoId
+            }}>
             { children }
         </InspecaoContext.Provider>
     )

@@ -7,6 +7,7 @@ import MenuDeSeguranca from '../pages/MenuDeSeguranca'
 import Inspecao from '../pages/Inspecao';
 import NovaInspecao from '../pages/NovaInspecao';
 import TelaDePerguntas from '../pages/telaDePerguntas'
+import NaoConformidades from './../pages/NaoConformidades';
 
 const AppStack = createStackNavigator()
 
@@ -46,6 +47,11 @@ const AppRoutes: React.FC = () => (
         <AppStack.Screen
             name="TelaDePerguntas"
             component={TelaDePerguntas}
+        />
+
+        <AppStack.Screen
+            name="NaoConformidades"
+            component={NaoConformidades}
         />
     </AppStack.Navigator>
 )
