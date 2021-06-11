@@ -16,7 +16,7 @@ export interface InspecaoContextData {
     ProcessoId: number | undefined,
     inspecaoId: number | undefined,
     setProcessoContratoIdContextData(IdProcesso: number, idContrato: number): void,
-    setInspecaoIdContextData(inspecaoId: number):void
+    setInspecaoIdContextData(inspecaoId: number): void
 }
 
 const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContextData)
@@ -42,6 +42,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         setProcessoId(processoId)
         setContratoId(contratoId)
     }
+    
     function setInspecaoIdContextData(inspecaoId: number) {
         setInspecaoId(inspecaoId)
     }

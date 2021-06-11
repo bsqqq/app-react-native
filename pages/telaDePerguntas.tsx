@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native'
 import InspecaoContext from '../contexts/inspecao';
+import NaoConformidadesContext from '../contexts/NaoConformidades'
 import fb from '../services/firebase'
 
 interface objetoDePergunta {
@@ -12,25 +13,63 @@ interface objetoDePergunta {
   processosId: Array<number>
 }
 
+interface objetoDeResposta {
+  respostaId: number,
+  inspecaoId: number | undefined,
+  perguntaId: number,
+  valorResposta: string,
+  status?: string
+}
+
 const TelaDePerguntas: React.FC = () => {
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
+  const { setRespostaIdContext } = useContext(NaoConformidadesContext)
   const [perguntaAtual, setPerguntaAtual] = useState<string>()
   const [disabled, setDisabled] = useState(false)
   const navigation = useNavigation()
   const db = fb.database()
 
-  function handleNextQuestion() {
+  function handleNextQuestion(decisao: string) {
+    const objDeResp: objetoDeResposta[] = []
     try {
-      if(indicePerguntaAtual == listaPerguntas.length - 1) {
+      if (indicePerguntaAtual == listaPerguntas.length - 1) {
         setPerguntaAtual("Inspeção finalizada.")
         setDisabled(true)
         return
       }
-      setPerguntaAtual(listaPerguntas[indicePerguntaAtual + 1].pergunta); 
-      setIndicePerguntaAtual(indicePerguntaAtual + 1);
+      if (decisao == 'sim') {
+        setPerguntaAtual(listaPerguntas[indicePerguntaAtual + 1].pergunta);
+        setIndicePerguntaAtual(indicePerguntaAtual + 1);
+        let resposta: objetoDeResposta = {
+          inspecaoId,
+          perguntaId: listaPerguntas[indicePerguntaAtual].id,
+          respostaId: new Date().getTime(),
+          valorResposta: decisao,
+          status: 'ok'
+        }
+        objDeResp.push(resposta)
+      } else if (decisao == 'nao') {
+        let resposta: objetoDeResposta = {
+          inspecaoId,
+          perguntaId: listaPerguntas[indicePerguntaAtual].id,
+          respostaId: new Date().getTime(),
+          valorResposta: decisao,
+          status: 'pendente'
+        }
+        setRespostaIdContext(resposta.respostaId)
+        objDeResp.push(resposta)
+        setPerguntaAtual(listaPerguntas[indicePerguntaAtual + 1].pergunta);
+        setIndicePerguntaAtual(indicePerguntaAtual + 1);
+        navigation.navigate('NaoConformidades')
+      }
+      else {
+        // caso escolha N/A
+      }
       console.log(`${indicePerguntaAtual + 1}/${listaPerguntas.length}`)
+      console.log(objDeResp)
+
     } catch (error) {
       console.log(error)
     }
@@ -70,13 +109,13 @@ const TelaDePerguntas: React.FC = () => {
       <View style={style.container}>
         <View style={style.containerHorizontal}>
           <View style={style.buttonContainer}>
-            <Button title="Sim" onPress={handleNextQuestion} disabled={disabled}/>
+            <Button title="Sim" onPress={() => handleNextQuestion('sim')} disabled={disabled} />
           </View>
           <View style={style.buttonContainer}>
-            <Button title="Não" onPress={() => navigation.navigate('NaoConformidades')} disabled={disabled}/>
+            <Button title="Não" onPress={() => handleNextQuestion('nao')} disabled={disabled} />
           </View>
           <View style={style.buttonContainer}>
-            <Button title="N/A" onPress={handleNextQuestion} disabled={disabled}/>
+            <Button title="N/A" onPress={() => handleNextQuestion('n/a')} disabled={disabled} />
           </View>
         </View>
       </View>
@@ -96,7 +135,7 @@ const style = StyleSheet.create({
   },
   buttonContainer: {
     flex: 1,
-    marginHorizontal: 5
+    marginHorizontal: 5,
   },
   campoDePergunta: {
     borderWidth: 4,
@@ -104,7 +143,9 @@ const style = StyleSheet.create({
     padding: 100,
     maxWidth: 550,
     marginTop: 60,
-    marginHorizontal: 25
+    marginHorizontal: 25,
+    alignSelf: 'center',
+    fontWeight: 'bold'
   }
 })
 

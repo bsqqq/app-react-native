@@ -15,6 +15,6 @@ const firebaseConfig = {
     appId: Constants.manifest?.extra?.REACT_APP_FB_APP_ID
 }
 
-const fb = firebase.default.initializeApp(firebaseConfig)
+const fb = !firebase.apps?.length ? firebase.default.initializeApp(firebaseConfig) : firebase.app()
 
 export default fb
