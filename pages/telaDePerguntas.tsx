@@ -14,10 +14,10 @@ interface objetoDePergunta {
 }
 
 interface objetoDeResposta {
-  respostaId: number,
   inspecaoId: number | undefined,
-  perguntaId: number,
   valorResposta: string,
+  perguntaId: number,
+  respostaId: number,
   status?: string
 }
 
@@ -28,11 +28,11 @@ const TelaDePerguntas: React.FC = () => {
   const { setRespostaIdContext } = useContext(NaoConformidadesContext)
   const [perguntaAtual, setPerguntaAtual] = useState<string>()
   const [disabled, setDisabled] = useState(false)
+  const objDeResp: objetoDeResposta[] = []
   const navigation = useNavigation()
   const db = fb.database()
 
   function handleNextQuestion(decisao: string) {
-    const objDeResp: objetoDeResposta[] = []
     try {
       if (indicePerguntaAtual == listaPerguntas.length - 1) {
         setPerguntaAtual("Inspeção finalizada.")
