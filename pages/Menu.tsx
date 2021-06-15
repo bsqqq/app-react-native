@@ -9,7 +9,7 @@ export default function Menu() {
     const navigation = useNavigation()
     return(
         <SafeAreaView style={styles.container}>
-            <Text>Bem Vindo(a) {user?.name}</Text>
+            <Text style={{fontSize: 25, fontStyle: 'italic', fontWeight: 'bold'}}>Bem Vindo(a) {user?.name}</Text>
             <Text>Menu Principal</Text>
                 <View style={styles.session}>
                     <Itens titulo="Segurança" icone="shield" onPress={() => navigation.navigate('MenuDeSeguranca')}/>

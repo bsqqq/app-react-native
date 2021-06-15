@@ -22,7 +22,6 @@ export const AuthProvider: React.FC = ({ children }) => {
   useEffect(() => {
     async function loadStorageData() {
       setLoading(true);
-      setTimeout(() => console.log(''), 1500)
       const storagedUser = await AsyncStorage.getItem("@mais-parceria:user");
       const storagedToken = await AsyncStorage.getItem("@mais-parceria:token");
       if (storagedUser && storagedToken) {
@@ -38,13 +37,9 @@ export const AuthProvider: React.FC = ({ children }) => {
     const response = await auth.signIn(cpf, senha);
     setUser(response?.user);
     api.defaults.headers["Authorization"] = `Bearer ${response?.token}`;
-    await AsyncStorage.setItem(
-      "@mais-parceria:user",
-      JSON.stringify(response?.user)
-    );
+    await AsyncStorage.setItem("@mais-parceria:user", JSON.stringify(response?.user));
     await AsyncStorage.setItem("@mais-parceria:token", String(response?.token));
     await fb.auth().signInWithCustomToken(response?.token);
-    console.log(`logado como ${response?.user.name}`);
   }
 
   async function signOut() {
@@ -55,9 +50,7 @@ export const AuthProvider: React.FC = ({ children }) => {
     console.log(`Deslogou`);
   }
   return (
-    <AuthContext.Provider
-      value={{ signed: !!user, user, loading, signIn, signOut }}
-    >
+    <AuthContext.Provider value={{ signed: !!user, user, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

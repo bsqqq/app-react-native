@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native'
 import InspecaoContext from '../contexts/inspecao';
 import NaoConformidadesContext from '../contexts/NaoConformidades'
 import fb from '../services/firebase'
+import Buttom from '../components/NextButton'
 
 interface objetoDePergunta {
   contratosId: Array<number>,
@@ -18,7 +19,8 @@ interface objetoDeResposta {
   valorResposta: string,
   perguntaId: number,
   respostaId: number,
-  status?: string
+  status: string,
+  NaoConformidades?: Array<string>
 }
 
 const TelaDePerguntas: React.FC = () => {
@@ -43,18 +45,19 @@ const TelaDePerguntas: React.FC = () => {
         setPerguntaAtual(listaPerguntas[indicePerguntaAtual + 1].pergunta);
         setIndicePerguntaAtual(indicePerguntaAtual + 1);
         let resposta: objetoDeResposta = {
+          respostaId: new Date().getTime(),
           inspecaoId,
           perguntaId: listaPerguntas[indicePerguntaAtual].id,
-          respostaId: new Date().getTime(),
           valorResposta: decisao,
           status: 'ok'
         }
         objDeResp.push(resposta)
+
       } else if (decisao == 'nao') {
         let resposta: objetoDeResposta = {
+          respostaId: new Date().getTime(),
           inspecaoId,
           perguntaId: listaPerguntas[indicePerguntaAtual].id,
-          respostaId: new Date().getTime(),
           valorResposta: decisao,
           status: 'pendente'
         }
@@ -63,6 +66,7 @@ const TelaDePerguntas: React.FC = () => {
         setPerguntaAtual(listaPerguntas[indicePerguntaAtual + 1].pergunta);
         setIndicePerguntaAtual(indicePerguntaAtual + 1);
         navigation.navigate('NaoConformidades')
+
       }
       else {
         // caso escolha N/A
@@ -104,6 +108,11 @@ const TelaDePerguntas: React.FC = () => {
   return (
     <>
       <View style={style.campoDePergunta}>
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          <Text>Pergunta {indicePerguntaAtual + 1}</Text>
+          <Text> de </Text>
+          <Text>{listaPerguntas.length}:</Text>
+        </View>
         <Text>{perguntaAtual}</Text>
       </View>
       <View style={style.container}>
@@ -118,6 +127,9 @@ const TelaDePerguntas: React.FC = () => {
             <Button title="N/A" onPress={() => handleNextQuestion('n/a')} disabled={disabled} />
           </View>
         </View>
+        <View style={{}}>
+          <Buttom texto='Enviar' disabled={true} />
+        </View>
       </View>
     </>
   )
@@ -131,14 +143,15 @@ const style = StyleSheet.create({
   },
   containerHorizontal: {
     flexDirection: 'row',
-    marginHorizontal: 100
+    marginHorizontal: 100,
+    marginBottom: 400
   },
   buttonContainer: {
     flex: 1,
     marginHorizontal: 5,
   },
   campoDePergunta: {
-    borderWidth: 4,
+    borderWidth: 5,
     borderRadius: 10,
     padding: 100,
     maxWidth: 550,

@@ -151,6 +151,7 @@ export default function NovaInspecao() {
             <KeyboardAvoidingView behavior={Platform.OS === 'android' ? 'padding' : 'height'} style={styles.container} >
                 <ScrollView>
                     <View>
+                        {/*Número de inspeção precisa ser auto-incremental*/}
                         <Text style={styles.titulo}>Número da inspeção:</Text>
                         <TextInput
                             style={styles.input}

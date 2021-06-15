@@ -10,12 +10,10 @@ export default NaoConformidadeContext
 
 export const NaoConformidadeProvider: React.FC = ({ children }) => {
     const [respostaId, setRespostaId] = useState<number>()
-    const [descricao, setDescricao] = useState<string>()
-    
+
     function setRespostaIdContext(id: number) {
         setRespostaId(id)
     }
-    
 
     return (
         <NaoConformidadeContext.Provider value={{ respostaId, setRespostaIdContext }}>
