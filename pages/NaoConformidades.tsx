@@ -10,7 +10,7 @@ import {
     Dimensions,
     TextInput,
     KeyboardAvoidingView,
-    Platform
+    Platform,
 } from 'react-native';
 import {
     Camera,
@@ -32,10 +32,10 @@ interface photoProps {
 
 const NaoConformidades: React.FC = () => {
     const [naoConformidadesRegistradas, setNaoConformidadesRegistradas] = useState<Array<string>>([])
-    const { respostaId } = useContext(NaoConformidadeContext)
+    const { respostaId, setFotosInspecao } = useContext(NaoConformidadeContext)
     const [cameraPos, setCameraPos] = useState(Camera.Constants.Type.back)
+    const [modalVisible, setModalVisible] = useState<boolean>(false)
     const [textDescricao, setTextDescricao] = useState<string>()
-    const [visible, setVisible] = useState<boolean>(false)
     const [nomeFoto, setNomeFoto] = useState<string>('')
     const [photoURI, setPhotoURI] = useState<string>()
     const [perms, setPerms] = useState<boolean>()
@@ -52,7 +52,7 @@ const NaoConformidades: React.FC = () => {
     async function takePic() {
         const data: CameraCapturedPicture = await camera.takePictureAsync({})
         setPhotoURI(data.uri)
-        setVisible(true)
+        setModalVisible(true)
     }
 
     function handleSavePic() {
@@ -62,9 +62,8 @@ const NaoConformidades: React.FC = () => {
         }
         const arrURI: string[] = naoConformidadesRegistradas
         arrURI.push(String(photoURI))
-        console.log(arrURI)
         setNaoConformidadesRegistradas(arrURI)
-        setVisible(false)
+        setModalVisible(false)
     }
 
     function handleConfirmInspection() {
@@ -73,6 +72,7 @@ const NaoConformidades: React.FC = () => {
             nodeDoArquivo: nomeFoto,
             respostaId,
         }
+        setFotosInspecao(naoConformidadesRegistradas)
         navigation.navigate('TelaDePerguntas')
     }
 
@@ -123,7 +123,7 @@ const NaoConformidades: React.FC = () => {
                             <Modal
                                 animationType='slide'
                                 transparent={false}
-                                visible={visible}
+                                visible={modalVisible}
                             >
                                 <KeyboardAvoidingView
                                     behavior={Platform.OS === 'android' ? 'padding' : 'height'}
@@ -136,7 +136,7 @@ const NaoConformidades: React.FC = () => {
                                     }
                                 >
                                     <View style={{ margin: 20 }}>
-                                        <TouchableOpacity style={{ margin: 10 }} onPress={() => setVisible(false)}>
+                                        <TouchableOpacity style={{ margin: 10 }} onPress={() => setModalVisible(false)}>
                                             <FontAwesome
                                                 name='window-close'
                                                 size={40}
@@ -226,7 +226,7 @@ const NaoConformidades: React.FC = () => {
                     style={{
                         flexDirection: 'row'
                     }}>
-                    {naoConformidadesRegistradas.map(item => {
+                    {naoConformidadesRegistradas.map((item, key) => {
                         return <Image
                             source={{ uri: item }}
                             style={{
@@ -235,6 +235,7 @@ const NaoConformidades: React.FC = () => {
                                 marginHorizontal: 10,
                                 marginTop: -80
                             }}
+                            key={key}
                         />
                     })}
                 </View>

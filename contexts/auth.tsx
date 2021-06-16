@@ -22,8 +22,8 @@ export const AuthProvider: React.FC = ({ children }) => {
   useEffect(() => {
     async function loadStorageData() {
       setLoading(true);
-      const storagedUser = await AsyncStorage.getItem("@mais-parceria:user");
-      const storagedToken = await AsyncStorage.getItem("@mais-parceria:token");
+      const storagedUser: string | null = await AsyncStorage.getItem("@mais-parceria:user");
+      const storagedToken: string | null = await AsyncStorage.getItem("@mais-parceria:token");
       if (storagedUser && storagedToken) {
         api.defaults.headers.Authorization = `Bearer ${storagedToken}`;
         setUser(JSON.parse(storagedUser));

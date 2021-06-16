@@ -7,43 +7,37 @@ import fb from '../services/firebase'
 import Buttom from '../components/NextButton'
 
 interface objetoDePergunta {
+  processosId: Array<number>
   contratosId: Array<number>,
+  pergunta: string,
   grupo: string,
   id: number,
-  pergunta: string,
-  processosId: Array<number>
 }
 
 interface objetoDeResposta {
+  NaoConformidades?: Array<string>
   inspecaoId: number | undefined,
   valorResposta: string,
   perguntaId: number,
   respostaId: number,
   status: string,
-  NaoConformidades?: Array<string>
 }
 
 const TelaDePerguntas: React.FC = () => {
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
+  const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
   const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
   const { setRespostaIdContext } = useContext(NaoConformidadesContext)
-  const [perguntaAtual, setPerguntaAtual] = useState<string>()
+  const [proximaPergunta, setProximaPergunta] = useState<string>()
   const [disabled, setDisabled] = useState(false)
-  const objDeResp: objetoDeResposta[] = []
   const navigation = useNavigation()
   const db = fb.database()
 
   function handleNextQuestion(decisao: string) {
+    const objDeResp: objetoDeResposta[] = listaRespostas
     try {
-      if (indicePerguntaAtual == listaPerguntas.length - 1) {
-        setPerguntaAtual("Inspeção finalizada.")
-        setDisabled(true)
-        return
-      }
       if (decisao == 'sim') {
-        setPerguntaAtual(listaPerguntas[indicePerguntaAtual + 1].pergunta);
-        setIndicePerguntaAtual(indicePerguntaAtual + 1);
         let resposta: objetoDeResposta = {
           respostaId: new Date().getTime(),
           inspecaoId,
@@ -51,8 +45,11 @@ const TelaDePerguntas: React.FC = () => {
           valorResposta: decisao,
           status: 'ok'
         }
+        setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
+        setIndicePerguntaAtual(indicePerguntaAtual + 1);
         objDeResp.push(resposta)
-
+        setListaRespostas(objDeResp)
+        // console.log(listaRespostas)
       } else if (decisao == 'nao') {
         let resposta: objetoDeResposta = {
           respostaId: new Date().getTime(),
@@ -63,20 +60,29 @@ const TelaDePerguntas: React.FC = () => {
         }
         setRespostaIdContext(resposta.respostaId)
         objDeResp.push(resposta)
-        setPerguntaAtual(listaPerguntas[indicePerguntaAtual + 1].pergunta);
+        setListaRespostas(objDeResp)
+        // console.log(listaRespostas)
+        setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
         setIndicePerguntaAtual(indicePerguntaAtual + 1);
         navigation.navigate('NaoConformidades')
-
       }
       else {
         // caso escolha N/A
       }
+      if (indicePerguntaAtual + 1 === listaPerguntas.length) {
+        setDisabled(true)
+      }
       console.log(`${indicePerguntaAtual + 1}/${listaPerguntas.length}`)
-      console.log(objDeResp)
+      console.log(listaRespostas)
 
     } catch (error) {
       console.log(error)
+      alert(error)
     }
+  }
+
+  function handleEnvioDeInspecao() {
+    console.log('apertou aqui')
   }
 
   useEffect(() => {
@@ -98,7 +104,7 @@ const TelaDePerguntas: React.FC = () => {
               perguntas.push(dataPerguntas)
           })
           setListaPerguntas(perguntas)
-          setPerguntaAtual(perguntas[indicePerguntaAtual]?.pergunta)
+          setProximaPergunta(perguntas[indicePerguntaAtual]?.pergunta)
         }
       })
     }
@@ -108,12 +114,13 @@ const TelaDePerguntas: React.FC = () => {
   return (
     <>
       <View style={style.campoDePergunta}>
-        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-          <Text>Pergunta {indicePerguntaAtual + 1}</Text>
-          <Text> de </Text>
-          <Text>{listaPerguntas.length}:</Text>
+        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+          {indicePerguntaAtual + 1 <= listaPerguntas.length
+            ? <Text>Pergunta {indicePerguntaAtual + 1} de {listaPerguntas.length}:</Text>
+            : undefined
+          }
         </View>
-        <Text>{perguntaAtual}</Text>
+        <Text>{proximaPergunta}</Text>
       </View>
       <View style={style.container}>
         <View style={style.containerHorizontal}>
@@ -128,7 +135,7 @@ const TelaDePerguntas: React.FC = () => {
           </View>
         </View>
         <View style={{}}>
-          <Buttom texto='Enviar' disabled={true} />
+          <Buttom texto='Enviar' disabled={!disabled} onPress={handleEnvioDeInspecao} />
         </View>
       </View>
     </>
