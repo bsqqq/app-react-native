@@ -83,21 +83,24 @@ export default function NovaInspecao() {
                 ContratoId: contratoId,
                 ProcessoId: processoId
             }
-            setProcessoContratoIdContextData(Number(newInspecao?.ProcessoId), Number(newInspecao?.ContratoId))
+            console.log(newInspecao)
+            setProcessoContratoIdContextData(Number(processoId), Number(contratoId))
             setInspecaoIdContextData(Number(newInspecao.id))
             if (
-                (!newInspecao.NumeroDeInspecao?.toString().trim() || newInspecao.NumeroDeInspecao?.toString() == "")
-                && (!newInspecao.MunicipioId?.toString().trim() || newInspecao.MunicipioId?.toString() == "")
-                && (!newInspecao.ContratoId?.toString().trim() || newInspecao.ContratoId?.toString() == "")
-                && (!newInspecao.ProcessoId?.toString().trim() || newInspecao.ProcessoId?.toString() == "")
-                && (!newInspecao.OT_OS_SI?.toString().trim() || newInspecao.OT_OS_SI?.toString() == "")
-                && (!newInspecao.Localidade?.trim() || newInspecao.Localidade?.toString() == "")
-                && (!newInspecao.Equipe?.trim() || newInspecao.Equipe?.toString() == "")
-                && (!newInspecao.Placa?.trim() || newInspecao.Placa?.toString() == "")
+                // garantir que todos os campos sejam preenchidos
+                newInspecao?.Placa == undefined
+                && newInspecao?.Equipe == undefined
+                && newInspecao?.OT_OS_SI == undefined
+                && newInspecao?.Localidade == undefined
+                && newInspecao?.ContratoId == undefined
+                && newInspecao?.ProcessoId == undefined
+                && newInspecao?.MunicipioId == undefined
+                && newInspecao?.NumeroDeInspecao == undefined
             ) {
                 alert('Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
                 console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
             } else {
+                // lembrar de descomentar a linha abaixo
                 // await db.ref(`/inspecoes/${newInspecao.id}`).set(newInspecao)
                 navigation.navigate('TelaDePerguntas')
             }
@@ -210,7 +213,7 @@ export default function NovaInspecao() {
                             onChangeText={value => setPlaca(value)}
                             maxLength={7}
                         />
-
+                        {/*O campo de colaboradores precisa ser um Multiple Select*/}
                         <Text style={styles.titulo}>Equipe:</Text>
                         <TextInput
                             style={styles.input}
