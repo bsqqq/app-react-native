@@ -21,6 +21,8 @@ import { FontAwesome } from '@expo/vector-icons'
 import Buttom from '../components/NextButton'
 import NaoConformidadeContext from '../contexts/NaoConformidades';
 import { useNavigation } from '@react-navigation/native'
+import * as Permissions from 'expo-permissions'
+import * as MediaLibrary from 'expo-media-library';
 
 interface photoProps {
     respostaId: number | undefined,
@@ -39,6 +41,7 @@ const NaoConformidades: React.FC = () => {
     const [nomeFoto, setNomeFoto] = useState<string>('')
     const [photoURI, setPhotoURI] = useState<string>()
     const [perms, setPerms] = useState<boolean>()
+    const Fotos: MediaLibrary.Asset[] = []
     const navigation = useNavigation()
     var camera: Camera
 
@@ -46,7 +49,13 @@ const NaoConformidades: React.FC = () => {
         (async () => {
             const { status }: PermissionResponse = await Camera.requestPermissionsAsync()
             setPerms(status === 'granted')
+        })();
+
+        (async () => {
+            const { status }: PermissionResponse = await Permissions.askAsync(Permissions.MEDIA_LIBRARY)
+            setPerms(status === 'granted')
         })()
+
     }, [])
 
     async function takePic() {
@@ -55,19 +64,20 @@ const NaoConformidades: React.FC = () => {
         setModalVisible(true)
     }
 
-    function handleSavePic() {
+    async function handleSavePic() {
         if (textDescricao == '' || textDescricao == undefined) {
             alert('O campo de descrição está vazío! Por favor preencha o campo de descrição.')
             return
         }
         const arrURI: string[] = naoConformidadesRegistradas
         arrURI.push(String(photoURI))
+        Fotos.push(await MediaLibrary.createAssetAsync(String(photoURI)))
         setNaoConformidadesRegistradas(arrURI)
         setModalVisible(false)
     }
 
-    function handleConfirmInspection() {
-        const objDeNaoConformidade: photoProps = {
+    function handleConfirmNaoConformidade() {
+        const objFotosDeNaoConformidade: photoProps = {
             fotoId: new Date().getTime(),
             nodeDoArquivo: nomeFoto,
             respostaId,
@@ -155,7 +165,8 @@ const NaoConformidades: React.FC = () => {
                                         <Image
                                             style={{
                                                 width: Dimensions.get('window').width * 0.9,
-                                                height: Dimensions.get('window').width * 0.9
+                                                height: Dimensions.get('window').width * 0.9,
+                                                borderRadius: 10
                                             }}
                                             source={{ uri: photoURI }}
                                         />
@@ -172,7 +183,7 @@ const NaoConformidades: React.FC = () => {
                                             <Text
                                                 style={{
                                                     marginHorizontal: 10,
-                                                    maxWidth: 250,
+                                                    maxWidth: 170,
                                                     textAlign: 'center'
                                                 }}>
                                                 Por favor insira UMA DESCRIÇÃO para esta foto no campo abaixo. (Obrigatório)
@@ -196,7 +207,7 @@ const NaoConformidades: React.FC = () => {
                                             <Text
                                                 style={{
                                                     marginHorizontal: 10,
-                                                    maxWidth: 250,
+                                                    maxWidth: 170,
                                                     textAlign: 'center'
                                                 }}>
                                                 Isso está atrelado a um colaborador?
@@ -242,7 +253,7 @@ const NaoConformidades: React.FC = () => {
                 <Text>E depois confirme se todas as Não Conformidades foram registradas.</Text>
                 <Buttom
                     texto="Confirmar"
-                    onPress={handleConfirmInspection}
+                    onPress={handleConfirmNaoConformidade}
                 />
             </SafeAreaView>
         );
@@ -259,7 +270,8 @@ const style = StyleSheet.create({
         flex: 1,
         width: Dimensions.get('window').width * 0.8,
         maxHeight: Dimensions.get('window').height * 0.72,
-        marginBottom: 90
+        marginBottom: 90,
+        borderRadius: 5
     },
     container: {
         flex: 1,

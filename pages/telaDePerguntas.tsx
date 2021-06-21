@@ -49,7 +49,8 @@ const TelaDePerguntas: React.FC = () => {
         setIndicePerguntaAtual(indicePerguntaAtual + 1);
         objDeResp.push(resposta)
         setListaRespostas(objDeResp)
-      } else if (decisao == 'nao') {
+      }
+      else if (decisao == 'nao') {
         let resposta: objetoDeResposta = {
           respostaId: new Date().getTime(),
           inspecaoId,
@@ -159,7 +160,7 @@ const style = StyleSheet.create({
     borderWidth: 5,
     borderRadius: 10,
     padding: 100,
-    maxWidth: 550,
+    // maxWidth: 500,
     marginTop: 60,
     marginHorizontal: 25,
     alignSelf: 'center',

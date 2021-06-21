@@ -4,15 +4,12 @@ import { NavigationContainer } from '@react-navigation/native'
 import { Providers } from './contexts/Providers'
 import Routes from './routes/'
 import { LogBox } from 'react-native';
-import NetworkContext from './contexts/network';
-import {estouConectado} from './utils/AmIOnline'
+import { estouOnline } from './utils/EstouOnline'
 
 const App: React.FC = () => {
-  // estouConectado()
-  const {conectado} = React.useContext(NetworkContext)
-  LogBox.ignoreLogs(['Setting a timer for a long period of time'])
-  LogBox.ignoreLogs(['componentWillReceiveProps has been renamed'])
-  console.log(`estou conectado? ${conectado}`)
+    var conectado = estouOnline()
+    LogBox.ignoreLogs(['Setting a timer for a long period of time'])
+    LogBox.ignoreLogs(['componentWillReceiveProps has been renamed'])
   return (
     <NavigationContainer>
       <Providers>
