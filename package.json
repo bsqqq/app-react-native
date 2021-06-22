@@ -10,7 +10,6 @@
   "dependencies": {
     "@expo/vector-icons": "^12.0.0",
     "@react-native-async-storage/async-storage": "github:react-native-community/async-storage",
-    "@react-native-community/datetimepicker": "^3.2.0",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/netinfo": "^6.0.0",
     "@react-native-community/slider": "3.0.3",
@@ -31,7 +30,6 @@
     "expo-google-sign-in": "~9.1.0",
     "expo-location": "^12.0.4",
     "expo-media-library": "~12.0.2",
-    "expo-permissions": "~12.0.1",
     "expo-status-bar": "~1.0.4",
     "feather-icons": "^4.28.0",
     "feather-icons-react": "^0.4.3",

@@ -83,7 +83,6 @@ export default function NovaInspecao() {
                 ContratoId: contratoId,
                 ProcessoId: processoId
             }
-            console.log(newInspecao)
             setProcessoContratoIdContextData(Number(processoId), Number(contratoId))
             setInspecaoIdContextData(Number(newInspecao.id))
             if (

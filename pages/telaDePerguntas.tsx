@@ -24,11 +24,11 @@ interface objetoDeResposta {
 }
 
 const TelaDePerguntas: React.FC = () => {
+  const { setRespostaIdContext, clearFotosInspecao } = useContext(NaoConformidadesContext)
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
   const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
-  const { setRespostaIdContext } = useContext(NaoConformidadesContext)
   const [proximaPergunta, setProximaPergunta] = useState<string>()
   const [disabled, setDisabled] = useState(false)
   const navigation = useNavigation()
@@ -71,8 +71,6 @@ const TelaDePerguntas: React.FC = () => {
       if (indicePerguntaAtual + 1 === listaPerguntas.length) {
         setDisabled(true)
       }
-      console.log(`${indicePerguntaAtual + 1}/${listaPerguntas.length}`)
-      console.log(listaRespostas)
 
     } catch (error) {
       console.log(error)
@@ -82,6 +80,9 @@ const TelaDePerguntas: React.FC = () => {
 
   function handleEnvioDeInspecao() {
     console.log('apertou aqui')
+    // escrita para o storage com o array de fotos
+    // depois dar um clearFotosInspecao()
+    clearFotosInspecao()
   }
 
   useEffect(() => {
@@ -136,6 +137,7 @@ const TelaDePerguntas: React.FC = () => {
         <View style={{}}>
           <Buttom texto='Enviar' disabled={!disabled} onPress={handleEnvioDeInspecao} />
         </View>
+        <Text style={{fontStyle: 'italic'}}>Certifique-se de que este dispositivo está com carga suficiente até o fim desta inspeção.</Text>
       </View>
     </>
   )

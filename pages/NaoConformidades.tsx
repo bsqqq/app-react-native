@@ -21,14 +21,14 @@ import { FontAwesome } from '@expo/vector-icons'
 import Buttom from '../components/NextButton'
 import NaoConformidadeContext from '../contexts/NaoConformidades';
 import { useNavigation } from '@react-navigation/native'
-import * as Permissions from 'expo-permissions'
 import * as MediaLibrary from 'expo-media-library';
+import fb from '../services/firebase'
 
 interface photoProps {
     respostaId: number | undefined,
     fotoId: number,
     tipo?: undefined,
-    nodeDoArquivo: string,
+    nomeDoArquivo: string,
     hiperlink?: string
 }
 
@@ -41,8 +41,8 @@ const NaoConformidades: React.FC = () => {
     const [nomeFoto, setNomeFoto] = useState<string>('')
     const [photoURI, setPhotoURI] = useState<string>()
     const [perms, setPerms] = useState<boolean>()
-    const Fotos: MediaLibrary.Asset[] = []
     const navigation = useNavigation()
+    const db = fb.database()
     var camera: Camera
 
     useEffect(() => {
@@ -52,10 +52,9 @@ const NaoConformidades: React.FC = () => {
         })();
 
         (async () => {
-            const { status }: PermissionResponse = await Permissions.askAsync(Permissions.MEDIA_LIBRARY)
+            const { status }: PermissionResponse = await MediaLibrary.requestPermissionsAsync()
             setPerms(status === 'granted')
         })()
-
     }, [])
 
     async function takePic() {
@@ -64,25 +63,27 @@ const NaoConformidades: React.FC = () => {
         setModalVisible(true)
     }
 
-    async function handleSavePic() {
+    async function handleModalSavePic() {
         if (textDescricao == '' || textDescricao == undefined) {
             alert('O campo de descrição está vazío! Por favor preencha o campo de descrição.')
             return
         }
         const arrURI: string[] = naoConformidadesRegistradas
         arrURI.push(String(photoURI))
-        Fotos.push(await MediaLibrary.createAssetAsync(String(photoURI)))
         setNaoConformidadesRegistradas(arrURI)
+        const Foto = await MediaLibrary.createAssetAsync(String(photoURI))
+        const objFotosDeNaoConformidade: photoProps = {
+            fotoId: Number(Foto.id),
+            nomeDoArquivo: Foto.filename,
+            respostaId,
+        }
+        await db.ref(`/`).set()
+        setFotosInspecao(Foto)
         setModalVisible(false)
     }
 
     function handleConfirmNaoConformidade() {
-        const objFotosDeNaoConformidade: photoProps = {
-            fotoId: new Date().getTime(),
-            nodeDoArquivo: nomeFoto,
-            respostaId,
-        }
-        setFotosInspecao(naoConformidadesRegistradas)
+        
         navigation.navigate('TelaDePerguntas')
     }
 
@@ -176,6 +177,7 @@ const NaoConformidades: React.FC = () => {
                                         style={{
                                             justifyContent: 'space-between',
                                             marginVertical: 20,
+                                            paddingHorizontal: 10,
                                             flexDirection: 'row',
                                             alignItems: 'flex-end'
                                         }}>
@@ -195,7 +197,8 @@ const NaoConformidades: React.FC = () => {
                                                     textAlign: 'center',
                                                     fontWeight: 'bold',
                                                     fontStyle: 'italic',
-                                                    maxWidth: 250
+                                                    maxWidth: 200,
+                                                    alignItems: 'center'
                                                 }}
                                                 onChangeText={
                                                     (value: string) => setTextDescricao(value)
@@ -226,7 +229,7 @@ const NaoConformidades: React.FC = () => {
 
                                     </SafeAreaView>
                                     <View style={{ alignItems: 'center' }}>
-                                        <Buttom texto="Sim, pode salvar!" style={style.button} onPress={handleSavePic} />
+                                        <Buttom texto="Sim, pode salvar!" style={style.button} onPress={handleModalSavePic} />
                                     </View>
                                 </KeyboardAvoidingView>
                             </Modal>
