@@ -111,6 +111,7 @@ export default function NovaInspecao() {
     useEffect(() => {
         const date = new Date()
         setDataHora(`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${new Date().toLocaleTimeString()}`);
+
         (async (): Promise<void> => {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
@@ -120,6 +121,7 @@ export default function NovaInspecao() {
             setLocation(location);
             Location.Accuracy.Highest
         })()
+        
     }, [])
 
     let municipioFormatado: ModalFilterPickerOption[] = []

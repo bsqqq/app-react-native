@@ -5,7 +5,7 @@ import { Providers } from './contexts/Providers'
 import Routes from './routes/'
 import { LogBox } from 'react-native';
 import { estouOnline } from './utils/EstouOnline'
-import { atualizacoes } from './utils/TenhoAtualizacoes';
+import atualizacoes from './utils/TenhoAtualizacoes';
 
 const App: React.FC = () => {
 
