@@ -7,8 +7,8 @@ export default async function atualizacoes() {
     try {
         const colabs = colaboradores
         const db = fb.database()
-        const snap = await db.ref('/colaboradores').once('value')
-        const shotColaboradores = snap.exportVal()
+        const snapColaboradores = await db.ref('/colaboradores').once('value')
+        const shotColaboradores = snapColaboradores.exportVal()
         var path = await fs.documentDirectory + 'json/'
         const fileUri = (jsonId: string) => path + `${jsonId}.json`
         async function garantirDirExiste() {

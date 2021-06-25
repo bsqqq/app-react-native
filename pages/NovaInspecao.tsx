@@ -10,6 +10,7 @@ import {
     Button,
     ScrollView
 } from 'react-native'
+import * as fs from 'expo-file-system'
 import Botao from '../components/NextButton'
 import fb from '../services/firebase'
 import InspecaoContext from '../contexts/inspecao'
@@ -18,13 +19,38 @@ import FilterPicker, { ModalFilterPickerOption } from 'react-native-modal-filter
 import municipios from '../json/municipios.json'
 import processos from '../json/processos.json'
 import contratos from '../json/contratos.json'
+import colaboradoress from '../json/colaboradores.json'
 import * as Location from 'expo-location'
 import AuthContext from '../contexts/auth'
+import MultiSelect from 'expo-multiple-select'
 
 interface ProcessosProps {
     [index: string]: {
         id: number,
         nome: string,
+    }
+}
+
+interface MultiProps {
+    id: string,
+    name: string
+}
+
+interface ColaboradoresProps {
+    [index: string]: {
+        admissao: string,
+        cpf: string,
+        email?: string,
+        empresaId: number,
+        funcaoId: number,
+        id: number,
+        matricula: string,
+        minhaParceria: boolean,
+        nome: string,
+        status: number,
+        totalDocs: number,
+        web: boolean,
+        senha?: string
     }
 }
 
@@ -39,12 +65,14 @@ interface objetoDeInspecao {
     CoordenadaY: string | number | undefined,
     Inspetor: string | undefined,
     Placa: string | undefined,
-    Equipe: string | undefined,
+    EquipeId: number[] | undefined,
     ContratoId: number | undefined,
     ProcessoId: number | undefined,
 }
 
 export default function NovaInspecao() {
+    var path = fs.documentDirectory + 'json/'
+    const fileUri = (jsonId: string) => path + `${jsonId}.json`
     const { setProcessoContratoIdContextData, setInspecaoIdContextData } = useContext(InspecaoContext)
     const [location, setLocation] = useState<Location.LocationObject>()
     const [municipioVisible, setMunicipioVisible] = useState(false)
@@ -56,15 +84,18 @@ export default function NovaInspecao() {
     const [processoId, setProcessoId] = useState<number>()
     const [localidade, setLocalidade] = useState<string>()
     const [municipio, setMunicipio] = useState<string>()
+    const [equipeId, setEquipeId] = useState<number[]>()
     const [processo, setProcesso] = useState<string>()
     const [contrato, setContrato] = useState<string>()
     const [dataHora, setDataHora] = useState<string>()
     const [OtOsSi, setOtOsSi] = useState<number>()
-    const [equipe, setEquipe] = useState<string>()
     const [placa, setPlaca] = useState<string>()
     const { user } = useContext(AuthContext)
+    var colaboradores: ColaboradoresProps
     const navigation = useNavigation()
     const db = fb.database()
+    // let colaboradoresFormatados: MultiProps[] = []
+    const [colaboradoresFormatados, setColaboradoresFormatados] = useState<MultiProps[]>([])
 
     async function handleNewInspecao() {
         try {
@@ -78,7 +109,7 @@ export default function NovaInspecao() {
                 CoordenadaX: location?.coords.latitude,
                 CoordenadaY: location?.coords.longitude,
                 Inspetor: user?.name,
-                Equipe: equipe,
+                EquipeId: equipeId,
                 Placa: placa,
                 ContratoId: contratoId,
                 ProcessoId: processoId
@@ -88,7 +119,7 @@ export default function NovaInspecao() {
             if (
                 // garantir que todos os campos sejam preenchidos
                 newInspecao?.Placa == undefined
-                && newInspecao?.Equipe == undefined
+                && newInspecao?.EquipeId == undefined
                 && newInspecao?.OT_OS_SI == undefined
                 && newInspecao?.Localidade == undefined
                 && newInspecao?.ContratoId == undefined
@@ -109,6 +140,7 @@ export default function NovaInspecao() {
     }
 
     useEffect(() => {
+        let colaboradoresFormatadosPreState: MultiProps[] = []
         const date = new Date()
         setDataHora(`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${new Date().toLocaleTimeString()}`);
 
@@ -120,8 +152,16 @@ export default function NovaInspecao() {
             let location = await Location.getCurrentPositionAsync({});
             setLocation(location);
             Location.Accuracy.Highest
+            colaboradores = JSON.parse(await fs.readAsStringAsync(fileUri('colaboradores')))
+            const keys: string[] = Object.keys(colaboradores)
+            keys.forEach(item => {
+                colaboradoresFormatadosPreState.push({
+                    id: String(colaboradores[item].id),
+                    name: colaboradores[item].nome
+                })
+            })
+            setColaboradoresFormatados(colaboradoresFormatadosPreState)
         })()
-        
     }, [])
 
     let municipioFormatado: ModalFilterPickerOption[] = []
@@ -216,10 +256,20 @@ export default function NovaInspecao() {
                         />
                         {/*O campo de colaboradores precisa ser um Multiple Select*/}
                         <Text style={styles.titulo}>Equipe:</Text>
-                        <TextInput
+                        {/* <TextInput
                             style={styles.input}
                             keyboardType='default'
                             onChangeText={value => setEquipe(value)}
+                        /> */}
+
+                        <MultiSelect
+                            items={colaboradoresFormatados}
+                            uniqueKey="id"
+                            selectedItems={equipeId}
+                            onSelectedItemsChange={(selectedItems: number[]) => {setEquipeId(selectedItems); console.log(equipeId)}}
+                            searchInputPlaceholderText="Pesquisar..."
+                            itemTextColor="blue"
+                            
                         />
 
                         <View style={{ flexDirection: 'row' }}>
