@@ -25,8 +25,6 @@ export default async function atualizacoes() {
                     await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(colabs)).then(() => console.log('concluido'))
                 }
             }
-            // const content = await fs.readAsStringAsync(fileUri('colaboradores'))
-            // console.log(JSON.parse(content))
         }
         garantirDirExiste()
     } catch (error) {

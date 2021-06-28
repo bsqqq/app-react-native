@@ -63,27 +63,30 @@ const NaoConformidades: React.FC = () => {
         setModalVisible(true)
     }
 
-    async function handleModalSavePic() {
+    function handleModalSavePic() {
         if (textDescricao == '' || textDescricao == undefined) {
             alert('O campo de descrição está vazío! Por favor preencha o campo de descrição.')
             return
         }
+
         const arrURI: string[] = naoConformidadesRegistradas
         arrURI.push(String(photoURI))
         setNaoConformidadesRegistradas(arrURI)
-        const Foto = await MediaLibrary.createAssetAsync(String(photoURI))
-        const objFotosDeNaoConformidade: photoProps = {
-            fotoId: Number(Foto.id),
-            nomeDoArquivo: Foto.filename,
-            respostaId,
-        }
-        await db.ref(`/`).set()
-        setFotosInspecao(Foto)
         setModalVisible(false)
     }
 
-    function handleConfirmNaoConformidade() {
-        
+    async function handleConfirmNaoConformidade() {
+        for (var i = 0; i < naoConformidadesRegistradas.length; i++) {
+            console.log(naoConformidadesRegistradas[i])
+            const Foto: MediaLibrary.Asset = await MediaLibrary.createAssetAsync(naoConformidadesRegistradas[i])
+            const objFotosDeNaoConformidade: photoProps = {
+                fotoId: Number(Foto.id),
+                nomeDoArquivo: Foto.filename,
+                respostaId,
+            }
+            // await db.ref(`/`).set()
+            setFotosInspecao(naoConformidadesRegistradas[i])
+        }
         navigation.navigate('TelaDePerguntas')
     }
 
