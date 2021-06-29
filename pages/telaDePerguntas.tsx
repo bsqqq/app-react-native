@@ -49,6 +49,7 @@ const TelaDePerguntas: React.FC = () => {
         setIndicePerguntaAtual(indicePerguntaAtual + 1);
         objDeResp.push(resposta)
         setListaRespostas(objDeResp)
+        console.log(objDeResp)
       }
       else if (decisao == 'nao') {
         let resposta: objetoDeResposta = {
@@ -63,6 +64,7 @@ const TelaDePerguntas: React.FC = () => {
         setListaRespostas(objDeResp)
         setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
         setIndicePerguntaAtual(indicePerguntaAtual + 1);
+        console.log(objDeResp)
         navigation.navigate('NaoConformidades')
       }
       else {
