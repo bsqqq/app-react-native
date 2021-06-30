@@ -8,15 +8,9 @@ import { estouOnline } from './utils/EstouOnline'
 import atualizacoes from './utils/TenhoAtualizacoes';
 
 const App: React.FC = () => {
-
   React.useEffect(() => {
-    async function atts() {
-      atualizacoes()
-    }
-    atts()
+    estouOnline()
   }, [])
-
-    var conectado = estouOnline()
     LogBox.ignoreLogs(['Setting a timer for a long period of time'])
     LogBox.ignoreLogs(['componentWillReceiveProps has been renamed'])
   return (

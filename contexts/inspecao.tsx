@@ -15,8 +15,10 @@ export interface InspecaoContextData {
     ContratoId: number | undefined,
     ProcessoId: number | undefined,
     inspecaoId: number | undefined,
+    Inspecao: string | undefined,
     setProcessoContratoIdContextData(IdProcesso: number, idContrato: number): void,
-    setInspecaoIdContextData(inspecaoId: number): void
+    setInspecaoIdContextData(inspecaoId: number): void,
+    setNewInspecao(inspecao: string): void
 }
 
 const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContextData)
@@ -37,6 +39,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     const [ContratoId, setContratoId] = useState<number>()
     const [ProcessoId, setProcessoId] = useState<number>()
     const [inspecaoId, setInspecaoId] = useState<number>()
+    const [Inspecao, setInspecao] = useState<string>()
 
     function setProcessoContratoIdContextData(processoId: number, contratoId: number) {
         setProcessoId(processoId)
@@ -47,6 +50,10 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         setInspecaoId(inspecaoId)
     }
 
+    function setNewInspecao(inspecao: string) {
+        console.log(inspecao)
+        setInspecao(inspecao)
+    }
     return (
         <InspecaoContext.Provider
             value={{
@@ -65,7 +72,9 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                 ProcessoId,
                 setProcessoContratoIdContextData,
                 setInspecaoIdContextData,
-                inspecaoId
+                inspecaoId,
+                setNewInspecao,
+                Inspecao
             }}>
             { children }
         </InspecaoContext.Provider>

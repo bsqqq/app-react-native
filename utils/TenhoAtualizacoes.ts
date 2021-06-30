@@ -1,4 +1,3 @@
-import { estouOnline } from './EstouOnline'
 import fb from '../services/firebase'
 import colaboradores from '../json/colaboradores.json'
 import * as fs from 'expo-file-system'
@@ -16,15 +15,12 @@ export default async function atualizacoes() {
             if (!dirInfo.exists) {
                 console.log('criando diretorio...')
                 await fs.makeDirectoryAsync(path, { intermediates: true })
-            } else {
-                if (estouOnline()) {
-                    console.log('escrevendo colaboradores.json com o conteudo do banco de dados')
-                    await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(shotColaboradores)).then(() => console.log('concluido'))
-                } else {
-                    console.log('escrevendo colaboradores.json com o conteudo do banco local (json)') // na duvida se isso realmente printaria...
-                    await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(colabs)).then(() => console.log('concluido'))
-                }
             }
+                console.log('escrevendo colaboradores.json com o conteudo do banco de dados')
+                await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(shotColaboradores)).then(() => console.log('concluido'))
+                // console.log('escrevendo colaboradores.json com o conteudo do banco local (json)') // na duvida se isso realmente printaria...
+                // await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(colabs)).then(() => console.log('concluido'))
+
         }
         garantirDirExiste()
     } catch (error) {

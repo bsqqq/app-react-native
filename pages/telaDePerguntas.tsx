@@ -24,7 +24,7 @@ interface objetoDeResposta {
 }
 
 const TelaDePerguntas: React.FC = () => {
-  const { setRespostaIdContext, finishFotosInspecao } = useContext(NaoConformidadesContext)
+  const { setRespostaIdContext, finishInspecao } = useContext(NaoConformidadesContext)
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
   const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
@@ -83,8 +83,7 @@ const TelaDePerguntas: React.FC = () => {
   function handleEnvioDeInspecao() {
     console.log('apertou aqui')
     // escrita para o storage com o array de fotos
-    // depois dar um clearFotosInspecao()
-    finishFotosInspecao()
+    finishInspecao()
     navigation.navigate('Inspecao')
   }
 

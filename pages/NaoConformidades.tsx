@@ -85,8 +85,8 @@ const NaoConformidades: React.FC = () => {
                 respostaId,
             }
             // await db.ref(`/`).set()
-            setFotosInspecao(naoConformidadesRegistradas[i])
         }
+        setFotosInspecao(naoConformidadesRegistradas)
         navigation.navigate('TelaDePerguntas')
     }
 

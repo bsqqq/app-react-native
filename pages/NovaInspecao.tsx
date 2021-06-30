@@ -73,7 +73,7 @@ interface objetoDeInspecao {
 export default function NovaInspecao() {
     var path = fs.documentDirectory + 'json/'
     const fileUri = (jsonId: string) => path + `${jsonId}.json`
-    const { setProcessoContratoIdContextData, setInspecaoIdContextData } = useContext(InspecaoContext)
+    const { setProcessoContratoIdContextData, setInspecaoIdContextData, setNewInspecao } = useContext(InspecaoContext)
     const [location, setLocation] = useState<Location.LocationObject>()
     const [municipioVisible, setMunicipioVisible] = useState(false)
     const [contratoVisible, setContratoVisible] = useState(false)
@@ -132,6 +132,7 @@ export default function NovaInspecao() {
             } else {
                 // lembrar de descomentar a linha abaixo
                 // await db.ref(`/inspecoes/${newInspecao.id}`).set(newInspecao)
+                setNewInspecao(JSON.stringify(newInspecao))
                 navigation.navigate('TelaDePerguntas')
             }
         } catch (error) {
