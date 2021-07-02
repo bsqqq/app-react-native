@@ -11,38 +11,35 @@ import {
     TextInput,
     KeyboardAvoidingView,
     Platform,
+    Button,
 } from 'react-native';
 import {
     Camera,
     CameraCapturedPicture,
     PermissionResponse,
 } from 'expo-camera'
+import FilterPicker, { ModalFilterPickerOption } from 'react-native-modal-filter-picker'
 import { FontAwesome } from '@expo/vector-icons'
 import Buttom from '../components/NextButton'
-import NaoConformidadeContext from '../contexts/NaoConformidades';
 import { useNavigation } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library';
-import fb from '../services/firebase'
-
-interface photoProps {
-    respostaId: number | undefined,
-    fotoId: number,
-    tipo?: undefined,
-    nomeDoArquivo: string,
-    hiperlink?: string
-}
+import InspecaoContext from '../contexts/inspecao';
+import * as fs from 'expo-file-system'
 
 const NaoConformidades: React.FC = () => {
     const [naoConformidadesRegistradas, setNaoConformidadesRegistradas] = useState<Array<string>>([])
-    const { respostaId, setFotosInspecao } = useContext(NaoConformidadeContext)
+    const [colaboradoresVisible, setColaboradoresVisible] = useState<boolean>(false)
     const [cameraPos, setCameraPos] = useState(Camera.Constants.Type.back)
+    const { setFotosInspecao, EquipeId } = useContext(InspecaoContext)
     const [modalVisible, setModalVisible] = useState<boolean>(false)
     const [textDescricao, setTextDescricao] = useState<string>()
-    const [nomeFoto, setNomeFoto] = useState<string>('')
     const [photoURI, setPhotoURI] = useState<string>()
+    const [colabId, setColabId] = useState<number>()
     const [perms, setPerms] = useState<boolean>()
+    const [colab, setColab] = useState<string>('')
+    const [colaboradores, setColaboradores] = useState<ModalFilterPickerOption[]>([])
+    var colabsFormatados: ModalFilterPickerOption[] = []
     const navigation = useNavigation()
-    const db = fb.database()
     var camera: Camera
 
     useEffect(() => {
@@ -54,11 +51,25 @@ const NaoConformidades: React.FC = () => {
         (async () => {
             const { status }: PermissionResponse = await MediaLibrary.requestPermissionsAsync()
             setPerms(status === 'granted')
+        })();
+
+        (async () => {
+            var path = fs.documentDirectory + 'json/'
+            const fileUri = (jsonId: string) => path + `${jsonId}.json`
+            var colabs = JSON.parse(await fs.readAsStringAsync(fileUri('colaboradores')))
+            let keys = Object.keys(colabs)
+            keys.forEach(key => {
+                colabsFormatados.push({
+                    key: String(colabs[key].id),
+                    label: colabs[key].nome
+                })
+            })
+            setColaboradores(colabsFormatados)
         })()
     }, [])
 
     async function takePic() {
-        const data: CameraCapturedPicture = await camera.takePictureAsync({})
+        const data: CameraCapturedPicture = await camera.takePictureAsync({ quality: 0.3 })
         setPhotoURI(data.uri)
         setModalVisible(true)
     }
@@ -68,7 +79,6 @@ const NaoConformidades: React.FC = () => {
             alert('O campo de descrição está vazío! Por favor preencha o campo de descrição.')
             return
         }
-
         const arrURI: string[] = naoConformidadesRegistradas
         arrURI.push(String(photoURI))
         setNaoConformidadesRegistradas(arrURI)
@@ -78,13 +88,7 @@ const NaoConformidades: React.FC = () => {
     async function handleConfirmNaoConformidade() {
         for (var i = 0; i < naoConformidadesRegistradas.length; i++) {
             console.log(naoConformidadesRegistradas[i])
-            const Foto: MediaLibrary.Asset = await MediaLibrary.createAssetAsync(naoConformidadesRegistradas[i])
-            const objFotosDeNaoConformidade: photoProps = {
-                fotoId: Number(Foto.id),
-                nomeDoArquivo: Foto.filename,
-                respostaId,
-            }
-            // await db.ref(`/`).set()
+            await MediaLibrary.createAssetAsync(naoConformidadesRegistradas[i])
         }
         setFotosInspecao(naoConformidadesRegistradas)
         navigation.navigate('TelaDePerguntas')
@@ -165,7 +169,6 @@ const NaoConformidades: React.FC = () => {
                                                 fontWeight: 'bold'
                                             }}>A imagem está nítida e compreensiva?
                                         </Text>
-
                                         <Image
                                             style={{
                                                 width: Dimensions.get('window').width * 0.9,
@@ -175,7 +178,6 @@ const NaoConformidades: React.FC = () => {
                                             source={{ uri: photoURI }}
                                         />
                                     </View>
-
                                     <SafeAreaView
                                         style={{
                                             justifyContent: 'space-between',
@@ -191,7 +193,7 @@ const NaoConformidades: React.FC = () => {
                                                     maxWidth: 170,
                                                     textAlign: 'center'
                                                 }}>
-                                                Por favor insira UMA DESCRIÇÃO para esta foto no campo abaixo. (Obrigatório)
+                                                Descrição (Obrigatório)
                                             </Text>
                                             <TextInput
                                                 style={{
@@ -208,7 +210,6 @@ const NaoConformidades: React.FC = () => {
                                                 }
                                             />
                                         </View>
-
                                         <View>
                                             <Text
                                                 style={{
@@ -217,17 +218,20 @@ const NaoConformidades: React.FC = () => {
                                                     textAlign: 'center'
                                                 }}>
                                                 Isso está atrelado a um colaborador?
-                                                se sim, insira o nome do colaborador abaixo
                                             </Text>
-                                            <TextInput
-                                                style={{
-                                                    borderBottomWidth: 1,
-                                                    borderColor: 'lightblue',
-                                                    textAlign: 'center',
-                                                    fontWeight: 'bold',
-                                                    fontStyle: 'italic'
+                                            <Text>{colab}</Text>
+                                            <FilterPicker
+                                                visible={colaboradoresVisible}
+                                                onSelect={(item: any) => {
+                                                    console.log(item)
+                                                    setColabId(Number(item.key))
+                                                    setColab(item.label)
+                                                    setColaboradoresVisible(false)
                                                 }}
-                                                onChangeText={(value: string) => setNomeFoto(value)} />
+                                                onCancel={() => setColaboradoresVisible(false)}
+                                                options={colaboradores}
+                                            />
+                                            <Button title="Pressione aqui para selecionar" onPress={() => { setColaboradoresVisible(true); console.log('apertou') }} />
                                         </View>
 
                                     </SafeAreaView>

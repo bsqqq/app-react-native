@@ -1,4 +1,8 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useState, useContext } from 'react'
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { estouOnline } from '../utils/EstouOnline';
+import fb from '../services/firebase'
+import NaoConformidadeContext from './NaoConformidades';
 
 export interface InspecaoContextData {
     id?: number | undefined
@@ -11,20 +15,24 @@ export interface InspecaoContextData {
     CoordenadaY: string | number | undefined,
     Inspetor: string | undefined,
     Placa: string | undefined,
-    Equipe: string | undefined,
+    EquipeId: number[] | undefined,
     ContratoId: number | undefined,
     ProcessoId: number | undefined,
     inspecaoId: number | undefined,
     Inspecao: string | undefined,
     setProcessoContratoIdContextData(IdProcesso: number, idContrato: number): void,
     setInspecaoIdContextData(inspecaoId: number): void,
-    setNewInspecao(inspecao: string): void
+    setNewInspecao(inspecao: string): void,
+    setFotosInspecao(FotoURI: string[]): Promise<void>,
+    finishInspecao(): Promise<void>,
+    setEquipeIdContext(equipeId: number[] | undefined): void
 }
 
 const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContextData)
 export default InspecaoContext
 
 export const InspecaoProvider: React.FC = ({ children }) => {
+    const { respostaId } = useContext(NaoConformidadeContext)
     const [id, setId] = useState<number>()
     const [NumeroDeInspecao, setNumeroDeInspecao] = useState<number>()
     const [DataEHoraDaInspecao, setDataEHoraDaInspecao] = useState<string>()
@@ -35,7 +43,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     const [CoordenadaY, setCoordenadaY] = useState<string>()
     const [Inspetor, setInspetor] = useState<string>()
     const [Placa, setPlaca] = useState<string>()
-    const [Equipe, setEquipe] = useState<string>()
+    const [EquipeId, setEquipeId] = useState<number[]>()
     const [ContratoId, setContratoId] = useState<number>()
     const [ProcessoId, setProcessoId] = useState<number>()
     const [inspecaoId, setInspecaoId] = useState<number>()
@@ -45,7 +53,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         setProcessoId(processoId)
         setContratoId(contratoId)
     }
-    
+
     function setInspecaoIdContextData(inspecaoId: number) {
         setInspecaoId(inspecaoId)
     }
@@ -53,6 +61,43 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     function setNewInspecao(inspecao: string) {
         console.log(inspecao)
         setInspecao(inspecao)
+    }
+
+    async function setFotosInspecao(FotoURI: string[]) {
+        await AsyncStorage.setItem('@mais-parceria-app-fotos', JSON.stringify(FotoURI))
+    }
+
+    function setEquipeIdContext(equipeId: number[]) {
+        setEquipeId(equipeId)
+    }
+
+    async function finishInspecao() {
+        // esta função vai escrever tudo no banco de dados.
+        try {
+            const db = fb.database()
+            const storage = fb.storage()
+            await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
+            const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
+            const arrayDeFts = JSON.parse(String(fts))
+            console.log(arrayDeFts.length)
+            const promises = arrayDeFts.map(async (item: string, index: number) => {
+                const response = await fetch(item)
+                var blob = await response.blob()
+                await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
+                var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
+                await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0) + index}`).set({
+                    hiperlink,
+                    descricao: '',
+                    inspecaoId,
+                    id: (inspecaoId || 0) + index,
+                    respostaId
+                })
+            })
+            await Promise.all(promises)
+            fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', (error) => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
+        } catch (error) {
+            console.log(error)
+        }
     }
     return (
         <InspecaoContext.Provider
@@ -67,16 +112,19 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                 CoordenadaY,
                 Inspetor,
                 Placa,
-                Equipe,
+                EquipeId,
                 ContratoId,
                 ProcessoId,
                 setProcessoContratoIdContextData,
                 setInspecaoIdContextData,
                 inspecaoId,
                 setNewInspecao,
-                Inspecao
+                Inspecao,
+                setFotosInspecao,
+                finishInspecao,
+                setEquipeIdContext
             }}>
-            { children }
+            {children}
         </InspecaoContext.Provider>
     )
 }

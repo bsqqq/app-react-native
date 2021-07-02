@@ -15,16 +15,17 @@ interface objetoDePergunta {
 }
 
 interface objetoDeResposta {
-  NaoConformidades?: Array<string>
+  // NaoConformidades?: Array<string>
   inspecaoId: number | undefined,
   valorResposta: string,
   perguntaId: number,
   respostaId: number,
-  status: string,
+  status?: string,
 }
 
 const TelaDePerguntas: React.FC = () => {
-  const { setRespostaIdContext, finishInspecao } = useContext(NaoConformidadesContext)
+  const { setRespostaIdContext } = useContext(NaoConformidadesContext)
+  const { finishInspecao } = useContext(InspecaoContext)
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
   const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
@@ -68,7 +69,15 @@ const TelaDePerguntas: React.FC = () => {
         navigation.navigate('NaoConformidades')
       }
       else {
-        // caso escolha N/A
+        if(decisao == 'n/a') {
+          let resposta: objetoDeResposta = {
+            respostaId: new Date().getTime(),
+            inspecaoId,
+            perguntaId: listaPerguntas[indicePerguntaAtual].id,
+            valorResposta: decisao,
+            status: ""
+          }
+        }
       }
       if (indicePerguntaAtual + 1 === listaPerguntas.length) {
         setDisabled(true)
@@ -82,7 +91,6 @@ const TelaDePerguntas: React.FC = () => {
 
   function handleEnvioDeInspecao() {
     console.log('apertou aqui')
-    // escrita para o storage com o array de fotos
     finishInspecao()
     navigation.navigate('Inspecao')
   }

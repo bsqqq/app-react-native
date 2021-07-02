@@ -10,16 +10,14 @@ import {
     Button,
     ScrollView
 } from 'react-native'
+import FilterPicker, { ModalFilterPickerOption } from 'react-native-modal-filter-picker'
 import * as fs from 'expo-file-system'
 import Botao from '../components/NextButton'
-import fb from '../services/firebase'
 import InspecaoContext from '../contexts/inspecao'
 import { useNavigation } from '@react-navigation/native'
-import FilterPicker, { ModalFilterPickerOption } from 'react-native-modal-filter-picker'
-import municipios from '../json/municipios.json'
-import processos from '../json/processos.json'
-import contratos from '../json/contratos.json'
-import colaboradoress from '../json/colaboradores.json'
+import municipios from '../json/municipios.json' // se possivel, trocar por processo do fs
+import processos from '../json/processos.json' // trocar por processos do fs
+import contratos from '../json/contratos.json' // trocar por contratos do fs
 import * as Location from 'expo-location'
 import AuthContext from '../contexts/auth'
 import MultiSelect from 'expo-multiple-select'
@@ -71,9 +69,10 @@ interface objetoDeInspecao {
 }
 
 export default function NovaInspecao() {
+    const { setProcessoContratoIdContextData, setInspecaoIdContextData, setNewInspecao, setEquipeIdContext } = useContext(InspecaoContext)
     var path = fs.documentDirectory + 'json/'
     const fileUri = (jsonId: string) => path + `${jsonId}.json`
-    const { setProcessoContratoIdContextData, setInspecaoIdContextData, setNewInspecao } = useContext(InspecaoContext)
+    const [colaboradoresFormatados, setColaboradoresFormatados] = useState<MultiProps[]>([])
     const [location, setLocation] = useState<Location.LocationObject>()
     const [municipioVisible, setMunicipioVisible] = useState(false)
     const [contratoVisible, setContratoVisible] = useState(false)
@@ -93,9 +92,6 @@ export default function NovaInspecao() {
     const { user } = useContext(AuthContext)
     var colaboradores: ColaboradoresProps
     const navigation = useNavigation()
-    const db = fb.database()
-    // let colaboradoresFormatados: MultiProps[] = []
-    const [colaboradoresFormatados, setColaboradoresFormatados] = useState<MultiProps[]>([])
 
     async function handleNewInspecao() {
         try {
@@ -118,21 +114,20 @@ export default function NovaInspecao() {
             setInspecaoIdContextData(Number(newInspecao.id))
             if (
                 // garantir que todos os campos sejam preenchidos
-                newInspecao?.Placa == undefined
-                && newInspecao?.EquipeId == undefined
-                && newInspecao?.OT_OS_SI == undefined
-                && newInspecao?.Localidade == undefined
-                && newInspecao?.ContratoId == undefined
-                && newInspecao?.ProcessoId == undefined
-                && newInspecao?.MunicipioId == undefined
-                && newInspecao?.NumeroDeInspecao == undefined
+                newInspecao?.Placa == undefined || newInspecao.Placa.length <= 0
+                && newInspecao?.EquipeId == undefined || Number(newInspecao.EquipeId?.length) <= 0
+                && newInspecao?.Localidade == undefined || Number(newInspecao.Localidade?.length) <= 0
+                && newInspecao?.ContratoId == undefined || Number(newInspecao.ContratoId?.toString()) <= 0
+                && newInspecao?.ProcessoId == undefined || Number(newInspecao.ProcessoId?.toString()) <= 0
+                && newInspecao?.MunicipioId == undefined || Number(newInspecao.MunicipioId?.toString()) <= 0
+                && newInspecao?.OT_OS_SI == undefined || Number(newInspecao.OT_OS_SI?.toString().length) <= 0
+                && newInspecao?.NumeroDeInspecao == undefined || Number(newInspecao.NumeroDeInspecao?.toString()) <= 0
             ) {
                 alert('Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
                 console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
             } else {
-                // lembrar de descomentar a linha abaixo
-                // await db.ref(`/inspecoes/${newInspecao.id}`).set(newInspecao)
                 setNewInspecao(JSON.stringify(newInspecao))
+                setEquipeIdContext(newInspecao?.EquipeId)
                 navigation.navigate('TelaDePerguntas')
             }
         } catch (error) {
@@ -255,19 +250,13 @@ export default function NovaInspecao() {
                             onChangeText={value => setPlaca(value)}
                             maxLength={7}
                         />
-                        {/*O campo de colaboradores precisa ser um Multiple Select*/}
-                        <Text style={styles.titulo}>Equipe:</Text>
-                        {/* <TextInput
-                            style={styles.input}
-                            keyboardType='default'
-                            onChangeText={value => setEquipe(value)}
-                        /> */}
 
+                        <Text style={styles.titulo}>Equipe:</Text>
                         <MultiSelect
                             items={colaboradoresFormatados}
                             uniqueKey="id"
                             selectedItems={equipeId}
-                            onSelectedItemsChange={(selectedItems: number[]) => {setEquipeId(selectedItems); console.log(equipeId)}}
+                            onSelectedItemsChange={(selectedItems: number[]) => {setEquipeId(selectedItems); console.log(selectedItems)}}
                             searchInputPlaceholderText="Pesquisar..."
                             itemTextColor="blue"
                             
