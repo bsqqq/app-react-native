@@ -15,8 +15,8 @@ import * as fs from 'expo-file-system'
 import Botao from '../components/NextButton'
 import InspecaoContext from '../contexts/inspecao'
 import { useNavigation } from '@react-navigation/native'
-import municipios from '../json/municipios.json' // se possivel, trocar por processo do fs
-import processos from '../json/processos.json' // trocar por processos do fs
+// import municipios from '../json/municipios.json' // se possivel, trocar por processo do fs
+// import processos from '../json/processos.json' // trocar por processos do fs
 import contratos from '../json/contratos.json' // trocar por contratos do fs
 import * as Location from 'expo-location'
 import AuthContext from '../contexts/auth'
@@ -32,6 +32,13 @@ interface ProcessosProps {
 interface MultiProps {
     id: string,
     name: string
+}
+
+interface ContratoProps {
+    [index: string]: {
+        id: string,
+        nome: string
+    }
 }
 
 interface ColaboradoresProps {
@@ -73,7 +80,10 @@ export default function NovaInspecao() {
     var path = fs.documentDirectory + 'json/'
     const fileUri = (jsonId: string) => path + `${jsonId}.json`
     const [colaboradoresFormatados, setColaboradoresFormatados] = useState<MultiProps[]>([])
+    const [processosState, setProcessosState] = useState<ProcessosProps>({})
     const [location, setLocation] = useState<Location.LocationObject>()
+    const [contratosState, setContratosState] = useState<ContratoProps>({})
+    const [municipiosState, setMunicipiosState] = useState<any[]>()
     const [municipioVisible, setMunicipioVisible] = useState(false)
     const [contratoVisible, setContratoVisible] = useState(false)
     const [processoVisible, setProcessoVisible] = useState(false)
@@ -90,8 +100,11 @@ export default function NovaInspecao() {
     const [OtOsSi, setOtOsSi] = useState<number>()
     const [placa, setPlaca] = useState<string>()
     const { user } = useContext(AuthContext)
-    var colaboradores: ColaboradoresProps
     const navigation = useNavigation()
+    var colaboradores: ColaboradoresProps
+    var processos: ProcessosProps
+    var contratos: ContratoProps = {}
+    var municipios: any[]
 
     async function handleNewInspecao() {
         try {
@@ -137,6 +150,7 @@ export default function NovaInspecao() {
 
     useEffect(() => {
         let colaboradoresFormatadosPreState: MultiProps[] = []
+        // let contratosP: ContratoProps[]
         const date = new Date()
         setDataHora(`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${new Date().toLocaleTimeString()}`);
 
@@ -157,18 +171,27 @@ export default function NovaInspecao() {
                 })
             })
             setColaboradoresFormatados(colaboradoresFormatadosPreState)
+        })();
+        
+        (async (): Promise<void> => {
+            municipios = JSON.parse(await fs.readAsStringAsync(fileUri('municipios')))
+            setMunicipiosState(municipios)
+            processos = JSON.parse(await fs.readAsStringAsync(fileUri('processos')))
+            setProcessosState(processos)
+            contratos = JSON.parse(await fs.readAsStringAsync(fileUri('contratos')))
+            setContratosState(contratos)
         })()
     }, [])
 
     let municipioFormatado: ModalFilterPickerOption[] = []
-    municipios.forEach(municipio => {
+    municipiosState?.forEach(municipio => {
         municipioFormatado.push({
             key: String(municipio.id),
             label: municipio.nome
         })
     })
 
-    const processosTipados: ProcessosProps = processos
+    const processosTipados: ProcessosProps = processosState
     let processosFormatados: ModalFilterPickerOption[] = []
     const chaves: string[] = Object.keys(processosTipados)
     chaves.forEach(item => {
@@ -178,11 +201,13 @@ export default function NovaInspecao() {
         })
     })
 
+    const contratosTipados: ContratoProps = contratosState
     let contratosFormatados: ModalFilterPickerOption[] = []
-    contratos.forEach(contrato => {
+    const keys: string[] = Object.keys(contratosTipados)
+    keys?.forEach(item => {
         contratosFormatados.push({
-            key: String(contrato.id),
-            label: contrato.nome
+            key: String(contratosTipados[item].id),
+            label: contratosTipados[item].nome
         })
     })
 
@@ -256,10 +281,10 @@ export default function NovaInspecao() {
                             items={colaboradoresFormatados}
                             uniqueKey="id"
                             selectedItems={equipeId}
-                            onSelectedItemsChange={(selectedItems: number[]) => {setEquipeId(selectedItems); console.log(selectedItems)}}
+                            onSelectedItemsChange={(selectedItems: number[]) => { setEquipeId(selectedItems); console.log(selectedItems) }}
                             searchInputPlaceholderText="Pesquisar..."
                             itemTextColor="blue"
-                            
+
                         />
 
                         <View style={{ flexDirection: 'row' }}>

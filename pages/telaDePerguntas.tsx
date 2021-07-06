@@ -99,6 +99,7 @@ const TelaDePerguntas: React.FC = () => {
     async function getPerguntas() {
       await db.ref('/perguntas-de-seguranca').on('value', (snap: any) => {
         const perguntasJSON = snap.val()
+        console.log(perguntasJSON)
         if (perguntasJSON) {
           const keys = Object.keys(perguntasJSON)
           let perguntas: objetoDePergunta[] = []

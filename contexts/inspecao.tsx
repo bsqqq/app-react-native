@@ -1,6 +1,8 @@
 import React, { createContext, useState, useContext } from 'react'
+import * as Notifications from 'expo-notifications'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { estouOnline } from '../utils/EstouOnline';
+import netinfo from '@react-native-community/netinfo'
 import fb from '../services/firebase'
 import NaoConformidadeContext from './NaoConformidades';
 
@@ -24,8 +26,8 @@ export interface InspecaoContextData {
     setInspecaoIdContextData(inspecaoId: number): void,
     setNewInspecao(inspecao: string): void,
     setFotosInspecao(FotoURI: string[]): Promise<void>,
-    finishInspecao(): Promise<void>,
     setEquipeIdContext(equipeId: number[] | undefined): void
+    finishInspecao(): Promise<void>,
 }
 
 const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContextData)
@@ -74,27 +76,39 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     async function finishInspecao() {
         // esta função vai escrever tudo no banco de dados.
         try {
-            const db = fb.database()
-            const storage = fb.storage()
-            await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
-            const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
-            const arrayDeFts = JSON.parse(String(fts))
-            console.log(arrayDeFts.length)
-            const promises = arrayDeFts.map(async (item: string, index: number) => {
-                const response = await fetch(item)
-                var blob = await response.blob()
-                await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
-                var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
-                await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0) + index}`).set({
-                    hiperlink,
-                    descricao: '',
-                    inspecaoId,
-                    id: (inspecaoId || 0) + index,
-                    respostaId
+            if (netinfo.addEventListener(state => {
+                return state.isConnected == true
+            })) {
+                Notifications.setNotificationHandler({
+                    handleNotification: async () => ({
+                        shouldShowAlert: true,
+                        shouldPlaySound: true,
+                        shouldSetBadge: false
+                    })
                 })
-            })
-            await Promise.all(promises)
-            fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', (error) => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
+                const db = fb.database()
+                const storage = fb.storage()
+                await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
+                const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
+                const arrayDeFts = JSON.parse(String(fts))
+                const promises = arrayDeFts.map(async (item: string, index: number) => {
+                    const response = await fetch(item)
+                    var blob = await response.blob()
+                    await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
+                    var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
+                    await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0) + index}`).set({
+                        hiperlink,
+                        descricao: '',
+                        inspecaoId,
+                        id: (inspecaoId || 0) + index,
+                        respostaId
+                    })
+                })
+                await Promise.all(promises)
+                fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
+            } else {
+                // guardar estados até ficar online de novo
+            }
         } catch (error) {
             console.log(error)
         }
