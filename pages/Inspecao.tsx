@@ -13,6 +13,7 @@ import ItemInspecao from "../components/itemInspecao";
 import fb from "../services/firebase";
 import { InspecaoContextData } from "../contexts/inspecao";
 import AuthContext from "../contexts/auth";
+import * as fs from 'expo-file-system'
 
 interface InspecoesDataResolvidas {
   [index: string]: InspecaoContextData;
@@ -20,6 +21,8 @@ interface InspecoesDataResolvidas {
 
 export default function Inspecao() {
   const db = fb.database();
+  var path = fs.documentDirectory + 'json/'
+  const fileUri = (jsonId: string) => path + `${jsonId}.json`
   var inspecoesKeys: string[];
   var contratosKeys: string[];
   var processosKeys: string[];
@@ -42,6 +45,9 @@ export default function Inspecao() {
 
       const snapDeProcessos = await db.ref("/processos").once("value");
       const shotDeProcessos = snapDeProcessos.exportVal();
+      const fsInspecoes = fs.readAsStringAsync(fileUri('inspecoes'))
+      console.log(`fsInspecoes: ${fsInspecoes}`)
+      console.log(`shotDeInspeções: ${shot}`)
       const arrayDeProcessos: Array<any> = [];
       processosKeys = Object.keys(shotDeProcessos);
       processosKeys.forEach(key => {

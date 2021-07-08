@@ -1,6 +1,4 @@
-import React, { createContext, useState, useContext } from 'react'
-
-import InspecaoContext from './inspecao';
+import React, { createContext, useState } from 'react'
 
 interface NaoConformidadeProps {
     respostaId: number | undefined,
@@ -11,11 +9,12 @@ const NaoConformidadeContext = createContext<NaoConformidadeProps>({} as NaoConf
 export default NaoConformidadeContext
 
 export const NaoConformidadeProvider: React.FC = ({ children }) => {
-    // const { inspecaoId, Inspecao } = useContext(InspecaoContext)
     const [respostaId, setRespostaId] = useState<number>()
 
     function setRespostaIdContext(id: number) {
+        console.log(`NaoConformidades Context setRespostaIdContext: => ${id}`)
         setRespostaId(id)
+        console.log(respostaId)
     }
 
     return (

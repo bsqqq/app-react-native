@@ -1,10 +1,7 @@
 import React, { createContext, useState, useContext } from 'react'
-import * as Notifications from 'expo-notifications'
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { estouOnline } from '../utils/EstouOnline';
 import netinfo from '@react-native-community/netinfo'
 import fb from '../services/firebase'
-import NaoConformidadeContext from './NaoConformidades';
 
 export interface InspecaoContextData {
     id?: number | undefined
@@ -22,19 +19,25 @@ export interface InspecaoContextData {
     ProcessoId: number | undefined,
     inspecaoId: number | undefined,
     Inspecao: string | undefined,
+    descricao: string | undefined,
+    colabId: number[] | undefined,
+    respostaId: number | undefined,
     setProcessoContratoIdContextData(IdProcesso: number, idContrato: number): void,
     setInspecaoIdContextData(inspecaoId: number): void,
-    setNewInspecao(inspecao: string): void,
+    setNewInspecao(inspecao: string): Promise<void>,
     setFotosInspecao(FotoURI: string[]): Promise<void>,
     setEquipeIdContext(equipeId: number[] | undefined): void
     finishInspecao(): Promise<void>,
+    setDescricaoContext(desc: string): void,
+    setColabIdContext(colabId: number): void,
+    setRespId(id: number): void
 }
 
 const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContextData)
 export default InspecaoContext
 
 export const InspecaoProvider: React.FC = ({ children }) => {
-    const { respostaId } = useContext(NaoConformidadeContext)
+    // const { respostaId } = useContext(NaoConformidadeContext)
     const [id, setId] = useState<number>()
     const [NumeroDeInspecao, setNumeroDeInspecao] = useState<number>()
     const [DataEHoraDaInspecao, setDataEHoraDaInspecao] = useState<string>()
@@ -50,6 +53,9 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     const [ProcessoId, setProcessoId] = useState<number>()
     const [inspecaoId, setInspecaoId] = useState<number>()
     const [Inspecao, setInspecao] = useState<string>()
+    const [descricao, setDescricao] = useState<string>()
+    const [respostaId, setRespostaId] = useState<number>()
+    const [colabId, setColabId] = useState<number[]>([])
 
     function setProcessoContratoIdContextData(processoId: number, contratoId: number) {
         setProcessoId(processoId)
@@ -60,9 +66,10 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         setInspecaoId(inspecaoId)
     }
 
-    function setNewInspecao(inspecao: string) {
+    async function setNewInspecao(inspecao: string) {
         console.log(inspecao)
         setInspecao(inspecao)
+        await AsyncStorage.setItem('@mais-parceria-app-inspecao', inspecao)
     }
 
     async function setFotosInspecao(FotoURI: string[]) {
@@ -73,42 +80,80 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         setEquipeId(equipeId)
     }
 
+    function setColabIdContext(colabIdLocal: number) {
+        const arrColabId = colabId
+        arrColabId?.push(colabIdLocal)
+        setColabId(arrColabId)
+    }
+
+    function setDescricaoContext(desc: string) {
+        setDescricao(desc)
+    }
+
+    function setRespId(id: number) {
+        setRespostaId(id)
+    }
+
     async function finishInspecao() {
         // esta função vai escrever tudo no banco de dados.
+        const db = fb.database()
+        const storage = fb.storage()
         try {
-            if (netinfo.addEventListener(state => {
-                return state.isConnected == true
-            })) {
-                Notifications.setNotificationHandler({
-                    handleNotification: async () => ({
-                        shouldShowAlert: true,
-                        shouldPlaySound: true,
-                        shouldSetBadge: false
+            netinfo.fetch().then(async state => {
+                if (state.isConnected == true) {
+                    console.log('entrou aqui no netinfo.fetch()')
+                    console.log(`respostaId: ${respostaId}`)
+                    await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
+                    const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
+                    const arrayDeFts = JSON.parse(String(fts))
+                    const promises = arrayDeFts.map(async (item: string, index: number) => {
+                        const response = await fetch(item)
+                        var blob = await response.blob()
+                        await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
+                        var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
+                        await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0) + index}`).set({
+                            id: (inspecaoId || 0) + index,
+                            hiperlink,
+                            descricao,
+                            inspecaoId,
+                            respostaId,
+                            colaboradorId: colabId[index] || [],
+                            prazoDeResolucao: 0
+                        })
                     })
-                })
-                const db = fb.database()
-                const storage = fb.storage()
-                await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
-                const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
-                const arrayDeFts = JSON.parse(String(fts))
-                const promises = arrayDeFts.map(async (item: string, index: number) => {
-                    const response = await fetch(item)
-                    var blob = await response.blob()
-                    await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
-                    var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
-                    await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0) + index}`).set({
-                        hiperlink,
-                        descricao: '',
-                        inspecaoId,
-                        id: (inspecaoId || 0) + index,
-                        respostaId
+                    await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
+                    fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
+                } else {
+                    alert('AVISO: Atualmente o dispositivo se encontra offline, se caso não for possível enviar as inspeções normalmente para o servidor até o primeiro momento que se encontrar online, tente contactar todos os envolvidos sobre qualquer Não Conformidade, prazo, responsável, etc... as fotos são salvas automaticamente no álbum do dispositivo. Informe também ao desenvolvedor (Vinicius) sobre o caso para uma solução em breve...')
+                    netinfo.addEventListener(async state => {
+                        while (state.isConnected == false) {
+                            continue
+                        }
+                        // dados da inspeção
+                        await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
+                        // dados de fotos
+                        const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
+                        const arrayDeFts = JSON.parse(String(fts))
+                        const promises = arrayDeFts.map(async (item: string, index: number) => {
+                            const response = await fetch(item)
+                            var blob = await response.blob()
+                            await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
+                            var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
+                            await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0) + index}`).set({
+                                id: (inspecaoId || 0) + index,
+                                hiperlink,
+                                descricao,
+                                inspecaoId,
+                                respostaId,
+                                colaboradorId: colabId[index] || [],
+                                prazoDeReolucao: 0
+                            })
+                        })
+                        await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
+                        fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
                     })
-                })
-                await Promise.all(promises)
-                fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
-            } else {
-                // guardar estados até ficar online de novo
-            }
+                }
+            })
         } catch (error) {
             console.log(error)
         }
@@ -127,6 +172,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                 Inspetor,
                 Placa,
                 EquipeId,
+                descricao,
                 ContratoId,
                 ProcessoId,
                 setProcessoContratoIdContextData,
@@ -136,7 +182,12 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                 Inspecao,
                 setFotosInspecao,
                 finishInspecao,
-                setEquipeIdContext
+                setEquipeIdContext,
+                setDescricaoContext,
+                setColabIdContext,
+                colabId,
+                setRespId,
+                respostaId
             }}>
             {children}
         </InspecaoContext.Provider>

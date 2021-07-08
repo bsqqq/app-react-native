@@ -17,15 +17,15 @@ export interface Response {
 export async function signIn(cpf: string, senha: string): Promise<Response | null | undefined> {
     try {
         const response: AxiosResponse = await authentication.post('/login', { cpf, senha })
-            return {
-                token: response.data?.token,
-                user: {
-                    name: response.data?.nome,
-                    email: response.data?.email
-                }
-            } 
+        return {
+            token: response.data?.token,
+            user: {
+                name: response.data?.nome,
+                email: response.data?.email
+            }
+        }
     } catch (error) {
-        if(error.response?.status == 500) {
+        if (error.response?.status == 500) {
             console.log(`Erro interno no sistema... ${error}`)
             alert("Algo deu errado, erro interno no sistema!")
             return null

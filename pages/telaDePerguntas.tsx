@@ -5,6 +5,7 @@ import InspecaoContext from '../contexts/inspecao';
 import NaoConformidadesContext from '../contexts/NaoConformidades'
 import fb from '../services/firebase'
 import Buttom from '../components/NextButton'
+import * as fs from 'expo-file-system'
 
 interface objetoDePergunta {
   processosId: Array<number>
@@ -15,7 +16,6 @@ interface objetoDePergunta {
 }
 
 interface objetoDeResposta {
-  // NaoConformidades?: Array<string>
   inspecaoId: number | undefined,
   valorResposta: string,
   perguntaId: number,
@@ -25,7 +25,7 @@ interface objetoDeResposta {
 
 const TelaDePerguntas: React.FC = () => {
   const { setRespostaIdContext } = useContext(NaoConformidadesContext)
-  const { finishInspecao } = useContext(InspecaoContext)
+  const { finishInspecao, setRespId } = useContext(InspecaoContext)
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
   const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
@@ -60,7 +60,9 @@ const TelaDePerguntas: React.FC = () => {
           valorResposta: decisao,
           status: 'pendente'
         }
+        console.log(`resposta.respostaId: ${resposta.respostaId}`)
         setRespostaIdContext(resposta.respostaId)
+        setRespId(resposta.respostaId)
         objDeResp.push(resposta)
         setListaRespostas(objDeResp)
         setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
@@ -69,14 +71,19 @@ const TelaDePerguntas: React.FC = () => {
         navigation.navigate('NaoConformidades')
       }
       else {
-        if(decisao == 'n/a') {
+        if (decisao == 'n/a') {
           let resposta: objetoDeResposta = {
             respostaId: new Date().getTime(),
             inspecaoId,
             perguntaId: listaPerguntas[indicePerguntaAtual].id,
             valorResposta: decisao,
-            status: ""
+            status: "n/a"
           }
+          setRespId(resposta.respostaId)
+          objDeResp.push(resposta)
+          setListaRespostas(objDeResp)
+          setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.')
+          setIndicePerguntaAtual(indicePerguntaAtual + 1)
         }
       }
       if (indicePerguntaAtual + 1 === listaPerguntas.length) {
@@ -148,7 +155,7 @@ const TelaDePerguntas: React.FC = () => {
         <View style={{}}>
           <Buttom texto='Enviar' disabled={!disabled} onPress={handleEnvioDeInspecao} />
         </View>
-        <Text style={{fontStyle: 'italic'}}>Certifique-se de que este dispositivo está com carga suficiente até o fim desta inspeção.</Text>
+        <Text style={{ fontStyle: 'italic' }}>Certifique-se de que este dispositivo está com carga suficiente até o fim desta inspeção.</Text>
       </View>
     </>
   )
@@ -173,7 +180,6 @@ const style = StyleSheet.create({
     borderWidth: 5,
     borderRadius: 10,
     padding: 100,
-    // maxWidth: 500,
     marginTop: 60,
     marginHorizontal: 25,
     alignSelf: 'center',

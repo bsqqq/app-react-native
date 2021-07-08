@@ -25,20 +25,21 @@ import { useNavigation } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library';
 import InspecaoContext from '../contexts/inspecao';
 import * as fs from 'expo-file-system'
+import Inspecao from './Inspecao';
 
 const NaoConformidades: React.FC = () => {
     const [naoConformidadesRegistradas, setNaoConformidadesRegistradas] = useState<Array<string>>([])
+    const { setFotosInspecao, setDescricaoContext, setColabIdContext } = useContext(InspecaoContext)
+    const [colaboradores, setColaboradores] = useState<ModalFilterPickerOption[]>([])
     const [colaboradoresVisible, setColaboradoresVisible] = useState<boolean>(false)
     const [cameraPos, setCameraPos] = useState(Camera.Constants.Type.back)
-    const { setFotosInspecao, EquipeId } = useContext(InspecaoContext)
     const [modalVisible, setModalVisible] = useState<boolean>(false)
     const [textDescricao, setTextDescricao] = useState<string>()
+    var colabsFormatados: ModalFilterPickerOption[] = []
     const [photoURI, setPhotoURI] = useState<string>()
     const [colabId, setColabId] = useState<number>()
     const [perms, setPerms] = useState<boolean>()
     const [colab, setColab] = useState<string>('')
-    const [colaboradores, setColaboradores] = useState<ModalFilterPickerOption[]>([])
-    var colabsFormatados: ModalFilterPickerOption[] = []
     const navigation = useNavigation()
     var camera: Camera
 
@@ -69,7 +70,7 @@ const NaoConformidades: React.FC = () => {
     }, [])
 
     async function takePic() {
-        const data: CameraCapturedPicture = await camera.takePictureAsync({ quality: 0.3 })
+        const data: CameraCapturedPicture = await camera.takePictureAsync({ quality: 0.4 })
         setPhotoURI(data.uri)
         setModalVisible(true)
     }
@@ -82,12 +83,14 @@ const NaoConformidades: React.FC = () => {
         const arrURI: string[] = naoConformidadesRegistradas
         arrURI.push(String(photoURI))
         setNaoConformidadesRegistradas(arrURI)
+        setDescricaoContext(textDescricao)
+        setColabIdContext(Number(colabId))
+        setColab('')
         setModalVisible(false)
     }
 
     async function handleConfirmNaoConformidade() {
         for (var i = 0; i < naoConformidadesRegistradas.length; i++) {
-            console.log(naoConformidadesRegistradas[i])
             await MediaLibrary.createAssetAsync(naoConformidadesRegistradas[i])
         }
         setFotosInspecao(naoConformidadesRegistradas)

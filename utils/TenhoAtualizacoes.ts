@@ -9,10 +9,12 @@ export default async function atualizacoes() {
         const snapColaboradores = await db.ref('/colaboradores').once('value')
         const snapContratos = await db.ref('/empresas').once('value')
         const snapProcessos = await db.ref('/processos').once('value')
+        const snapInspecoes = await db.ref('/inspecoes').once('value')
         const shotPerguntasDeSeguranca = snapPerguntasDeSeguranca.exportVal()
         const shotColaboradores = snapColaboradores.exportVal()
         const shotContratos = snapContratos.exportVal()
         const shotProcessos = snapProcessos.exportVal()
+        const shotInspecoes = snapInspecoes.exportVal()
         var path = fs.documentDirectory + 'json/'
         const fileUri = (jsonId: string) => path + `${jsonId}.json`
         async function garantirDirExiste() {
@@ -24,6 +26,7 @@ export default async function atualizacoes() {
             await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(shotColaboradores)).then(() => console.log('colaboradores: concluido'))
             await fs.writeAsStringAsync(fileUri('processos'), JSON.stringify(shotProcessos)).then(() => console.log('processos: concluido'))
             await fs.writeAsStringAsync(fileUri('contratos'), JSON.stringify(shotContratos)).then(() => console.log('contratos: concluido'))
+            await fs.writeAsStringAsync(fileUri('inspecoes'), JSON.stringify(shotInspecoes)).then(() => console.log('inspeções: concluido'))
         }
         getMunicipios().then(() => console.log('terminou de pegar os municipios'))
         garantirDirExiste()
