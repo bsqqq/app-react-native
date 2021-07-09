@@ -10,17 +10,11 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ItemInspecao from "../components/itemInspecao";
-import fb from "../services/firebase";
 import { InspecaoContextData } from "../contexts/inspecao";
 import AuthContext from "../contexts/auth";
 import * as fs from 'expo-file-system'
 
-interface InspecoesDataResolvidas {
-  [index: string]: InspecaoContextData;
-}
-
 export default function Inspecao() {
-  const db = fb.database();
   var path = fs.documentDirectory + 'json/'
   const fileUri = (jsonId: string) => path + `${jsonId}.json`
   var inspecoesKeys: string[];
@@ -30,32 +24,27 @@ export default function Inspecao() {
   const [inspecoes, setInspecoes] = useState<Array<InspecaoContextData>>([]);
   useEffect(() => {
     async function getInspecoes() {
-      const snap = await db.ref(`/inspecoes`).once("value");
-      const shot: InspecoesDataResolvidas = snap.exportVal();
+      const fsInspecoes = JSON.parse(await fs.readAsStringAsync(fileUri('inspecoes')))
+      console.log(fsInspecoes)
       const arrayDeTratamento: Array<InspecaoContextData> = [];
-      inspecoesKeys = Object.keys(shot);
+      inspecoesKeys = Object.keys(fsInspecoes);
 
-      const snapDeContratos = await db.ref("/empresas").once("value");
-      const shotDeContratos = snapDeContratos.exportVal();
+      const fsContratos = JSON.parse(await fs.readAsStringAsync(fileUri('contratos')))
       const arrayDeContratos: Array<any> = [];
-      contratosKeys = Object.keys(shotDeContratos);
+      contratosKeys = Object.keys(fsContratos);
       contratosKeys.forEach(key => {
-        arrayDeContratos.push(shotDeContratos[key]);
+        arrayDeContratos.push(fsContratos[key]);
       });
 
-      const snapDeProcessos = await db.ref("/processos").once("value");
-      const shotDeProcessos = snapDeProcessos.exportVal();
-      const fsInspecoes = fs.readAsStringAsync(fileUri('inspecoes'))
-      console.log(`fsInspecoes: ${fsInspecoes}`)
-      console.log(`shotDeInspeções: ${shot}`)
+      const fsProcessos = JSON.parse(await fs.readAsStringAsync(fileUri('processos')))
       const arrayDeProcessos: Array<any> = [];
-      processosKeys = Object.keys(shotDeProcessos);
+      processosKeys = Object.keys(fsProcessos);
       processosKeys.forEach(key => {
-        arrayDeProcessos.push(shotDeProcessos[key]);
+        arrayDeProcessos.push(fsProcessos[key]);
       });
 
       inspecoesKeys.forEach(key => {
-        var tal = shot[key];
+        var tal = fsInspecoes[key];
         if (tal.Inspetor === user?.name) {
           var contratoEncontrado = arrayDeContratos.find(contrato => {
             var contratoEncontrado = Number(contrato.id) === Number(tal.ContratoId);
@@ -100,6 +89,7 @@ export default function Inspecao() {
           <Text style={style.buttonText}>+</Text>
         </TouchableOpacity>
       </View>
+      {/* <Button title='a' onPress={() => console.log(inspecoes)}/> */}
     </SafeAreaView>
   );
 }

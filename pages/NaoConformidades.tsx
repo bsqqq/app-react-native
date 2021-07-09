@@ -25,7 +25,6 @@ import { useNavigation } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library';
 import InspecaoContext from '../contexts/inspecao';
 import * as fs from 'expo-file-system'
-import Inspecao from './Inspecao';
 
 const NaoConformidades: React.FC = () => {
     const [naoConformidadesRegistradas, setNaoConformidadesRegistradas] = useState<Array<string>>([])
@@ -86,6 +85,7 @@ const NaoConformidades: React.FC = () => {
         setDescricaoContext(textDescricao)
         setColabIdContext(Number(colabId))
         setColab('')
+        setColabId(0)
         setModalVisible(false)
     }
 

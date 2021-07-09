@@ -104,27 +104,39 @@ const TelaDePerguntas: React.FC = () => {
 
   useEffect(() => {
     async function getPerguntas() {
-      await db.ref('/perguntas-de-seguranca').on('value', (snap: any) => {
-        const perguntasJSON = snap.val()
-        console.log(perguntasJSON)
-        if (perguntasJSON) {
-          const keys = Object.keys(perguntasJSON)
-          let perguntas: objetoDePergunta[] = []
-          keys.forEach(key => {
-            const dataPerguntas = perguntasJSON[key]
-            const processoEncontrado = dataPerguntas.processosId.find((item: number) => {
-              return item === ProcessoId
-            })
-            const contratoEncontrado = dataPerguntas.contratosId.find((item: number) => {
-              return item === ContratoId
-            })
-            if (processoEncontrado && contratoEncontrado)
-              perguntas.push(dataPerguntas)
+      var path = fs.documentDirectory + 'json/'
+      const fileUri = (jsonId: string) => path + `${jsonId}.json`
+      // await db.ref('/perguntas-de-seguranca').on('value', (snap: any) => {
+      const perguntasJSON = JSON.parse(await fs.readAsStringAsync(fileUri('perguntas-de-seguranca')))
+      console.log(perguntasJSON)
+      if (perguntasJSON) {
+        const keys = Object.keys(perguntasJSON)
+        let perguntas: objetoDePergunta[] = []
+        keys.forEach(key => {
+          const dataPerguntas = perguntasJSON[key]
+          const arraysKeysProcessos = Object.keys(dataPerguntas.processosId)
+          const arraysProcessos: number[] = []
+          arraysKeysProcessos.forEach(item => {
+            arraysProcessos.push(dataPerguntas.processosId[item])
           })
-          setListaPerguntas(perguntas)
-          setProximaPergunta(perguntas[indicePerguntaAtual]?.pergunta)
-        }
-      })
+          const arraysKeysContratos = Object.keys(dataPerguntas.contratosId)
+          const arraysContratos: number[] = []
+          arraysKeysContratos.forEach(item => {
+            arraysContratos.push(dataPerguntas.contratosId[item])
+          })
+          const processoEncontrado = arraysProcessos.find((item: number) => {
+            return item === ProcessoId
+          })
+          const contratoEncontrado = arraysContratos.find((item: number) => {
+            return item === ContratoId
+          })
+          if (processoEncontrado && contratoEncontrado)
+            perguntas.push(dataPerguntas)
+        })
+        setListaPerguntas(perguntas)
+        setProximaPergunta(perguntas[indicePerguntaAtual]?.pergunta)
+      }
+      // })
     }
     getPerguntas()
   }, [])

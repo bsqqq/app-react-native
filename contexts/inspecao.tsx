@@ -19,7 +19,7 @@ export interface InspecaoContextData {
     ProcessoId: number | undefined,
     inspecaoId: number | undefined,
     Inspecao: string | undefined,
-    descricao: string | undefined,
+    descricao: string[] | undefined,
     colabId: number[] | undefined,
     respostaId: number | undefined,
     setProcessoContratoIdContextData(IdProcesso: number, idContrato: number): void,
@@ -53,7 +53,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     const [ProcessoId, setProcessoId] = useState<number>()
     const [inspecaoId, setInspecaoId] = useState<number>()
     const [Inspecao, setInspecao] = useState<string>()
-    const [descricao, setDescricao] = useState<string>()
+    const [descricao, setDescricao] = useState<string[]>([])
     const [respostaId, setRespostaId] = useState<number>()
     const [colabId, setColabId] = useState<number[]>([])
 
@@ -87,7 +87,9 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     }
 
     function setDescricaoContext(desc: string) {
-        setDescricao(desc)
+        const arrDeDesc = descricao
+        arrDeDesc.push(desc)
+        setDescricao(arrDeDesc)
     }
 
     function setRespId(id: number) {
@@ -114,10 +116,10 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                         await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0) + index}`).set({
                             id: (inspecaoId || 0) + index,
                             hiperlink,
-                            descricao,
+                            descricao: descricao[index] || "",
                             inspecaoId,
                             respostaId,
-                            colaboradorId: colabId[index] || [],
+                            colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
                             prazoDeResolucao: 0
                         })
                     })
@@ -126,31 +128,30 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                 } else {
                     alert('AVISO: Atualmente o dispositivo se encontra offline, se caso não for possível enviar as inspeções normalmente para o servidor até o primeiro momento que se encontrar online, tente contactar todos os envolvidos sobre qualquer Não Conformidade, prazo, responsável, etc... as fotos são salvas automaticamente no álbum do dispositivo. Informe também ao desenvolvedor (Vinicius) sobre o caso para uma solução em breve...')
                     netinfo.addEventListener(async state => {
-                        while (state.isConnected == false) {
-                            continue
-                        }
-                        // dados da inspeção
-                        await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
-                        // dados de fotos
-                        const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
-                        const arrayDeFts = JSON.parse(String(fts))
-                        const promises = arrayDeFts.map(async (item: string, index: number) => {
-                            const response = await fetch(item)
-                            var blob = await response.blob()
-                            await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
-                            var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
-                            await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0) + index}`).set({
-                                id: (inspecaoId || 0) + index,
-                                hiperlink,
-                                descricao,
-                                inspecaoId,
-                                respostaId,
-                                colaboradorId: colabId[index] || [],
-                                prazoDeReolucao: 0
+                        if (state.isConnected == true) {
+                            // dados da inspeção
+                            await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
+                            // dados de fotos
+                            const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
+                            const arrayDeFts = JSON.parse(String(fts))
+                            const promises = arrayDeFts.map(async (item: string, index: number) => {
+                                const response = await fetch(item)
+                                var blob = await response.blob()
+                                await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
+                                var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
+                                await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0) + index}`).set({
+                                    id: (inspecaoId || 0) + index,
+                                    hiperlink,
+                                    descricao: descricao[index] || "",
+                                    inspecaoId,
+                                    respostaId,
+                                    colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
+                                    prazoDeReolucao: 0
+                                })
                             })
-                        })
-                        await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
-                        fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
+                            await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
+                            fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
+                        }
                     })
                 }
             })
