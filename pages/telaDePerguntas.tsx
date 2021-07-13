@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native'
 import InspecaoContext from '../contexts/inspecao';
 import NaoConformidadesContext from '../contexts/NaoConformidades'
-import fb from '../services/firebase'
 import Buttom from '../components/NextButton'
 import * as fs from 'expo-file-system'
 
@@ -32,46 +31,47 @@ const TelaDePerguntas: React.FC = () => {
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
   const [proximaPergunta, setProximaPergunta] = useState<string>()
   const [disabled, setDisabled] = useState(false)
+  const [voltarDisabled, setVoltarDisabled] = useState(true)
   const navigation = useNavigation()
-  const db = fb.database()
-
+  
   function handleNextQuestion(decisao: string) {
     const objDeResp: objetoDeResposta[] = listaRespostas
+    console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
     try {
-      if (decisao == 'sim') {
-        let resposta: objetoDeResposta = {
-          respostaId: new Date().getTime(),
-          inspecaoId,
-          perguntaId: listaPerguntas[indicePerguntaAtual].id,
-          valorResposta: decisao,
-          status: 'ok'
-        }
-        setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
-        setIndicePerguntaAtual(indicePerguntaAtual + 1);
-        objDeResp.push(resposta)
-        setListaRespostas(objDeResp)
-        console.log(objDeResp)
-      }
-      else if (decisao == 'nao') {
-        let resposta: objetoDeResposta = {
-          respostaId: new Date().getTime(),
-          inspecaoId,
-          perguntaId: listaPerguntas[indicePerguntaAtual].id,
-          valorResposta: decisao,
-          status: 'pendente'
-        }
-        console.log(`resposta.respostaId: ${resposta.respostaId}`)
-        setRespostaIdContext(resposta.respostaId)
-        setRespId(resposta.respostaId)
-        objDeResp.push(resposta)
-        setListaRespostas(objDeResp)
-        setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
-        setIndicePerguntaAtual(indicePerguntaAtual + 1);
-        console.log(objDeResp)
-        navigation.navigate('NaoConformidades')
-      }
-      else {
-        if (decisao == 'n/a') {
+      switch (decisao) {
+        case 'sim':
+          let respostaSim: objetoDeResposta = {
+            respostaId: new Date().getTime(),
+            inspecaoId,
+            perguntaId: listaPerguntas[indicePerguntaAtual].id,
+            valorResposta: decisao,
+            status: 'ok'
+          }
+          setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
+          setIndicePerguntaAtual(indicePerguntaAtual + 1);
+          objDeResp.push(respostaSim)
+          setListaRespostas(objDeResp)
+          console.log(objDeResp)
+          break;
+        case 'nao':
+          let respostaNao: objetoDeResposta = {
+            respostaId: new Date().getTime(),
+            inspecaoId,
+            perguntaId: listaPerguntas[indicePerguntaAtual].id,
+            valorResposta: decisao,
+            status: 'pendente'
+          }
+          console.log(`resposta.respostaId: ${respostaNao.respostaId}`)
+          setRespostaIdContext(respostaNao.respostaId)
+          setRespId(respostaNao.respostaId)
+          objDeResp.push(respostaNao)
+          setListaRespostas(objDeResp)
+          setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
+          setIndicePerguntaAtual(indicePerguntaAtual + 1);
+          console.log(objDeResp)
+          navigation.navigate('NaoConformidades')
+          break;
+        case 'n/a':
           let resposta: objetoDeResposta = {
             respostaId: new Date().getTime(),
             inspecaoId,
@@ -84,12 +84,23 @@ const TelaDePerguntas: React.FC = () => {
           setListaRespostas(objDeResp)
           setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.')
           setIndicePerguntaAtual(indicePerguntaAtual + 1)
-        }
+          break;
+        case 'voltar':
+          if(indicePerguntaAtual == 0)
+            setVoltarDisabled(true)
+          else 
+            setVoltarDisabled(false)
+          setProximaPergunta(indicePerguntaAtual == 0 ? listaPerguntas[indicePerguntaAtual].pergunta : listaPerguntas[indicePerguntaAtual - 1].pergunta)
+          setIndicePerguntaAtual(indicePerguntaAtual == 0 ? indicePerguntaAtual : indicePerguntaAtual - 1)
+          
+          objDeResp[indicePerguntaAtual]
+          break;  
+        default:
+          break;
       }
-      if (indicePerguntaAtual + 1 === listaPerguntas.length) {
+      if (indicePerguntaAtual + 1 === listaPerguntas.length) 
         setDisabled(true)
-      }
-
+      
     } catch (error) {
       console.log(error)
       alert(error)
@@ -97,7 +108,6 @@ const TelaDePerguntas: React.FC = () => {
   }
 
   function handleEnvioDeInspecao() {
-    console.log('apertou aqui')
     finishInspecao()
     navigation.navigate('Inspecao')
   }
@@ -164,7 +174,8 @@ const TelaDePerguntas: React.FC = () => {
             <Button title="N/A" onPress={() => handleNextQuestion('n/a')} disabled={disabled} />
           </View>
         </View>
-        <View style={{}}>
+        <Button title='voltar' onPress={() => handleNextQuestion('voltar')} disabled={voltarDisabled}/>
+        <View>
           <Buttom texto='Enviar' disabled={!disabled} onPress={handleEnvioDeInspecao} />
         </View>
         <Text style={{ fontStyle: 'italic' }}>Certifique-se de que este dispositivo está com carga suficiente até o fim desta inspeção.</Text>
