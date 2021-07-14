@@ -1,8 +1,7 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react'
+import { View, Text, StyleSheet, Button } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
-import InspecaoContext from '../contexts/inspecao';
-import NaoConformidadesContext from '../contexts/NaoConformidades'
+import InspecaoContext from '../contexts/inspecao'
 import Buttom from '../components/NextButton'
 import * as fs from 'expo-file-system'
 
@@ -23,20 +22,19 @@ interface objetoDeResposta {
 }
 
 const TelaDePerguntas: React.FC = () => {
-  const { setRespostaIdContext } = useContext(NaoConformidadesContext)
   const { finishInspecao, setRespId } = useContext(InspecaoContext)
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
   const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
   const [proximaPergunta, setProximaPergunta] = useState<string>()
-  const [disabled, setDisabled] = useState(false)
   const [voltarDisabled, setVoltarDisabled] = useState(true)
+  const [disabled, setDisabled] = useState(false)
   const navigation = useNavigation()
-  
+  var objDeResp: objetoDeResposta[]
+
   function handleNextQuestion(decisao: string) {
-    const objDeResp: objetoDeResposta[] = listaRespostas
-    console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
+    objDeResp = listaRespostas
     try {
       switch (decisao) {
         case 'sim':
@@ -47,11 +45,21 @@ const TelaDePerguntas: React.FC = () => {
             valorResposta: decisao,
             status: 'ok'
           }
-          setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
-          setIndicePerguntaAtual(indicePerguntaAtual + 1);
-          objDeResp.push(respostaSim)
+          setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.')
+          setIndicePerguntaAtual(indicePerguntaAtual + 1)
+          var jaExisteResposta = objDeResp.find(objetoDeResposta => {
+            return objetoDeResposta.perguntaId === respostaSim.perguntaId
+          })
+
+          if (jaExisteResposta != undefined)
+            objDeResp[objDeResp.indexOf(jaExisteResposta)] = respostaSim
+          else 
+            objDeResp.push(respostaSim)
+          
           setListaRespostas(objDeResp)
           console.log(objDeResp)
+          console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
+          setVoltarDisabled(false)
           break;
         case 'nao':
           let respostaNao: objetoDeResposta = {
@@ -61,14 +69,22 @@ const TelaDePerguntas: React.FC = () => {
             valorResposta: decisao,
             status: 'pendente'
           }
-          console.log(`resposta.respostaId: ${respostaNao.respostaId}`)
-          setRespostaIdContext(respostaNao.respostaId)
-          setRespId(respostaNao.respostaId)
-          objDeResp.push(respostaNao)
+          var jaExisteRespostaa = objDeResp.find(objetoDeResposta => {
+            return objetoDeResposta.perguntaId === respostaNao.perguntaId
+          })
+
+          if (jaExisteRespostaa != undefined) 
+            objDeResp[objDeResp.indexOf(jaExisteRespostaa)] = respostaNao
+          else {
+            setRespId(respostaNao.respostaId)
+            objDeResp.push(respostaNao)
+          } 
           setListaRespostas(objDeResp)
           setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
           setIndicePerguntaAtual(indicePerguntaAtual + 1);
           console.log(objDeResp)
+          console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
+          setVoltarDisabled(false)
           navigation.navigate('NaoConformidades')
           break;
         case 'n/a':
@@ -84,23 +100,15 @@ const TelaDePerguntas: React.FC = () => {
           setListaRespostas(objDeResp)
           setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.')
           setIndicePerguntaAtual(indicePerguntaAtual + 1)
+          setVoltarDisabled(false)
+          console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
           break;
-        case 'voltar':
-          if(indicePerguntaAtual == 0)
-            setVoltarDisabled(true)
-          else 
-            setVoltarDisabled(false)
-          setProximaPergunta(indicePerguntaAtual == 0 ? listaPerguntas[indicePerguntaAtual].pergunta : listaPerguntas[indicePerguntaAtual - 1].pergunta)
-          setIndicePerguntaAtual(indicePerguntaAtual == 0 ? indicePerguntaAtual : indicePerguntaAtual - 1)
-          
-          objDeResp[indicePerguntaAtual]
-          break;  
         default:
           break;
       }
-      if (indicePerguntaAtual + 1 === listaPerguntas.length) 
+      if (indicePerguntaAtual + 1 === listaPerguntas.length)
         setDisabled(true)
-      
+
     } catch (error) {
       console.log(error)
       alert(error)
@@ -112,11 +120,19 @@ const TelaDePerguntas: React.FC = () => {
     navigation.navigate('Inspecao')
   }
 
+  function goBack() {
+    if (indicePerguntaAtual == 0)
+      setVoltarDisabled(true)
+    else
+      setVoltarDisabled(false)
+    setProximaPergunta(indicePerguntaAtual == 0 ? listaPerguntas[indicePerguntaAtual].pergunta : listaPerguntas[indicePerguntaAtual - 1].pergunta)
+    setIndicePerguntaAtual(indicePerguntaAtual == 0 ? indicePerguntaAtual : indicePerguntaAtual - 1)
+  }
+
   useEffect(() => {
     async function getPerguntas() {
       var path = fs.documentDirectory + 'json/'
       const fileUri = (jsonId: string) => path + `${jsonId}.json`
-      // await db.ref('/perguntas-de-seguranca').on('value', (snap: any) => {
       const perguntasJSON = JSON.parse(await fs.readAsStringAsync(fileUri('perguntas-de-seguranca')))
       console.log(perguntasJSON)
       if (perguntasJSON) {
@@ -146,7 +162,6 @@ const TelaDePerguntas: React.FC = () => {
         setListaPerguntas(perguntas)
         setProximaPergunta(perguntas[indicePerguntaAtual]?.pergunta)
       }
-      // })
     }
     getPerguntas()
   }, [])
@@ -174,7 +189,7 @@ const TelaDePerguntas: React.FC = () => {
             <Button title="N/A" onPress={() => handleNextQuestion('n/a')} disabled={disabled} />
           </View>
         </View>
-        <Button title='voltar' onPress={() => handleNextQuestion('voltar')} disabled={voltarDisabled}/>
+        <Button title='voltar pergunta' onPress={goBack} disabled={voltarDisabled} />
         <View>
           <Buttom texto='Enviar' disabled={!disabled} onPress={handleEnvioDeInspecao} />
         </View>

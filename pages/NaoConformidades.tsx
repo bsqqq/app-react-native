@@ -34,7 +34,7 @@ const NaoConformidades: React.FC = () => {
     const [cameraPos, setCameraPos] = useState(Camera.Constants.Type.back)
     const [modalVisible, setModalVisible] = useState<boolean>(false)
     const [textDescricao, setTextDescricao] = useState<string>()
-    var colabsFormatados: ModalFilterPickerOption[] = []
+    const colabsFormatados: ModalFilterPickerOption[] = []
     const [photoURI, setPhotoURI] = useState<string>()
     const [colabId, setColabId] = useState<number>()
     const [perms, setPerms] = useState<boolean>()
@@ -90,9 +90,8 @@ const NaoConformidades: React.FC = () => {
     }
 
     async function handleConfirmNaoConformidade() {
-        for (var i = 0; i < naoConformidadesRegistradas.length; i++) {
+        for (var i = 0; i < naoConformidadesRegistradas.length; i++)
             await MediaLibrary.createAssetAsync(naoConformidadesRegistradas[i])
-        }
         setFotosInspecao(naoConformidadesRegistradas)
         navigation.navigate('TelaDePerguntas')
     }
@@ -161,7 +160,7 @@ const NaoConformidades: React.FC = () => {
                                             <FontAwesome
                                                 name='window-close'
                                                 size={40}
-                                                color='#F00'
+                                                color='#cf1818'
                                             />
                                         </TouchableOpacity>
                                         <Text
@@ -174,8 +173,8 @@ const NaoConformidades: React.FC = () => {
                                         </Text>
                                         <Image
                                             style={{
-                                                width: Dimensions.get('window').width * 0.9,
-                                                height: Dimensions.get('window').width * 0.9,
+                                                width: Dimensions.get('window').width * 0.7,
+                                                height: Dimensions.get('window').width * 0.7,
                                                 borderRadius: 10
                                             }}
                                             source={{ uri: photoURI }}
@@ -189,35 +188,37 @@ const NaoConformidades: React.FC = () => {
                                             flexDirection: 'row',
                                             alignItems: 'flex-end'
                                         }}>
-                                        <View>
+                                        <View style={{justifyContent: 'center'}}>
+                                            <View>
+                                                <Text
+                                                    style={{
+                                                        marginHorizontal: 10,
+                                                        maxWidth: 170,
+                                                        textAlign: 'center'
+                                                    }}>
+                                                    Descrição (Obrigatório)
+                                                </Text>
+                                                <TextInput
+                                                    style={{
+                                                        borderBottomWidth: 1,
+                                                        borderColor: 'lightblue',
+                                                        textAlign: 'center',
+                                                        fontWeight: 'bold',
+                                                        fontStyle: 'italic',
+                                                        marginBottom: 10,
+                                                        maxWidth: 200,
+                                                        alignItems: 'center'
+                                                    }}
+                                                    onChangeText={
+                                                        (value: string) => setTextDescricao(value)
+                                                    }
+                                                />
+                                            </View>
                                             <Text
                                                 style={{
                                                     marginHorizontal: 10,
                                                     maxWidth: 170,
-                                                    textAlign: 'center'
-                                                }}>
-                                                Descrição (Obrigatório)
-                                            </Text>
-                                            <TextInput
-                                                style={{
-                                                    borderBottomWidth: 1,
-                                                    borderColor: 'lightblue',
-                                                    textAlign: 'center',
-                                                    fontWeight: 'bold',
-                                                    fontStyle: 'italic',
-                                                    maxWidth: 200,
-                                                    alignItems: 'center'
-                                                }}
-                                                onChangeText={
-                                                    (value: string) => setTextDescricao(value)
-                                                }
-                                            />
-                                        </View>
-                                        <View>
-                                            <Text
-                                                style={{
-                                                    marginHorizontal: 10,
-                                                    maxWidth: 170,
+                                                    marginBottom: 10,
                                                     textAlign: 'center'
                                                 }}>
                                                 Isso está atrelado a um colaborador?

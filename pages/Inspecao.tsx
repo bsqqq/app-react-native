@@ -25,7 +25,6 @@ export default function Inspecao() {
   useEffect(() => {
     async function getInspecoes() {
       const fsInspecoes = JSON.parse(await fs.readAsStringAsync(fileUri('inspecoes')))
-      console.log(fsInspecoes)
       const arrayDeTratamento: Array<InspecaoContextData> = [];
       inspecoesKeys = Object.keys(fsInspecoes);
 
@@ -89,7 +88,6 @@ export default function Inspecao() {
           <Text style={style.buttonText}>+</Text>
         </TouchableOpacity>
       </View>
-      {/* <Button title='a' onPress={() => console.log(inspecoes)}/> */}
     </SafeAreaView>
   );
 }

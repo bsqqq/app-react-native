@@ -21,17 +21,16 @@ export default async function atualizacoes() {
             const dirInfo = await fs.getInfoAsync(path)
             if (!dirInfo.exists)
                 await fs.makeDirectoryAsync(path, { intermediates: true })
-            console.log('escrevendo com o conteúdo do banco de dados')
-            await fs.writeAsStringAsync(fileUri('perguntas-de-seguranca'), JSON.stringify(shotPerguntasDeSeguranca)).then(() => console.log('perguntas de segurança: concluido'))
-            await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(shotColaboradores)).then(() => console.log('colaboradores: concluido'))
-            await fs.writeAsStringAsync(fileUri('processos'), JSON.stringify(shotProcessos)).then(() => console.log('processos: concluido'))
-            await fs.writeAsStringAsync(fileUri('contratos'), JSON.stringify(shotContratos)).then(() => console.log('contratos: concluido'))
-            await fs.writeAsStringAsync(fileUri('inspecoes'), JSON.stringify(shotInspecoes)).then(() => console.log('inspeções: concluido'))
+            await fs.writeAsStringAsync(fileUri('perguntas-de-seguranca'), JSON.stringify(shotPerguntasDeSeguranca))
+            await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(shotColaboradores))
+            await fs.writeAsStringAsync(fileUri('processos'), JSON.stringify(shotProcessos))
+            await fs.writeAsStringAsync(fileUri('contratos'), JSON.stringify(shotContratos))
+            await fs.writeAsStringAsync(fileUri('inspecoes'), JSON.stringify(shotInspecoes))
         }
-        getMunicipios().then(() => console.log('terminou de pegar os municipios'))
+        getMunicipios()
         garantirDirExiste()
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 
 }

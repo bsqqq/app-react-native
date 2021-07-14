@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps } from 'react-native'
-import { Entypo } from '@expo/vector-icons'
+import { Feather } from '@expo/vector-icons'
 
 interface ItemProps extends TouchableOpacityProps {
     titulo: string;
@@ -10,7 +10,7 @@ interface ItemProps extends TouchableOpacityProps {
 export default function ItemMenu({ titulo, icone, ...resto }: ItemProps) {
     return (
         <TouchableOpacity style={ styles.item } { ...resto }>
-            <Entypo name={ icone } style={{fontSize: 70}}/>
+            <Feather name={ icone } style={{fontSize: 70}}/>
             <Text style={{ fontSize: 40 }}> { titulo } </Text>
         </TouchableOpacity>
     )
@@ -26,6 +26,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderColor: "gray",
         borderWidth: 5,
-        borderRadius: 10
+        borderRadius: 15
     }
 })

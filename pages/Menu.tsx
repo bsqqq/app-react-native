@@ -15,15 +15,15 @@ export default function Menu() {
             <Text>Menu Principal</Text>
             <View style={styles.session}>
                 <Itens titulo="Segurança" icone="shield" onPress={() => navigation.navigate('MenuDeSeguranca')} />
-                <Itens titulo="Obras" icone="instagram" />
-                <Itens titulo="Manutenção" icone="tools" />
-                <Itens titulo="Frota" icone="globe" />
+                <Itens titulo="Obras" icone="briefcase" />
+                <Itens titulo="Manutenção" icone="tool" />
+                <Itens titulo="Frota" icone="flag" />
             </View>
             <Button title="Sair" onPress={() => signOut()} />
             {
                 status
-                    ? <Text>Status: Online</Text>
-                    : <Text>Status: Offline</Text>
+                ? <Text>Status: Online</Text>
+                : <Text>Status: Offline</Text>
             }
         </SafeAreaView>
     )

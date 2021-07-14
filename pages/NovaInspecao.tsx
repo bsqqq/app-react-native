@@ -15,9 +15,6 @@ import * as fs from 'expo-file-system'
 import Botao from '../components/NextButton'
 import InspecaoContext from '../contexts/inspecao'
 import { useNavigation } from '@react-navigation/native'
-// import municipios from '../json/municipios.json' // se possivel, trocar por processo do fs
-// import processos from '../json/processos.json' // trocar por processos do fs
-import contratos from '../json/contratos.json' // trocar por contratos do fs
 import * as Location from 'expo-location'
 import AuthContext from '../contexts/auth'
 import MultiSelect from 'expo-multiple-select'

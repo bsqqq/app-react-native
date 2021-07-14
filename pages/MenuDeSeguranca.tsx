@@ -5,15 +5,15 @@ import Itens from '../components/ItemMenu'
 
 export default function MenuDeSeguranca() {
     const navigation = useNavigation()
-    return(
+    return (
         <SafeAreaView style={styles.container}>
             <Text>Menu De Segurança</Text>
-                <View style={styles.session}>
-                    <Itens titulo="Inspeção" icone="shield" onPress={() => navigation.navigate('Inspecao')}/>
-                    <Itens titulo="Check-List" icone="instagram" />
-                    <Itens titulo="APR" icone="mic" onPress={() => navigation.navigate('APR')}/>
-                    <Itens titulo="Laudo" icone="globe" />
-                </View>
+            <View style={styles.session}>
+                <Itens titulo="Inspeção" icone="shield" onPress={() => navigation.navigate('Inspecao')} />
+                <Itens titulo="Check-List" icone="instagram" />
+                <Itens titulo="APR" icone="mic" onPress={() => navigation.navigate('APR')} />
+                <Itens titulo="Laudo" icone="file" />
+            </View>
         </SafeAreaView>
     )
 }
