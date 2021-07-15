@@ -1,35 +1,35 @@
-import React, { createContext, useState, useContext } from 'react'
+import React, { createContext, useState } from 'react'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import netinfo from '@react-native-community/netinfo'
 import fb from '../services/firebase'
 
 export interface InspecaoContextData {
     id?: number | undefined
-    NumeroDeInspecao: number | undefined,
-    DataEHoraDaInspecao: string | undefined,
-    OT_OS_SI: number | undefined,
-    MunicipioId: string | number | undefined,
-    Localidade: string | undefined,
+    NumeroDeInspecao: number | undefined
+    DataEHoraDaInspecao: string | undefined
+    OT_OS_SI: number | undefined
+    MunicipioId: string | number | undefined
+    Localidade: string | undefined
     CoordenadaX: string | number | undefined
-    CoordenadaY: string | number | undefined,
-    Inspetor: string | undefined,
-    Placa: string | undefined,
-    EquipeId: number[] | undefined,
-    ContratoId: number | undefined,
-    ProcessoId: number | undefined,
-    inspecaoId: number | undefined,
-    Inspecao: string | undefined,
-    descricao: string[] | undefined,
-    colabId: number[] | undefined,
-    respostaId: number | undefined,
-    setProcessoContratoIdContextData(IdProcesso: number, idContrato: number): void,
-    setInspecaoIdContextData(inspecaoId: number): void,
-    setNewInspecao(inspecao: string): Promise<void>,
-    setFotosInspecao(FotoURI: string[]): Promise<void>,
+    CoordenadaY: string | number | undefined
+    Inspetor: string | undefined
+    Placa: string | undefined
+    EquipeId: number[] | undefined
+    ContratoId: number | undefined
+    ProcessoId: number | undefined
+    inspecaoId: number | undefined
+    Inspecao: string | undefined
+    descricao: string[] | undefined
+    colabId: number[] | undefined
+    respostaId: number | undefined
+    setProcessoContratoIdContextData(IdProcesso: number, idContrato: number): void
+    setInspecaoIdContextData(inspecaoId: number): void
+    setNewInspecao(inspecao: string): Promise<void>
+    setFotosInspecao(FotoURI: string[]): Promise<void>
     setEquipeIdContext(equipeId: number[] | undefined): void
-    finishInspecao(): Promise<void>,
-    setDescricaoContext(desc: string): void,
-    setColabIdContext(colabId: number): void,
+    finishInspecao(): Promise<void>
+    setDescricaoContext(desc: string): void
+    setColabIdContext(colabId: number): void
     setRespId(id: number): void
 }
 
@@ -37,7 +37,6 @@ const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContext
 export default InspecaoContext
 
 export const InspecaoProvider: React.FC = ({ children }) => {
-    // const { respostaId } = useContext(NaoConformidadeContext)
     const [id, setId] = useState<number>()
     const [NumeroDeInspecao, setNumeroDeInspecao] = useState<number>()
     const [DataEHoraDaInspecao, setDataEHoraDaInspecao] = useState<string>()
@@ -103,8 +102,6 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         try {
             netinfo.fetch().then(async state => {
                 if (state.isConnected == true) {
-                    console.log('entrou aqui no netinfo.fetch()')
-                    console.log(`respostaId: ${respostaId}`)
                     await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
                     const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
                     const arrayDeFts = JSON.parse(String(fts))
@@ -129,9 +126,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                     alert('AVISO: Atualmente o dispositivo se encontra offline, se caso não for possível enviar as inspeções normalmente para o servidor até o primeiro momento que se encontrar online, tente contactar todos os envolvidos sobre qualquer Não Conformidade, prazo, responsável, etc... as fotos são salvas automaticamente no álbum do dispositivo. Informe também ao desenvolvedor (Vinicius) sobre o caso para uma solução em breve...')
                     netinfo.addEventListener(async state => {
                         if (state.isConnected == true) {
-                            // dados da inspeção
                             await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
-                            // dados de fotos
                             const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
                             const arrayDeFts = JSON.parse(String(fts))
                             const promises = arrayDeFts.map(async (item: string, index: number) => {
@@ -156,6 +151,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                 }
             })
         } catch (error) {
+            alert(error)
             console.log(error)
         }
     }

@@ -44,7 +44,8 @@ export default function Inspecao() {
 
       inspecoesKeys.forEach(key => {
         var tal = fsInspecoes[key];
-        if (tal.Inspetor === user?.name) {
+        // console.log(tal)
+        if (tal.InspetorId === user?.id) {
           var contratoEncontrado = arrayDeContratos.find(contrato => {
             var contratoEncontrado = Number(contrato.id) === Number(tal.ContratoId);
             return contratoEncontrado;
@@ -66,7 +67,7 @@ export default function Inspecao() {
   return (
     <SafeAreaView style={style.container}>
       <ScrollView>
-        {inspecoes.map((inspecao) => {
+        {inspecoes.length > 0 ? inspecoes?.map(inspecao => {
           return (
             <ItemInspecao
               key={inspecao.id}
@@ -78,7 +79,10 @@ export default function Inspecao() {
               ProcessoId={inspecao.ProcessoId}
             />
           );
-        })}
+        }) : <Text style={{
+          alignItems: "center",
+          justifyContent: "center"
+        }}> Não foram encontrados inspeções para este usuário. </Text>}
       </ScrollView>
       <View style={style.buttonPosition}>
         <TouchableOpacity
@@ -88,6 +92,7 @@ export default function Inspecao() {
           <Text style={style.buttonText}>+</Text>
         </TouchableOpacity>
       </View>
+      <Text>Algumas inspeções não irão ser exibidas aqui caso elas tenham sido feitas durante esta sessão, será necessário estar online e entrar novamente para atualizar a lista</Text>
     </SafeAreaView>
   );
 }

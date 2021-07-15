@@ -9,9 +9,15 @@ export default function Menu() {
     const { signOut, user } = useContext(AuthContext)
     const navigation = useNavigation()
     const status = estouOnline()
-    return (
+    return (    
         <SafeAreaView style={styles.container}>
-            <Text style={{ fontSize: 20, fontStyle: 'italic', fontWeight: 'bold' }}>Bem Vindo(a) {user?.name}</Text>
+            <Text style={{
+                fontSize: 20,
+                fontStyle: 'italic',
+                fontWeight: 'bold'
+            }}
+            >Bem Vindo(a) {user?.name}
+            </Text>
             <Text>Menu Principal</Text>
             <View style={styles.session}>
                 <Itens titulo="Segurança" icone="shield" onPress={() => navigation.navigate('MenuDeSeguranca')} />
@@ -19,12 +25,12 @@ export default function Menu() {
                 <Itens titulo="Manutenção" icone="tool" />
                 <Itens titulo="Frota" icone="flag" />
             </View>
-            <Button title="Sair" onPress={() => signOut()} />
             {
                 status
-                ? <Text>Status: Online</Text>
-                : <Text>Status: Offline</Text>
+                    ? <Text>Status: Online</Text>
+                    : <Text>Status: Offline</Text>
             }
+            <Button title="Sair" onPress={() => signOut()} />
         </SafeAreaView>
     )
 }

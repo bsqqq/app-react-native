@@ -66,6 +66,7 @@ interface objetoDeInspecao {
     CoordenadaX: string | number | undefined
     CoordenadaY: string | number | undefined,
     Inspetor: string | undefined,
+    InspetorId: number | undefined,
     Placa: string | undefined,
     EquipeId: number[] | undefined,
     ContratoId: number | undefined,
@@ -102,7 +103,6 @@ export default function NovaInspecao() {
     var processos: ProcessosProps
     var contratos: ContratoProps = {}
     var municipios: any[]
-
     async function handleNewInspecao() {
         try {
             const newInspecao: objetoDeInspecao = {
@@ -115,6 +115,7 @@ export default function NovaInspecao() {
                 CoordenadaX: location?.coords.latitude,
                 CoordenadaY: location?.coords.longitude,
                 Inspetor: user?.name,
+                InspetorId: user?.id,
                 EquipeId: equipeId,
                 Placa: placa,
                 ContratoId: contratoId,
@@ -169,7 +170,7 @@ export default function NovaInspecao() {
             })
             setColaboradoresFormatados(colaboradoresFormatadosPreState)
         })();
-        
+
         (async (): Promise<void> => {
             municipios = JSON.parse(await fs.readAsStringAsync(fileUri('municipios')))
             setMunicipiosState(municipios)

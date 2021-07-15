@@ -10,7 +10,8 @@ export interface Response {
     token: string,
     user: {
         name: string,
-        email: string
+        email: string,
+        id: number
     }
 }
 
@@ -21,7 +22,8 @@ export async function signIn(cpf: string, senha: string): Promise<Response | nul
             token: response.data?.token,
             user: {
                 name: response.data?.nome,
-                email: response.data?.email
+                email: response.data?.email,
+                id: response.data?.id
             }
         }
     } catch (error) {

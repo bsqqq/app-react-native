@@ -53,9 +53,9 @@ const TelaDePerguntas: React.FC = () => {
 
           if (jaExisteResposta != undefined)
             objDeResp[objDeResp.indexOf(jaExisteResposta)] = respostaSim
-          else 
+          else
             objDeResp.push(respostaSim)
-          
+
           setListaRespostas(objDeResp)
           console.log(objDeResp)
           console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
@@ -73,12 +73,12 @@ const TelaDePerguntas: React.FC = () => {
             return objetoDeResposta.perguntaId === respostaNao.perguntaId
           })
 
-          if (jaExisteRespostaa != undefined) 
+          if (jaExisteRespostaa != undefined)
             objDeResp[objDeResp.indexOf(jaExisteRespostaa)] = respostaNao
           else {
             setRespId(respostaNao.respostaId)
             objDeResp.push(respostaNao)
-          } 
+          }
           setListaRespostas(objDeResp)
           setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
           setIndicePerguntaAtual(indicePerguntaAtual + 1);
@@ -189,7 +189,10 @@ const TelaDePerguntas: React.FC = () => {
             <Button title="N/A" onPress={() => handleNextQuestion('n/a')} disabled={disabled} />
           </View>
         </View>
-        <Button title='voltar pergunta' onPress={goBack} disabled={voltarDisabled} />
+        <View style={{flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30}}>
+          <Button title='voltar pergunta' onPress={goBack} disabled={voltarDisabled} />
+          <Button title='acançar pergunta' onPress={goBack} disabled={voltarDisabled} />
+        </View>
         <View>
           <Buttom texto='Enviar' disabled={!disabled} onPress={handleEnvioDeInspecao} />
         </View>
