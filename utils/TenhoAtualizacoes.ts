@@ -7,14 +7,16 @@ export default async function atualizacoes() {
         const db = fb.database()
         const snapPerguntasDeSeguranca = await db.ref('/perguntas-de-seguranca').once('value')
         const snapColaboradores = await db.ref('/colaboradores').once('value')
-        const snapContratos = await db.ref('/empresas').once('value')
         const snapProcessos = await db.ref('/processos').once('value')
         const snapInspecoes = await db.ref('/inspecoes').once('value')
+        const snapContratos = await db.ref('/empresas').once('value')
+        const snapControle = await db.ref('/controle').once('value')
         const shotPerguntasDeSeguranca = snapPerguntasDeSeguranca.exportVal()
         const shotColaboradores = snapColaboradores.exportVal()
         const shotContratos = snapContratos.exportVal()
         const shotProcessos = snapProcessos.exportVal()
         const shotInspecoes = snapInspecoes.exportVal()
+        const shotControle = snapControle.exportVal()
         var path = fs.documentDirectory + 'json/'
         const fileUri = (jsonId: string) => path + `${jsonId}.json`
         async function garantirDirExiste() {
@@ -23,6 +25,7 @@ export default async function atualizacoes() {
                 await fs.makeDirectoryAsync(path, { intermediates: true })
             await fs.writeAsStringAsync(fileUri('perguntas-de-seguranca'), JSON.stringify(shotPerguntasDeSeguranca)).then(() => console.log('perguntas de segurança obtidos com sucesso.'))
             await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(shotColaboradores)).then(() => console.log('colaboradores obtidos com sucesso.'))
+            await fs.writeAsStringAsync(fileUri('controle'), JSON.stringify(shotControle)).then(() => console.log('numero de inspeção obtido com sucesso.'))
             await fs.writeAsStringAsync(fileUri('processos'), JSON.stringify(shotProcessos)).then(() => console.log('processos obtidos com sucesso.'))
             await fs.writeAsStringAsync(fileUri('contratos'), JSON.stringify(shotContratos)).then(() => console.log('contratos obtidos com sucesso.'))
             await fs.writeAsStringAsync(fileUri('inspecoes'), JSON.stringify(shotInspecoes)).then(() => console.log('inspeções obtidos com sucesso.'))

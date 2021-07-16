@@ -6,10 +6,11 @@ import AuthContext from '../contexts/auth';
 import { estouOnline } from './../utils/EstouOnline';
 
 export default function Menu() {
+    
     const { signOut, user } = useContext(AuthContext)
     const navigation = useNavigation()
     const status = estouOnline()
-    return (    
+    return (
         <SafeAreaView style={styles.container}>
             <Text style={{
                 fontSize: 20,

@@ -73,6 +73,18 @@ interface objetoDeInspecao {
     ProcessoId: number | undefined,
 }
 
+interface ControleProps {
+    "indice-pedido-de-compra": {
+        [index: number]: number
+    }
+    "numero-de-inspecao": number
+    versao: {
+        alteracoes: Array<string>
+        forceLogout: boolean
+        tag: string
+    }
+}
+
 export default function NovaInspecao() {
     const { setProcessoContratoIdContextData, setInspecaoIdContextData, setNewInspecao, setEquipeIdContext } = useContext(InspecaoContext)
     var path = fs.documentDirectory + 'json/'
@@ -105,9 +117,10 @@ export default function NovaInspecao() {
     var municipios: any[]
     async function handleNewInspecao() {
         try {
+            var controle: ControleProps = JSON.parse(await fs.readAsStringAsync(fileUri('controle')))
             const newInspecao: objetoDeInspecao = {
                 id: new Date().getTime(),
-                NumeroDeInspecao: numInspecao,
+                NumeroDeInspecao: controle['numero-de-inspecao'] + 1,
                 DataEHoraDaInspecao: dataHora,
                 OT_OS_SI: OtOsSi,
                 MunicipioId: municipioId,
@@ -148,7 +161,6 @@ export default function NovaInspecao() {
 
     useEffect(() => {
         let colaboradoresFormatadosPreState: MultiProps[] = []
-        // let contratosP: ContratoProps[]
         const date = new Date()
         setDataHora(`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${new Date().toLocaleTimeString()}`);
 
@@ -214,14 +226,6 @@ export default function NovaInspecao() {
             <KeyboardAvoidingView behavior={Platform.OS === 'android' ? 'padding' : 'height'} style={styles.container} >
                 <ScrollView>
                     <View>
-                        {/*Número de inspeção precisa ser auto-incremental*/}
-                        <Text style={styles.titulo}>Número da inspeção:</Text>
-                        <TextInput
-                            style={styles.input}
-                            keyboardType='numeric'
-                            onChangeText={value => setNumInspecao(parseInt(value))}
-                        />
-
                         <Text style={styles.titulo}>Data e hora da inspeção:</Text>
                         <TextInput
                             style={styles.input}

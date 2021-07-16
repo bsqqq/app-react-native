@@ -177,7 +177,7 @@ export default class PlayerRecorder extends React.Component<Props, State> {
     } catch (error) {
       /* No android, chamar esta funcão antes da captura de qualquer dado
       pode causar um erro onde dirá que nenhum dado foi capturado pois
-      não o tempo de gravação nãoa tingiu o limite de tempo necessário */
+      não o tempo de gravação não atingiu o limite de tempo necessário */
       if (error.code === "E_AUDIO_NODATA") {
         console.log(
           `Stop was called too quickly, no data has yet been received (${error.message})`

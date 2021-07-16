@@ -55,6 +55,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     const [descricao, setDescricao] = useState<string[]>([])
     const [respostaId, setRespostaId] = useState<number>()
     const [colabId, setColabId] = useState<number[]>([])
+    const [arrNaoConformmidadesIds, setArrNaoConformidadesIds] = useState<number[]>([])
 
     function setProcessoContratoIdContextData(processoId: number, contratoId: number) {
         setProcessoId(processoId)
@@ -92,7 +93,10 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     }
 
     function setRespId(id: number) {
+        const arrNaoConformidade = arrNaoConformmidadesIds
         setRespostaId(id)
+        arrNaoConformidade.push(id)
+        setArrNaoConformidadesIds(arrNaoConformidade)
     }
 
     async function finishInspecao() {

@@ -7,18 +7,18 @@ import * as fs from 'expo-file-system'
 
 interface objetoDePergunta {
   processosId: Array<number>
-  contratosId: Array<number>,
-  pergunta: string,
-  grupo: string,
-  id: number,
+  contratosId: Array<number>
+  pergunta: string
+  grupo: string
+  id: number
 }
 
 interface objetoDeResposta {
-  inspecaoId: number | undefined,
-  valorResposta: string,
-  perguntaId: number,
-  respostaId: number,
-  status?: string,
+  inspecaoId: number | undefined
+  valorResposta: string
+  perguntaId: number
+  respostaId: number
+  status?: string
 }
 
 const TelaDePerguntas: React.FC = () => {
@@ -28,7 +28,6 @@ const TelaDePerguntas: React.FC = () => {
   const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
   const [proximaPergunta, setProximaPergunta] = useState<string>()
-  const [voltarDisabled, setVoltarDisabled] = useState(true)
   const [disabled, setDisabled] = useState(false)
   const navigation = useNavigation()
   var objDeResp: objetoDeResposta[]
@@ -59,7 +58,7 @@ const TelaDePerguntas: React.FC = () => {
           setListaRespostas(objDeResp)
           console.log(objDeResp)
           console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
-          setVoltarDisabled(false)
+          
           break;
         case 'nao':
           let respostaNao: objetoDeResposta = {
@@ -83,8 +82,7 @@ const TelaDePerguntas: React.FC = () => {
           setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
           setIndicePerguntaAtual(indicePerguntaAtual + 1);
           console.log(objDeResp)
-          console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
-          setVoltarDisabled(false)
+
           navigation.navigate('NaoConformidades')
           break;
         case 'n/a':
@@ -100,8 +98,7 @@ const TelaDePerguntas: React.FC = () => {
           setListaRespostas(objDeResp)
           setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.')
           setIndicePerguntaAtual(indicePerguntaAtual + 1)
-          setVoltarDisabled(false)
-          console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
+          
           break;
         default:
           break;
@@ -121,20 +118,22 @@ const TelaDePerguntas: React.FC = () => {
   }
 
   function goBack() {
-    if (indicePerguntaAtual == 0)
-      setVoltarDisabled(true)
-    else
-      setVoltarDisabled(false)
-    setProximaPergunta(indicePerguntaAtual == 0 ? listaPerguntas[indicePerguntaAtual].pergunta : listaPerguntas[indicePerguntaAtual - 1].pergunta)
-    setIndicePerguntaAtual(indicePerguntaAtual == 0 ? indicePerguntaAtual : indicePerguntaAtual - 1)
+    setProximaPergunta(listaPerguntas[indicePerguntaAtual - 1].pergunta)
+    setIndicePerguntaAtual(indicePerguntaAtual - 1)
+    if (disabled == true) 
+      setDisabled(false)
+  }
+
+  function goFoward() {
+    setProximaPergunta(listaPerguntas[indicePerguntaAtual + 1].pergunta)
+    setIndicePerguntaAtual(indicePerguntaAtual + 1)
   }
 
   useEffect(() => {
     async function getPerguntas() {
       var path = fs.documentDirectory + 'json/'
-      const fileUri = (jsonId: string) => path + `${jsonId}.json`
+      const fileUri = (jsonId: string): string => path + `${jsonId}.json`
       const perguntasJSON = JSON.parse(await fs.readAsStringAsync(fileUri('perguntas-de-seguranca')))
-      console.log(perguntasJSON)
       if (perguntasJSON) {
         const keys = Object.keys(perguntasJSON)
         let perguntas: objetoDePergunta[] = []
@@ -189,9 +188,9 @@ const TelaDePerguntas: React.FC = () => {
             <Button title="N/A" onPress={() => handleNextQuestion('n/a')} disabled={disabled} />
           </View>
         </View>
-        <View style={{flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30}}>
-          <Button title='voltar pergunta' onPress={goBack} disabled={voltarDisabled} />
-          <Button title='acançar pergunta' onPress={goBack} disabled={voltarDisabled} />
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+          <Button title='voltar pergunta' onPress={goBack} disabled={indicePerguntaAtual == 0} />
+          <Button title='acançar pergunta' onPress={goFoward} disabled={indicePerguntaAtual > listaRespostas.length - 1} />
         </View>
         <View>
           <Buttom texto='Enviar' disabled={!disabled} onPress={handleEnvioDeInspecao} />
