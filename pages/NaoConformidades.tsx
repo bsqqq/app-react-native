@@ -25,10 +25,11 @@ import { useNavigation } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library';
 import InspecaoContext from '../contexts/inspecao';
 import * as fs from 'expo-file-system'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 const NaoConformidades: React.FC = () => {
+    const { setFotosInspecao, setDescricaoContext, setColabIdContext, setDates } = useContext(InspecaoContext)
     const [naoConformidadesRegistradas, setNaoConformidadesRegistradas] = useState<Array<string>>([])
-    const { setFotosInspecao, setDescricaoContext, setColabIdContext } = useContext(InspecaoContext)
     const [colaboradores, setColaboradores] = useState<ModalFilterPickerOption[]>([])
     const [colaboradoresVisible, setColaboradoresVisible] = useState<boolean>(false)
     const [cameraPos, setCameraPos] = useState(Camera.Constants.Type.back)
@@ -37,8 +38,11 @@ const NaoConformidades: React.FC = () => {
     const colabsFormatados: ModalFilterPickerOption[] = []
     const [photoURI, setPhotoURI] = useState<string>()
     const [colabId, setColabId] = useState<number>()
-    const [perms, setPerms] = useState<boolean>()
     const [colab, setColab] = useState<string>('')
+    const [perms, setPerms] = useState<boolean>()
+    const [date, setDate] = useState<Date>();
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
     const navigation = useNavigation()
     var camera: Camera
 
@@ -68,6 +72,21 @@ const NaoConformidades: React.FC = () => {
         })()
     }, [])
 
+    const onChange = (event: any, selectedDate: Date | undefined) => {
+        const currentDate = selectedDate || date;
+        setShow(Platform.OS === 'ios');
+        setDate(currentDate);
+    };
+
+    const showMode = (currentMode: string) => {
+        setShow(true);
+        setMode(currentMode);
+    };
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
+
     async function takePic() {
         const data: CameraCapturedPicture = await camera.takePictureAsync({ quality: 0.4 })
         setPhotoURI(data.uri)
@@ -86,6 +105,7 @@ const NaoConformidades: React.FC = () => {
         setColabIdContext(Number(colabId))
         setColab('')
         setColabId(0)
+        setDates(`${date?.getDate()}/${date?.getMonth() + 1}`)
         setModalVisible(false)
     }
 
@@ -182,14 +202,10 @@ const NaoConformidades: React.FC = () => {
                                     </View>
                                     <SafeAreaView
                                         style={{
-                                            justifyContent: 'space-between',
-                                            marginVertical: 20,
-                                            paddingHorizontal: 10,
-                                            flexDirection: 'row',
-                                            alignItems: 'flex-end'
+                                            marginVertical: 20
                                         }}>
-                                        <View style={{justifyContent: 'center'}}>
-                                            <View>
+                                        <View style={{ justifyContent: 'space-between' }}>
+                                            <View style={{ alignItems: 'center' }}>
                                                 <Text
                                                     style={{
                                                         marginHorizontal: 10,
@@ -206,38 +222,50 @@ const NaoConformidades: React.FC = () => {
                                                         fontWeight: 'bold',
                                                         fontStyle: 'italic',
                                                         marginBottom: 10,
-                                                        maxWidth: 200,
+                                                        maxWidth: 300,
                                                         alignItems: 'center'
                                                     }}
+                                                    placeholder="Insira aqui uma descrição para a Não-Conformidade."
                                                     onChangeText={
                                                         (value: string) => setTextDescricao(value)
                                                     }
                                                 />
+                                                <Text
+                                                    style={{
+                                                        marginHorizontal: 10,
+                                                        maxWidth: 170,
+                                                        marginBottom: 10,
+                                                        textAlign: 'center'
+                                                    }}>
+                                                    Isso está atrelado a um colaborador?
+                                                </Text>
+                                                <Text>{colab || "Aperte o botão abaixo para selecionar um colaborador"}</Text>
+                                                <FilterPicker
+                                                    visible={colaboradoresVisible}
+                                                    onSelect={(item: any) => {
+                                                        console.log(item)
+                                                        setColabId(Number(item.key))
+                                                        setColab(item.label)
+                                                        setColaboradoresVisible(false)
+                                                    }}
+                                                    onCancel={() => setColaboradoresVisible(false)}
+                                                    options={colaboradores}
+                                                />
+                                                <Button title="aperte aqui para selecionar o colaborador" onPress={() => setColaboradoresVisible(true)} />
+                                                <Text>Existe algum prazo para a resolução da Não-Conformidade?</Text>
+                                                <Button title="Aperte aqui para abrir o calendário" onPress={showDatepicker} />
+                                                <Text>{`Data estabelecida: ${date?.getDate() || ''}/${date?.getMonth() + 1 || ''}` || ''}</Text>
+                                                {show && (
+                                                    <DateTimePicker
+                                                        testID="dateTimePicker"
+                                                        value={date || new Date()}
+                                                        is24Hour={true}
+                                                        display="default"
+                                                        onChange={onChange}
+                                                    />
+                                                )}
                                             </View>
-                                            <Text
-                                                style={{
-                                                    marginHorizontal: 10,
-                                                    maxWidth: 170,
-                                                    marginBottom: 10,
-                                                    textAlign: 'center'
-                                                }}>
-                                                Isso está atrelado a um colaborador?
-                                            </Text>
-                                            <Text>{colab}</Text>
-                                            <FilterPicker
-                                                visible={colaboradoresVisible}
-                                                onSelect={(item: any) => {
-                                                    console.log(item)
-                                                    setColabId(Number(item.key))
-                                                    setColab(item.label)
-                                                    setColaboradoresVisible(false)
-                                                }}
-                                                onCancel={() => setColaboradoresVisible(false)}
-                                                options={colaboradores}
-                                            />
-                                            <Button title="Pressione aqui para selecionar" onPress={() => { setColaboradoresVisible(true); console.log('apertou') }} />
                                         </View>
-
                                     </SafeAreaView>
                                     <View style={{ alignItems: 'center' }}>
                                         <Buttom texto="Sim, pode salvar!" style={style.button} onPress={handleModalSavePic} />

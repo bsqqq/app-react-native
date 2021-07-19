@@ -2,6 +2,7 @@ import React, { createContext, useState } from 'react'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import netinfo from '@react-native-community/netinfo'
 import fb from '../services/firebase'
+import * as fs from 'expo-file-system'
 
 export interface InspecaoContextData {
     id?: number | undefined
@@ -31,6 +32,7 @@ export interface InspecaoContextData {
     setDescricaoContext(desc: string): void
     setColabIdContext(colabId: number): void
     setRespId(id: number): void
+    setDates(date: string): void
 }
 
 const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContextData)
@@ -55,6 +57,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     const [descricao, setDescricao] = useState<string[]>([])
     const [respostaId, setRespostaId] = useState<number>()
     const [colabId, setColabId] = useState<number[]>([])
+    const [prazoDasNaoConformidades, setPrazoDasNaoConformidades] = useState<string[]>([])
     const [arrNaoConformmidadesIds, setArrNaoConformidadesIds] = useState<number[]>([])
 
     function setProcessoContratoIdContextData(processoId: number, contratoId: number) {
@@ -67,7 +70,6 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     }
 
     async function setNewInspecao(inspecao: string) {
-        console.log(inspecao)
         setInspecao(inspecao)
         await AsyncStorage.setItem('@mais-parceria-app-inspecao', inspecao)
     }
@@ -99,14 +101,25 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         setArrNaoConformidadesIds(arrNaoConformidade)
     }
 
+    function setDates(dates: string) {
+        const arrDeDates = prazoDasNaoConformidades
+        arrDeDates.push(dates)
+        setPrazoDasNaoConformidades(arrDeDates)
+    }
+
     async function finishInspecao() {
         // esta função vai escrever tudo no banco de dados.
         const db = fb.database()
         const storage = fb.storage()
+        var path = fs.documentDirectory + 'json/'
+        const fileUri = (jsonId: string) => path + `${jsonId}.json`
+        var snap = await db.ref('/controle/numero-de-inspecao').once('value')
+        var shot = snap.exportVal()
         try {
             netinfo.fetch().then(async state => {
                 if (state.isConnected == true) {
                     await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
+                    await db.ref('/controle/numero-de-inspecao').set(await fs.readAsStringAsync(fileUri('numero-de-inspecao')) + 1 || shot + 1)
                     const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
                     const arrayDeFts = JSON.parse(String(fts))
                     const promises = arrayDeFts.map(async (item: string, index: number) => {
@@ -121,7 +134,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                             inspecaoId,
                             respostaId,
                             colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
-                            prazoDeResolucao: 0
+                            prazoDeReolucao: prazoDasNaoConformidades[index] || ""
                         })
                     })
                     await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
@@ -145,7 +158,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                                     inspecaoId,
                                     respostaId,
                                     colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
-                                    prazoDeReolucao: 0
+                                    prazoDeReolucao: prazoDasNaoConformidades[index] || ""
                                 })
                             })
                             await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
@@ -188,7 +201,8 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                 setColabIdContext,
                 colabId,
                 setRespId,
-                respostaId
+                respostaId,
+                setDates
             }}>
             {children}
         </InspecaoContext.Provider>

@@ -11,7 +11,7 @@ export interface itemInspecaoProps {
     key: number | undefined
 }
 
-const itemInspecao = ({ ...tudo } : itemInspecaoProps) => {
+const itemInspecao = ({ ...tudo }: itemInspecaoProps) => {
     return (
         <TouchableOpacity activeOpacity={0.1} style={style.cards}>
             <View style={style.textAlign}>
@@ -26,10 +26,6 @@ const itemInspecao = ({ ...tudo } : itemInspecaoProps) => {
                 <Text>OT / OS / SI: </Text>
                 <Text>{tudo.OT_OS_SI}</Text>
             </View>
-            {/* <View style={style.textAlign}>
-                <Text>Inspetor: </Text>
-                <Text>{tudo.Inspetor}</Text>
-            </View> */}
             <View style={style.textAlign}>
                 <Text>Contrato: </Text>
                 <Text>{tudo.ContratoId}</Text>

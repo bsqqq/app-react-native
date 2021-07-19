@@ -18,6 +18,8 @@ import { useNavigation } from '@react-navigation/native'
 import * as Location from 'expo-location'
 import AuthContext from '../contexts/auth'
 import MultiSelect from 'expo-multiple-select'
+import netinfo from '@react-native-community/netinfo';
+import fb from '../services/firebase'
 
 interface ProcessosProps {
     [index: string]: {
@@ -73,18 +75,6 @@ interface objetoDeInspecao {
     ProcessoId: number | undefined,
 }
 
-interface ControleProps {
-    "indice-pedido-de-compra": {
-        [index: number]: number
-    }
-    "numero-de-inspecao": number
-    versao: {
-        alteracoes: Array<string>
-        forceLogout: boolean
-        tag: string
-    }
-}
-
 export default function NovaInspecao() {
     const { setProcessoContratoIdContextData, setInspecaoIdContextData, setNewInspecao, setEquipeIdContext } = useContext(InspecaoContext)
     var path = fs.documentDirectory + 'json/'
@@ -98,7 +88,6 @@ export default function NovaInspecao() {
     const [contratoVisible, setContratoVisible] = useState(false)
     const [processoVisible, setProcessoVisible] = useState(false)
     const [municipioId, setMunicipioId] = useState<number>()
-    const [numInspecao, setNumInspecao] = useState<number>()
     const [contratoId, setContratoId] = useState<number>()
     const [processoId, setProcessoId] = useState<number>()
     const [localidade, setLocalidade] = useState<string>()
@@ -115,12 +104,16 @@ export default function NovaInspecao() {
     var processos: ProcessosProps
     var contratos: ContratoProps = {}
     var municipios: any[]
+    const db = fb.database()
     async function handleNewInspecao() {
         try {
-            var controle: ControleProps = JSON.parse(await fs.readAsStringAsync(fileUri('controle')))
+            var controle = JSON.parse(await fs.readAsStringAsync(fileUri('numero-de-inspecao')))
+            var estouOnline = (await netinfo.fetch()).isConnected
+            var snap = estouOnline ? await db.ref('/controle/numero-de-inspecao').once('value') : undefined
+            var shot = snap ? snap.exportVal() : undefined
             const newInspecao: objetoDeInspecao = {
                 id: new Date().getTime(),
-                NumeroDeInspecao: controle['numero-de-inspecao'] + 1,
+                NumeroDeInspecao: estouOnline ? shot : controle,
                 DataEHoraDaInspecao: dataHora,
                 OT_OS_SI: OtOsSi,
                 MunicipioId: municipioId,
@@ -145,7 +138,6 @@ export default function NovaInspecao() {
                 && newInspecao?.ProcessoId == undefined || Number(newInspecao.ProcessoId?.toString()) <= 0
                 && newInspecao?.MunicipioId == undefined || Number(newInspecao.MunicipioId?.toString()) <= 0
                 && newInspecao?.OT_OS_SI == undefined || Number(newInspecao.OT_OS_SI?.toString().length) <= 0
-                && newInspecao?.NumeroDeInspecao == undefined || Number(newInspecao.NumeroDeInspecao?.toString()) <= 0
             ) {
                 alert('Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
                 console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
