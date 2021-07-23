@@ -11,7 +11,9 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import ItemInspecao from "../components/itemInspecao";
 import { InspecaoContextData } from "../contexts/inspecao";
+import netinfo from '@react-native-community/netinfo'
 import AuthContext from "../contexts/auth";
+import fb from '../services/firebase'
 import * as fs from 'expo-file-system'
 
 export default function Inspecao() {
@@ -22,9 +24,12 @@ export default function Inspecao() {
   var processosKeys: string[];
   const { user } = useContext(AuthContext)
   const [inspecoes, setInspecoes] = useState<Array<InspecaoContextData>>([]);
+  const db = fb.database()
   useEffect(() => {
     async function getInspecoes() {
-      const fsInspecoes = JSON.parse(await fs.readAsStringAsync(fileUri('inspecoes')))
+      const snap = await db.ref('/inspecoes').once('value')
+      const shot = snap.exportVal()
+      const fsInspecoes = (await netinfo.fetch()).isConnected ? shot : JSON.parse(await fs.readAsStringAsync(fileUri('inspecoes')))
       const arrayDeTratamento: Array<InspecaoContextData> = [];
       inspecoesKeys = Object.keys(fsInspecoes);
 
@@ -44,7 +49,6 @@ export default function Inspecao() {
 
       inspecoesKeys.forEach(key => {
         var tal = fsInspecoes[key];
-        // console.log(tal)
         if (tal.InspetorId === user?.id) {
           var contratoEncontrado = arrayDeContratos.find(contrato => {
             var contratoEncontrado = Number(contrato.id) === Number(tal.ContratoId);

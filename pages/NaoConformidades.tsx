@@ -102,7 +102,7 @@ const NaoConformidades: React.FC = () => {
         arrURI.push(String(photoURI))
         setNaoConformidadesRegistradas(arrURI)
         setDescricaoContext(textDescricao)
-        setColabIdContext(Number(colabId))
+        setColabIdContext(Number(colabId ? colabId : 0))
         setColab('')
         setColabId(0)
         setDates(`${date?.getDate()}/${date?.getMonth() + 1}`)
@@ -252,7 +252,7 @@ const NaoConformidades: React.FC = () => {
                                                     options={colaboradores}
                                                 />
                                                 <Button title="aperte aqui para selecionar o colaborador" onPress={() => setColaboradoresVisible(true)} />
-                                                <Text>Existe algum prazo para a resolução da Não-Conformidade?</Text>
+                                                <Text>Informe algum prazo para a resolução da Não-Conformidade.</Text>
                                                 <Button title="Aperte aqui para abrir o calendário" onPress={showDatepicker} />
                                                 <Text>{`Data estabelecida: ${date?.getDate() || ''}/${date?.getMonth() + 1 || ''}` || ''}</Text>
                                                 {show && (
@@ -280,16 +280,28 @@ const NaoConformidades: React.FC = () => {
                         flexDirection: 'row'
                     }}>
                     {naoConformidadesRegistradas.map((item, key) => {
-                        return <Image
-                            source={{ uri: item }}
-                            style={{
-                                width: 100,
-                                height: 100,
-                                marginHorizontal: 10,
-                                marginTop: -80
-                            }}
-                            key={key}
-                        />
+                        return (
+                            <>
+                                <Image
+                                    source={{ uri: item }}
+                                    style={{
+                                        width: 100,
+                                        height: 100,
+                                        marginHorizontal: 10,
+                                        marginTop: -80
+                                    }}
+                                    key={key}
+                                />
+                                {/* <FontAwesome
+                                    name='window-close'
+                                    size={25}
+                                    color='#cf1818'
+                                    onPress={() => setNaoConformidadesRegistradas(naoConformidadesRegistradas.splice(naoConformidadesRegistradas.indexOf(naoConformidadesRegistradas[key]), 1))}
+                                    key={key + 1}
+                                    style={{position: 'absolute'}}
+                                /> */}
+                            </>
+                        )
                     })}
                 </View>
                 <Text>E depois confirme se todas as Não Conformidades foram registradas.</Text>

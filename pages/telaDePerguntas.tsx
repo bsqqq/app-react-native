@@ -22,11 +22,11 @@ interface objetoDeResposta {
 }
 
 const TelaDePerguntas: React.FC = () => {
-  const { finishInspecao, setRespId } = useContext(InspecaoContext)
+  const { ContratoId, ProcessoId, inspecaoId, setColabIdContext } = useContext(InspecaoContext)
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
-  const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
+  const { finishInspecao, setRespId } = useContext(InspecaoContext)
   const [proximaPergunta, setProximaPergunta] = useState<string>()
   const [disabled, setDisabled] = useState(false)
   const navigation = useNavigation()
@@ -46,19 +46,15 @@ const TelaDePerguntas: React.FC = () => {
           }
           setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.')
           setIndicePerguntaAtual(indicePerguntaAtual + 1)
-          var jaExisteResposta = objDeResp.find(objetoDeResposta => {
-            return objetoDeResposta.perguntaId === respostaSim.perguntaId
-          })
-
+          var jaExisteResposta = objDeResp.find(objetoDeResposta => objetoDeResposta.perguntaId === respostaSim.perguntaId)
           if (jaExisteResposta != undefined)
             objDeResp[objDeResp.indexOf(jaExisteResposta)] = respostaSim
           else
             objDeResp.push(respostaSim)
-
+          // setColabIdContext(0)
           setListaRespostas(objDeResp)
           console.log(objDeResp)
           console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
-          
           break;
         case 'nao':
           let respostaNao: objetoDeResposta = {
@@ -68,9 +64,7 @@ const TelaDePerguntas: React.FC = () => {
             valorResposta: decisao,
             status: 'pendente'
           }
-          var jaExisteRespostaa = objDeResp.find(objetoDeResposta => {
-            return objetoDeResposta.perguntaId === respostaNao.perguntaId
-          })
+          var jaExisteRespostaa = objDeResp.find(objetoDeResposta => objetoDeResposta.perguntaId === respostaNao.perguntaId)
 
           if (jaExisteRespostaa != undefined)
             objDeResp[objDeResp.indexOf(jaExisteRespostaa)] = respostaNao
@@ -98,7 +92,6 @@ const TelaDePerguntas: React.FC = () => {
           setListaRespostas(objDeResp)
           setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.')
           setIndicePerguntaAtual(indicePerguntaAtual + 1)
-          
           break;
         default:
           break;
@@ -120,7 +113,7 @@ const TelaDePerguntas: React.FC = () => {
   function goBack() {
     setProximaPergunta(listaPerguntas[indicePerguntaAtual - 1].pergunta)
     setIndicePerguntaAtual(indicePerguntaAtual - 1)
-    if (disabled == true) 
+    if (disabled == true)
       setDisabled(false)
   }
 

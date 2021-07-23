@@ -6,10 +6,15 @@ import AuthContext from '../contexts/auth';
 import { estouOnline } from './../utils/EstouOnline';
 
 export default function Menu() {
-    
+    estouOnline()
     const { signOut, user } = useContext(AuthContext)
     const navigation = useNavigation()
-    const status = estouOnline()
+    let status
+    try {
+        status = estouOnline()
+    } catch (error) {
+        alert(`Erro: Não foi possivel buscar informações para o uso do aplicativo, tente sair e entrar novamente, se a mensagem aparecer novamente, tente de novo.`)
+    }
     return (
         <SafeAreaView style={styles.container}>
             <Text style={{

@@ -6,11 +6,11 @@ export default async function atualizacoes() {
     try {
         const db = fb.database()
         const snapPerguntasDeSeguranca = await db.ref('/perguntas-de-seguranca').once('value')
+        const snapControle = await db.ref('/controle/numero-de-inspecao').once('value')
         const snapColaboradores = await db.ref('/colaboradores').once('value')
         const snapProcessos = await db.ref('/processos').once('value')
         const snapInspecoes = await db.ref('/inspecoes').once('value')
         const snapContratos = await db.ref('/empresas').once('value')
-        const snapControle = await db.ref('/controle/numero-de-inspecao').once('value')
         const shotPerguntasDeSeguranca = snapPerguntasDeSeguranca.exportVal()
         const shotColaboradores = snapColaboradores.exportVal()
         const shotContratos = snapContratos.exportVal()

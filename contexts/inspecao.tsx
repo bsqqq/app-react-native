@@ -58,7 +58,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     const [respostaId, setRespostaId] = useState<number>()
     const [colabId, setColabId] = useState<number[]>([])
     const [prazoDasNaoConformidades, setPrazoDasNaoConformidades] = useState<string[]>([])
-    const [arrNaoConformmidadesIds, setArrNaoConformidadesIds] = useState<number[]>([])
+    const [arrNaoConformidadesIds, setArrNaoConformidadesIds] = useState<number[]>([])
 
     function setProcessoContratoIdContextData(processoId: number, contratoId: number) {
         setProcessoId(processoId)
@@ -84,8 +84,9 @@ export const InspecaoProvider: React.FC = ({ children }) => {
 
     function setColabIdContext(colabIdLocal: number) {
         const arrColabId = colabId
-        arrColabId?.push(colabIdLocal)
+        arrColabId?.push(colabIdLocal ? colabIdLocal : 0)
         setColabId(arrColabId)
+        console.log(`array de colaboradores attribuidos a nao conformidades: ${colabId}`)
     }
 
     function setDescricaoContext(desc: string) {
@@ -95,7 +96,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     }
 
     function setRespId(id: number) {
-        const arrNaoConformidade = arrNaoConformmidadesIds
+        const arrNaoConformidade = arrNaoConformidadesIds
         setRespostaId(id)
         arrNaoConformidade.push(id)
         setArrNaoConformidadesIds(arrNaoConformidade)
@@ -111,15 +112,13 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         // esta função vai escrever tudo no banco de dados.
         const db = fb.database()
         const storage = fb.storage()
-        var path = fs.documentDirectory + 'json/'
-        const fileUri = (jsonId: string) => path + `${jsonId}.json`
         var snap = await db.ref('/controle/numero-de-inspecao').once('value')
         var shot = snap.exportVal()
         try {
             netinfo.fetch().then(async state => {
                 if (state.isConnected == true) {
                     await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
-                    await db.ref('/controle/numero-de-inspecao').set(await fs.readAsStringAsync(fileUri('numero-de-inspecao')) + 1 || shot + 1)
+                    await db.ref('/controle/numero-de-inspecao').set(Number(shot) + 1)
                     const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
                     const arrayDeFts = JSON.parse(String(fts))
                     const promises = arrayDeFts.map(async (item: string, index: number) => {
@@ -137,13 +136,19 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                             prazoDeReolucao: prazoDasNaoConformidades[index] || ""
                         })
                     })
+                    setColabId([])
+                    setPrazoDasNaoConformidades([])
+                    setDescricao([])
                     await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
                     fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
                 } else {
                     alert('AVISO: Atualmente o dispositivo se encontra offline, se caso não for possível enviar as inspeções normalmente para o servidor até o primeiro momento que se encontrar online, tente contactar todos os envolvidos sobre qualquer Não Conformidade, prazo, responsável, etc... as fotos são salvas automaticamente no álbum do dispositivo. Informe também ao desenvolvedor (Vinicius) sobre o caso para uma solução em breve...')
                     netinfo.addEventListener(async state => {
                         if (state.isConnected == true) {
+                            var snap = await db.ref('/controle/numero-de-inspecao').once('value')
+                            var shot = snap.exportVal()
                             await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
+                            await db.ref('/controle/numero-de-inspecao').set(Number(shot + 1))
                             const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
                             const arrayDeFts = JSON.parse(String(fts))
                             const promises = arrayDeFts.map(async (item: string, index: number) => {
@@ -161,6 +166,9 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                                     prazoDeReolucao: prazoDasNaoConformidades[index] || ""
                                 })
                             })
+                            setColabId([])
+                            setPrazoDasNaoConformidades([])
+                            setDescricao([])
                             await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
                             fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
                         }
