@@ -1,6 +1,6 @@
-import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import { useNavigation } from '@react-navigation/native';
 import Itens from '../components/ItemMenu'
 
 export default function MenuDeSeguranca() {

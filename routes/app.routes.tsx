@@ -8,6 +8,7 @@ import Inspecao from '../pages/Inspecao';
 import NovaInspecao from '../pages/NovaInspecao';
 import TelaDePerguntas from '../pages/telaDePerguntas'
 import NaoConformidades from './../pages/NaoConformidades';
+import InspecaoSelecionada from '../pages/InspecaoSelecionada';
 
 const AppStack = createStackNavigator()
 
@@ -52,6 +53,11 @@ const AppRoutes: React.FC = () => (
         <AppStack.Screen
             name="NaoConformidades"
             component={NaoConformidades}
+        />
+
+        <AppStack.Screen
+            name="InspecaoSelecionada"
+            component={InspecaoSelecionada}
         />
     </AppStack.Navigator>
 )

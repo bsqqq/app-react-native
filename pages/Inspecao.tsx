@@ -17,6 +17,7 @@ import fb from '../services/firebase'
 import * as fs from 'expo-file-system'
 
 export default function Inspecao() {
+  const navigation = useNavigation();
   var path = fs.documentDirectory + 'json/'
   const fileUri = (jsonId: string) => path + `${jsonId}.json`
   var inspecoesKeys: string[];
@@ -67,26 +68,27 @@ export default function Inspecao() {
     }
     getInspecoes();
   }, []);
-  const navigation = useNavigation();
   return (
     <SafeAreaView style={style.container}>
       <ScrollView>
         {inspecoes.length > 0 ? inspecoes?.map(inspecao => {
           return (
             <ItemInspecao
-              key={inspecao.id}
+              id={inspecao.id}
               DataEHoraDaInspecao={inspecao.DataEHoraDaInspecao}
               NumeroDeInspecao={inspecao.NumeroDeInspecao}
               OT_OS_SI={inspecao.OT_OS_SI}
               Inspetor={inspecao.Inspetor}
               ContratoId={inspecao.ContratoId}
               ProcessoId={inspecao.ProcessoId}
+              key={inspecao.id}
             />
           );
         }) : <Text style={{
           alignItems: "center",
           justifyContent: "center"
-        }}> Não foram encontrados inspeções para este usuário. </Text>}
+        }}> Não foram encontrados inspeções para este usuário. </Text>
+        }
       </ScrollView>
       <View style={style.buttonPosition}>
         <TouchableOpacity
@@ -96,7 +98,7 @@ export default function Inspecao() {
           <Text style={style.buttonText}>+</Text>
         </TouchableOpacity>
       </View>
-      <Text>Algumas inspeções não irão ser exibidas aqui caso elas tenham sido feitas durante esta sessão, será necessário estar online e entrar novamente para atualizar a lista</Text>
+      {/* <Text>Algumas inspeções não irão ser exibidas aqui caso elas tenham sido feitas durante esta sessão, será necessário estar online e entrar novamente para atualizar a lista</Text> */}
     </SafeAreaView>
   );
 }

@@ -52,7 +52,7 @@ export default function Login() {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View style={style.content}>
                         <View style={style.form}>
-                            <Text style={{ fontSize: 30, position: 'relative', top: 0 }}>Bem Vindo!</Text>
+                            <Text style={{ fontSize: 30, position: 'relative', top: 0 }}>Bem Vindo(a)!</Text>
                             <Text style={style.titulo}>Login</Text>
                             <TextInput
                                 placeholder="CPF"

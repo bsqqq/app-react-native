@@ -1,19 +1,21 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, Dimensions, TouchableOpacity, Text, TouchableOpacityProps } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-export interface itemInspecaoProps {
+export interface itemInspecaoProps extends TouchableOpacityProps {
     DataEHoraDaInspecao: string | undefined,
     NumeroDeInspecao: number | undefined,
     OT_OS_SI: number | null | undefined,
     Inspetor: string | null | undefined,
     ContratoId: number | string | undefined,
     ProcessoId: number | string | undefined,
-    key: number | undefined
+    id: number | undefined
 }
 
 const itemInspecao = ({ ...tudo }: itemInspecaoProps) => {
+    const navigation = useNavigation()
     return (
-        <TouchableOpacity activeOpacity={0.1} style={style.cards}>
+        <TouchableOpacity activeOpacity={0.1} style={style.cards} onPress={() => navigation.navigate('InspecaoSelecionada', { key: tudo.id })}>
             <View style={style.textAlign}>
                 <Text>Data: </Text>
                 <Text>{tudo.DataEHoraDaInspecao}</Text>

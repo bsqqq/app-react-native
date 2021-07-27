@@ -22,7 +22,7 @@ interface objetoDeResposta {
 }
 
 const TelaDePerguntas: React.FC = () => {
-  const { ContratoId, ProcessoId, inspecaoId, setColabIdContext } = useContext(InspecaoContext)
+  const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
@@ -51,7 +51,6 @@ const TelaDePerguntas: React.FC = () => {
             objDeResp[objDeResp.indexOf(jaExisteResposta)] = respostaSim
           else
             objDeResp.push(respostaSim)
-          // setColabIdContext(0)
           setListaRespostas(objDeResp)
           console.log(objDeResp)
           console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
@@ -167,7 +166,7 @@ const TelaDePerguntas: React.FC = () => {
             : undefined
           }
         </View>
-        <Text>{proximaPergunta}</Text>
+        <Text style={{ justifyContent: 'center', alignItems: 'center' }}>{proximaPergunta}</Text>
       </View>
       <View style={style.container}>
         <View style={style.containerHorizontal}>
@@ -181,14 +180,14 @@ const TelaDePerguntas: React.FC = () => {
             <Button title="N/A" onPress={() => handleNextQuestion('n/a')} disabled={disabled} />
           </View>
         </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', position: 'absolute', bottom: 350 }}>
           <Button title='voltar pergunta' onPress={goBack} disabled={indicePerguntaAtual == 0} />
           <Button title='acançar pergunta' onPress={goFoward} disabled={indicePerguntaAtual > listaRespostas.length - 1} />
         </View>
         <View>
           <Buttom texto='Enviar' disabled={!disabled} onPress={handleEnvioDeInspecao} />
         </View>
-        <Text style={{ fontStyle: 'italic' }}>Certifique-se de que este dispositivo está com carga suficiente até o fim desta inspeção.</Text>
+        <Text style={{ fontStyle: 'italic', fontSize: 11 }}>Certifique-se de que este dispositivo está com carga suficiente até o fim desta inspeção.</Text>
       </View>
     </>
   )
