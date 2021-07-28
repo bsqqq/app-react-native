@@ -81,8 +81,8 @@ export default function NovaInspecao() {
     const fileUri = (jsonId: string) => path + `${jsonId}.json`
     const [colaboradoresFormatados, setColaboradoresFormatados] = useState<MultiProps[]>([])
     const [processosState, setProcessosState] = useState<ProcessosProps>({})
-    const [location, setLocation] = useState<Location.LocationObject>()
     const [contratosState, setContratosState] = useState<ContratoProps>({})
+    const [location, setLocation] = useState<Location.LocationObject>()
     const [municipiosState, setMunicipiosState] = useState<any[]>()
     const [municipioVisible, setMunicipioVisible] = useState(false)
     const [contratoVisible, setContratoVisible] = useState(false)
@@ -100,11 +100,11 @@ export default function NovaInspecao() {
     const [placa, setPlaca] = useState<string>()
     const { user } = useContext(AuthContext)
     const navigation = useNavigation()
+    const db = fb.database()
     var colaboradores: ColaboradoresProps
     var processos: ProcessosProps
     var contratos: ContratoProps = {}
     var municipios: any[]
-    const db = fb.database()
     async function handleNewInspecao() {
         try {
             var controle = JSON.parse(await fs.readAsStringAsync(fileUri('numero-de-inspecao')))
@@ -161,9 +161,8 @@ export default function NovaInspecao() {
             if (status !== 'granted') {
                 return;
             }
-            let location = await Location.getCurrentPositionAsync({});
+            let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
             setLocation(location);
-            Location.Accuracy.Highest
             colaboradores = JSON.parse(await fs.readAsStringAsync(fileUri('colaboradores')))
             const keys: string[] = Object.keys(colaboradores)
             keys.forEach(item => {
@@ -275,7 +274,7 @@ export default function NovaInspecao() {
                             items={colaboradoresFormatados}
                             uniqueKey="id"
                             selectedItems={equipeId}
-                            onSelectedItemsChange={(selectedItems: number[]) => { setEquipeId(selectedItems); console.log(selectedItems) }}
+                            onSelectedItemsChange={(selectedItems: number[]) => setEquipeId(selectedItems)}
                             searchInputPlaceholderText="Pesquisar..."
                             itemTextColor="blue"
 

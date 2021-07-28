@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { View, Text, StyleSheet, Button } from 'react-native'
+import { View, Text, StyleSheet, Button, Dimensions } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import InspecaoContext from '../contexts/inspecao'
 import Buttom from '../components/NextButton'
@@ -104,7 +104,7 @@ const TelaDePerguntas: React.FC = () => {
     }
   }
 
-  function handleEnvioDeInspecao() {
+  function handleEnvioDeInspecao() { 
     finishInspecao()
     navigation.navigate('Inspecao')
   }
@@ -160,13 +160,14 @@ const TelaDePerguntas: React.FC = () => {
   return (
     <>
       <View style={style.campoDePergunta}>
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          {indicePerguntaAtual + 1 <= listaPerguntas.length
-            ? <Text>Pergunta {indicePerguntaAtual + 1} de {listaPerguntas.length}:</Text>
-            : undefined
+        <View>
+          {
+            indicePerguntaAtual + 1 <= listaPerguntas.length
+              ? <Text style={{}}>Pergunta {indicePerguntaAtual + 1} de {listaPerguntas.length}:</Text>
+              : undefined
           }
         </View>
-        <Text style={{ justifyContent: 'center', alignItems: 'center' }}>{proximaPergunta}</Text>
+        <Text style={{ textAlign: 'center' }}>{proximaPergunta}</Text>
       </View>
       <View style={style.container}>
         <View style={style.containerHorizontal}>
@@ -180,14 +181,13 @@ const TelaDePerguntas: React.FC = () => {
             <Button title="N/A" onPress={() => handleNextQuestion('n/a')} disabled={disabled} />
           </View>
         </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', position: 'absolute', bottom: 350 }}>
-          <Button title='voltar pergunta' onPress={goBack} disabled={indicePerguntaAtual == 0} />
-          <Button title='acançar pergunta' onPress={goFoward} disabled={indicePerguntaAtual > listaRespostas.length - 1} />
+        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 100 }}>
+          <Button title='voltar' onPress={goBack} disabled={indicePerguntaAtual == 0} />
+          <Button title='acançar' onPress={goFoward} disabled={indicePerguntaAtual > listaRespostas.length - 1} />
         </View>
-        <View>
+        <View style={{ alignItems: 'center', justifyContent: 'center', position: 'relative', top: 50 }}>
           <Buttom texto='Enviar' disabled={!disabled} onPress={handleEnvioDeInspecao} />
         </View>
-        <Text style={{ fontStyle: 'italic', fontSize: 11 }}>Certifique-se de que este dispositivo está com carga suficiente até o fim desta inspeção.</Text>
       </View>
     </>
   )
@@ -196,13 +196,13 @@ const TelaDePerguntas: React.FC = () => {
 const style = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    maxHeight: 550
   },
   containerHorizontal: {
     flexDirection: 'row',
-    marginHorizontal: 100,
-    marginBottom: 400
+    marginHorizontal: 80,
+    position: 'absolute',
+    top: 20
   },
   buttonContainer: {
     flex: 1,
@@ -211,10 +211,15 @@ const style = StyleSheet.create({
   campoDePergunta: {
     borderWidth: 5,
     borderRadius: 10,
-    padding: 100,
+    paddingVertical: Dimensions.get('window').height * 0.1,
+    paddingHorizontal: Dimensions.get('window').width * 0.25,
     marginTop: 60,
     marginHorizontal: 25,
-    alignSelf: 'center',
+    maxWidth: 400,
+    justifyContent: 'center', 
+    alignItems: 'center',
+    textAlign: 'center',
+    // alignSelf: 'center',
     fontWeight: 'bold'
   }
 })

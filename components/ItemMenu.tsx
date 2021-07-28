@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps } from 'react-native'
+import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps, Dimensions } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 
 interface ItemProps extends TouchableOpacityProps {
@@ -10,16 +10,16 @@ interface ItemProps extends TouchableOpacityProps {
 export default function ItemMenu({ titulo, icone, ...resto }: ItemProps) {
     return (
         <TouchableOpacity style={ styles.item } { ...resto }>
-            <Feather name={ icone } style={{fontSize: 70}}/>
-            <Text style={{ fontSize: 40 }}> { titulo } </Text>
+            <Feather name={ icone } style={{fontSize: 60}}/>
+            <Text style={{ fontSize: 30, fontWeight: 'bold' }}> { titulo } </Text>
         </TouchableOpacity>
     )
 }
 
 const styles = StyleSheet.create({
     item: {
-        padding: 20,
-        width: 400,
+        padding: 14,
+        width: Dimensions.get('window').width * 0.79,
         flexWrap: 'wrap',
         alignSelf: 'center',
         alignItems: 'center',

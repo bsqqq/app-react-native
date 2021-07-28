@@ -10,7 +10,7 @@ export default function MenuDeSeguranca() {
             <Text>Menu De Segurança</Text>
             <View style={styles.session}>
                 <Itens titulo="Inspeção" icone="shield" onPress={() => navigation.navigate('Inspecao')} />
-                <Itens titulo="Check-List" icone="instagram" />
+                <Itens titulo="Check-List" icone="check" onPress={() => navigation.navigate('Checklist')}/>
                 <Itens titulo="APR" icone="mic" onPress={() => navigation.navigate('APR')} />
                 <Itens titulo="Laudo" icone="file" />
             </View>
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     },
     session: {
         flex: 1,
-        justifyContent: 'space-around',
+        justifyContent: 'space-evenly',
         maxHeight: 750
     }
 })

@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from "@react-navigation/stack";
 
-import AudioRecPlay from '../pages/AudioRecPlay'
+import AudioRecPlay from '../pages/APR'
 import Menu from '../pages/Menu'
 import MenuDeSeguranca from '../pages/MenuDeSeguranca'
 import Inspecao from '../pages/Inspecao';
@@ -9,6 +9,7 @@ import NovaInspecao from '../pages/NovaInspecao';
 import TelaDePerguntas from '../pages/telaDePerguntas'
 import NaoConformidades from './../pages/NaoConformidades';
 import InspecaoSelecionada from '../pages/InspecaoSelecionada';
+import Checklist from '../pages/Checklist';
 
 const AppStack = createStackNavigator()
 
@@ -59,6 +60,12 @@ const AppRoutes: React.FC = () => (
             name="InspecaoSelecionada"
             component={InspecaoSelecionada}
         />
+
+        <AppStack.Screen
+            name="Checklist"
+            component={Checklist}
+        />
+        
     </AppStack.Navigator>
 )
 

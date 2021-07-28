@@ -20,7 +20,8 @@ export default function Menu() {
             <Text style={{
                 fontSize: 20,
                 fontStyle: 'italic',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                paddingTop: 20
             }}
             >Bem Vindo(a) {user?.name}
             </Text>
@@ -50,7 +51,7 @@ const styles = StyleSheet.create({
     },
     session: {
         flex: 1,
-        justifyContent: 'space-around',
-        maxHeight: 720
+        justifyContent: 'space-evenly',
+        maxHeight: 700
     }
 })

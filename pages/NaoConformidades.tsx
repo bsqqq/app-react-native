@@ -175,8 +175,8 @@ const NaoConformidades: React.FC = () => {
                                         })
                                     }
                                 >
-                                    <View style={{ margin: 20 }}>
-                                        <TouchableOpacity style={{ margin: 10 }} onPress={() => setModalVisible(false)}>
+                                    <View style={{ marginTop: 20 }}>
+                                        <TouchableOpacity style={{ marginTop: 10 }} onPress={() => setModalVisible(false)}>
                                             <FontAwesome
                                                 name='window-close'
                                                 size={40}
@@ -195,7 +195,8 @@ const NaoConformidades: React.FC = () => {
                                             style={{
                                                 width: Dimensions.get('window').width * 0.7,
                                                 height: Dimensions.get('window').width * 0.7,
-                                                borderRadius: 10
+                                                borderRadius: 10,
+                                                alignSelf: 'center'
                                             }}
                                             source={{ uri: photoURI }}
                                         />
@@ -222,24 +223,14 @@ const NaoConformidades: React.FC = () => {
                                                         fontWeight: 'bold',
                                                         fontStyle: 'italic',
                                                         marginBottom: 10,
-                                                        maxWidth: 300,
+                                                        width: 300,
                                                         alignItems: 'center'
                                                     }}
-                                                    placeholder="Insira aqui uma descrição para a Não-Conformidade."
                                                     onChangeText={
                                                         (value: string) => setTextDescricao(value)
                                                     }
                                                 />
-                                                <Text
-                                                    style={{
-                                                        marginHorizontal: 10,
-                                                        maxWidth: 170,
-                                                        marginBottom: 10,
-                                                        textAlign: 'center'
-                                                    }}>
-                                                    Isso está atrelado a um colaborador?
-                                                </Text>
-                                                <Text>{colab || "Aperte o botão abaixo para selecionar um colaborador"}</Text>
+                                                <Text>{colab}</Text>
                                                 <FilterPicker
                                                     visible={colaboradoresVisible}
                                                     onSelect={(item: any) => {
@@ -251,10 +242,9 @@ const NaoConformidades: React.FC = () => {
                                                     onCancel={() => setColaboradoresVisible(false)}
                                                     options={colaboradores}
                                                 />
-                                                <Button title="aperte aqui para selecionar o colaborador" onPress={() => setColaboradoresVisible(true)} />
-                                                <Text>Informe algum prazo para a resolução da Não-Conformidade.</Text>
-                                                <Button title="Aperte aqui para abrir o calendário" onPress={showDatepicker} />
+                                                <Button title="selecionar o colaborador" onPress={() => setColaboradoresVisible(true)} />
                                                 <Text>{`Data estabelecida: ${date?.getDate() || ''}/${date?.getMonth() + 1 || ''}` || ''}</Text>
+                                                <Button title="Inserir prazo" onPress={showDatepicker} />
                                                 {show && (
                                                     <DateTimePicker
                                                         testID="dateTimePicker"
@@ -268,7 +258,7 @@ const NaoConformidades: React.FC = () => {
                                         </View>
                                     </SafeAreaView>
                                     <View style={{ alignItems: 'center' }}>
-                                        <Buttom texto="Sim, pode salvar!" style={style.button} onPress={handleModalSavePic} />
+                                        <Buttom texto="Salvar!" style={style.button} onPress={handleModalSavePic} />
                                     </View>
                                 </KeyboardAvoidingView>
                             </Modal>
@@ -336,6 +326,8 @@ const style = StyleSheet.create({
         flexDirection: 'row',
         width: Dimensions.get('window').width * 0.8,
         height: Dimensions.get('window').height * 0.7,
+        position: 'absolute',
+        bottom: 5
     },
     buttonCamContainer: {
         backgroundColor: 'white',

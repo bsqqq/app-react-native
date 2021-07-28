@@ -13,6 +13,7 @@ import { Audio, AVPlaybackStatus } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import * as Font from "expo-font";
 import * as Icons from "../components/Icons";
+import * as MediaLibrary from 'expo-media-library';
 
 const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = Dimensions.get("window");
 const BACKGROUND_COLOR = "white";
@@ -213,6 +214,13 @@ export default class PlayerRecorder extends React.Component<Props, State> {
       this._updateScreenForSoundStatus
     );
     this.sound = sound;
+    const path = FileSystem.documentDirectory + 'audio/'
+    const fileUri = (jsonId: string) => path + `${jsonId}.m4a`
+    const dirInfo = await FileSystem.getInfoAsync(path)
+    !dirInfo.exists ? await FileSystem.makeDirectoryAsync(path, { intermediates: true }) : undefined
+    
+    // await FileSystem.downloadAsync(info.uri, FileSystem.documentDirectory + `${new Date().getTime()}.m4a`)
+    console.log(FileSystem.documentDirectory + `audio/${new Date().getTime()}.mp4 foi salvo`)
     this.setState({
       isLoading: false,
     });
