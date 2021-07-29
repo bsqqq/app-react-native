@@ -10,6 +10,7 @@ import TelaDePerguntas from '../pages/telaDePerguntas'
 import NaoConformidades from './../pages/NaoConformidades';
 import InspecaoSelecionada from '../pages/InspecaoSelecionada';
 import Checklist from '../pages/Checklist';
+import preAPR from '../pages/preAPR';
 
 const AppStack = createStackNavigator()
 
@@ -64,6 +65,11 @@ const AppRoutes: React.FC = () => (
         <AppStack.Screen
             name="Checklist"
             component={Checklist}
+        />
+
+        <AppStack.Screen
+            name="preAPR"
+            component={preAPR}
         />
         
     </AppStack.Navigator>

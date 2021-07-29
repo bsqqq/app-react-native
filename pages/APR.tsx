@@ -2,24 +2,22 @@ import React from "react";
 import {
   Dimensions,
   Image,
-  Slider,
   StyleSheet,
   Text,
   TouchableHighlight,
   View,
 } from "react-native";
-// import Slider from "@react-native-community/slider"
 import { Audio, AVPlaybackStatus } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import * as Font from "expo-font";
 import * as Icons from "../components/Icons";
-import * as MediaLibrary from 'expo-media-library';
+import fb from '../services/firebase'
 
 const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = Dimensions.get("window");
 const BACKGROUND_COLOR = "white";
 const LIVE_COLOR = "#FF0000";
 const DISABLED_OPACITY = 0.3;
-const RATE_SCALE = 3.0;
+// const RATE_SCALE = 3.0;
 
 type Props = {};
 
@@ -37,22 +35,22 @@ type State = {
   fontLoaded: boolean;
   shouldCorrectPitch: boolean;
   volume: number;
-  rate: number;
+  rate: number; 
 };
 
 export default class PlayerRecorder extends React.Component<Props, State> {
   private recording: Audio.Recording | null;
   private sound: Audio.Sound | null;
-  private isSeeking: boolean;
-  private shouldPlayAtEndOfSeek: boolean;
+  // private isSeeking: boolean;
+  // private shouldPlayAtEndOfSeek: boolean;
   private readonly recordingSettings: Audio.RecordingOptions;
 
   constructor(props: Props) {
     super(props);
     this.recording = null;
     this.sound = null;
-    this.isSeeking = false;
-    this.shouldPlayAtEndOfSeek = false;
+    // this.isSeeking = false;
+    // this.shouldPlayAtEndOfSeek = false;
     this.state = {
       haveRecordingPermissions: false,
       isLoading: false,
@@ -69,7 +67,7 @@ export default class PlayerRecorder extends React.Component<Props, State> {
       volume: 1.0,
       rate: 1.0,
     };
-    this.recordingSettings = Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY;
+    this.recordingSettings = Audio.RECORDING_OPTIONS_PRESET_LOW_QUALITY;
 
   }
   // quando o componente for carregado...
@@ -183,6 +181,7 @@ export default class PlayerRecorder extends React.Component<Props, State> {
         console.log(
           `Stop was called too quickly, no data has yet been received (${error.message})`
         );
+        alert('Parou a gravação muito rápido, não foi possível salvar nenhum dado.')
       } else {
         console.log("STOP ERROR: ", error.code, error.name, error.message);
       }
@@ -217,10 +216,12 @@ export default class PlayerRecorder extends React.Component<Props, State> {
     const path = FileSystem.documentDirectory + 'audio/'
     const fileUri = (jsonId: string) => path + `${jsonId}.m4a`
     const dirInfo = await FileSystem.getInfoAsync(path)
-    !dirInfo.exists ? await FileSystem.makeDirectoryAsync(path, { intermediates: true }) : undefined
-    
+    dirInfo.exists ? await FileSystem.makeDirectoryAsync(path, { intermediates: true }).then(() => console.log('diretorio de audio criado com sucesso')) : undefined
+    const response = await fetch(info.uri)
+    const blob = await response.blob()
+    const storage = fb.storage()
+    await storage.ref().child(`/fotos-de-inspecao/lala/som.mpeg`).put(blob, { contentType: 'audio/mpeg' })
     // await FileSystem.downloadAsync(info.uri, FileSystem.documentDirectory + `${new Date().getTime()}.m4a`)
-    console.log(FileSystem.documentDirectory + `audio/${new Date().getTime()}.mp4 foi salvo`)
     this.setState({
       isLoading: false,
     });
@@ -234,84 +235,84 @@ export default class PlayerRecorder extends React.Component<Props, State> {
     }
   };
   // quando o botao de pausa/play for pressionado
-  private _onPlayPausePressed = () => {
-    if (this.sound != null) {
-      if (this.state.isPlaying) {
-        this.sound.pauseAsync();
-      } else {
-        this.sound.playAsync();
-      }
-    }
-  };
-  // quando o stop for pressionado
-  private _onStopPressed = () => {
-    if (this.sound != null) {
-      this.sound.stopAsync();
-    }
-  };
-  // quando o mute for pressionado
-  private _onMutePressed = () => {
-    if (this.sound != null) {
-      this.sound.setIsMutedAsync(!this.state.muted);
-    }
-  };
+  // private _onPlayPausePressed = () => {
+  //   if (this.sound != null) {
+  //     if (this.state.isPlaying) {
+  //       this.sound.pauseAsync();
+  //     } else {
+  //       this.sound.playAsync();
+  //     }
+  //   }
+  // };
+  // // quando o stop for pressionado
+  // private _onStopPressed = () => {
+  //   if (this.sound != null) {
+  //     this.sound.stopAsync();
+  //   }
+  // };
+  // // quando o mute for pressionado
+  // private _onMutePressed = () => {
+  //   if (this.sound != null) {
+  //     this.sound.setIsMutedAsync(!this.state.muted);
+  //   }
+  // };
   // quando ajustar o volume
-  private _onVolumeSliderValueChange = (value: number) => {
-    if (this.sound != null) {
-      this.sound.setVolumeAsync(value);
-    }
-  };
-  // setar a velocidade do audio
-  private _trySetRate = async (rate: number, shouldCorrectPitch: boolean): Promise<void> => {
-    if (this.sound != null) {
-      try {
-        await this.sound.setRateAsync(rate, shouldCorrectPitch);
-      } catch (error) {
-        console.log(error)
-        // Rate changing could not be performed, possibly because the client's Android API is too old.
-      }
-    }
-  };
+  // private _onVolumeSliderValueChange = (value: number) => {
+  //   if (this.sound != null) {
+  //     this.sound.setVolumeAsync(value);
+  //   }
+  // };
+  // // setar a velocidade do audio
+  // private _trySetRate = async (rate: number, shouldCorrectPitch: boolean): Promise<void> => {
+  //   if (this.sound != null) {
+  //     try {
+  //       await this.sound.setRateAsync(rate, shouldCorrectPitch);
+  //     } catch (error) {
+  //       console.log(error)
+  //       // Rate changing could not be performed, possibly because the client's Android API is too old.
+  //     }
+  //   }
+  // };
   // colocando a velocidade no maximo
-  private _onRateSliderSlidingComplete = async (value: number) => {
-    this._trySetRate(value * RATE_SCALE, this.state.shouldCorrectPitch);
-  };
-  // se o botao de correção de tonalidade for pressionado
-  private _onPitchCorrectionPressed = () => {
-    this._trySetRate(this.state.rate, !this.state.shouldCorrectPitch);
-  };
-  // quando o slider mudar o valor manualmente
-  private _onSeekSliderValueChange = (value: number) => {
-    if (this.sound != null && !this.isSeeking) {
-      this.isSeeking = true;
-      this.shouldPlayAtEndOfSeek = this.state.shouldPlay;
-      this.sound.pauseAsync();
-    }
-  };
+  // private _onRateSliderSlidingComplete = async (value: number) => {
+  //   this._trySetRate(value * RATE_SCALE, this.state.shouldCorrectPitch);
+  // };
+  // // se o botao de correção de tonalidade for pressionado
+  // private _onPitchCorrectionPressed = () => {
+  //   this._trySetRate(this.state.rate, !this.state.shouldCorrectPitch);
+  // };
+  // // quando o slider mudar o valor manualmente
+  // private _onSeekSliderValueChange = (value: number) => {
+  //   if (this.sound != null && !this.isSeeking) {
+  //     this.isSeeking = true;
+  //     this.shouldPlayAtEndOfSeek = this.state.shouldPlay;
+  //     this.sound.pauseAsync();
+  //   }
+  // };
   // quando o slide de audio chegar ao fim
-  private _onSeekSliderSlidingComplete = async (value: number) => {
-    if (this.sound != null) {
-      this.isSeeking = false;
-      const seekPosition = value * (this.state.soundDuration || 0);
-      if (this.shouldPlayAtEndOfSeek) {
-        // this.sound.playFromPositionAsync(seekPosition);
-        this.sound.pauseAsync()
-      } else {
-        this.sound.setPositionAsync(seekPosition);
-      }
-    }
-  };
+  // private _onSeekSliderSlidingComplete = async (value: number) => {
+  //   if (this.sound != null) {
+  //     this.isSeeking = false;
+  //     const seekPosition = value * (this.state.soundDuration || 0);
+  //     if (this.shouldPlayAtEndOfSeek) {
+  //       // this.sound.playFromPositionAsync(seekPosition);
+  //       this.sound.pauseAsync()
+  //     } else {
+  //       this.sound.setPositionAsync(seekPosition);
+  //     }
+  //   }
+  // };
   // pegar a posição do slider
-  private _getSeekSliderPosition() {
-    if (
-      this.sound != null &&
-      this.state.soundPosition != null &&
-      this.state.soundDuration != null
-    ) {
-      return this.state.soundPosition / this.state.soundDuration;
-    }
-    return 0;
-  }
+  // private _getSeekSliderPosition() {
+  //   if (
+  //     this.sound != null &&
+  //     this.state.soundPosition != null &&
+  //     this.state.soundDuration != null
+  //   ) {
+  //     return this.state.soundPosition / this.state.soundDuration;
+  //   }
+  //   return 0;
+  // }
   // pegar o tempo do audio
   private _getMMSSFromMillis(millis: number) {
     const totalSeconds = millis / 1000;
@@ -328,18 +329,18 @@ export default class PlayerRecorder extends React.Component<Props, State> {
     return padWithZero(minutes) + ":" + padWithZero(seconds);
   }
   // mostrar o tempo atual do audio / tempo do audio completo
-  private _getPlaybackTimestamp() {
-    if (
-      this.sound != null &&
-      this.state.soundPosition != null &&
-      this.state.soundDuration != null
-    ) {
-      return `${this._getMMSSFromMillis(
-        this.state.soundPosition
-      )} / ${this._getMMSSFromMillis(this.state.soundDuration)}`;
-    }
-    return "";
-  }
+  // private _getPlaybackTimestamp() {
+  //   if (
+  //     this.sound != null &&
+  //     this.state.soundPosition != null &&
+  //     this.state.soundDuration != null
+  //   ) {
+  //     return `${this._getMMSSFromMillis(
+  //       this.state.soundPosition
+  //     )} / ${this._getMMSSFromMillis(this.state.soundDuration)}`;
+  //   }
+  //   return "";
+  // }
   // pegar o tempo de gravação
   private _getRecordingTimestamp() {
     if (this.state.recordingDuration != null) {
@@ -381,6 +382,7 @@ export default class PlayerRecorder extends React.Component<Props, State> {
             },
           ]}
         >
+          <Text style={[styles.textButton, { position: "absolute", top: 30 }]}>Aperte no microfone para iniciar a gravação, {"\n"}para terminar de gravar, aperte novamente no microfone.</Text>
           <View />
           <View style={styles.recordingContainer}>
             <View />
@@ -434,7 +436,7 @@ export default class PlayerRecorder extends React.Component<Props, State> {
           ]}
         >
           <View />
-          <View style={styles.playbackContainer}>
+          {/* <View style={styles.playbackContainer}>
             <Slider
               style={styles.playbackSlider}
               trackImage={Icons.TRACK_1.module}
@@ -452,11 +454,11 @@ export default class PlayerRecorder extends React.Component<Props, State> {
             >
               {this._getPlaybackTimestamp()}
             </Text>
-          </View>
+          </View> */}
           <View
             style={[styles.buttonsContainerBase, styles.buttonsContainerTopRow]}
           >
-            <View style={styles.volumeContainer}>
+            {/* <View style={styles.volumeContainer}>
               <TouchableHighlight
                 underlayColor={BACKGROUND_COLOR}
                 style={styles.wrapper}
@@ -480,9 +482,9 @@ export default class PlayerRecorder extends React.Component<Props, State> {
                 onValueChange={this._onVolumeSliderValueChange}
                 disabled={!this.state.isPlaybackAllowed || this.state.isLoading}
               />
-            </View>
+            </View> */}
             <View style={styles.playStopContainer}>
-              <TouchableHighlight
+              {/* <TouchableHighlight
                 underlayColor={BACKGROUND_COLOR}
                 style={styles.wrapper}
                 onPress={this._onPlayPausePressed}
@@ -496,15 +498,15 @@ export default class PlayerRecorder extends React.Component<Props, State> {
                       : Icons.PLAY_BUTTON.module
                   }
                 />
-              </TouchableHighlight>
-              <TouchableHighlight
+              </TouchableHighlight> */}
+              {/* <TouchableHighlight
                 underlayColor={BACKGROUND_COLOR}
                 style={styles.wrapper}
                 onPress={this._onStopPressed}
                 disabled={!this.state.isPlaybackAllowed || this.state.isLoading}
               >
                 <Image style={styles.image} source={Icons.STOP_BUTTON.module} />
-              </TouchableHighlight>
+              </TouchableHighlight> */}
             </View>
             <View />
           </View>
@@ -514,7 +516,7 @@ export default class PlayerRecorder extends React.Component<Props, State> {
               styles.buttonsContainerBottomRow,
             ]}
           >
-            <Text style={styles.timestamp}>Velocidade:</Text>
+            {/* <Text style={styles.timestamp}>Velocidade:</Text>
             <Slider
               style={styles.rateSlider}
               trackImage={Icons.TRACK_1.module}
@@ -532,7 +534,7 @@ export default class PlayerRecorder extends React.Component<Props, State> {
               <Text style={[{ fontFamily: "cutive-mono-regular" }]}>
                 PC: {this.state.shouldCorrectPitch ? "sim" : "não"}
               </Text>
-            </TouchableHighlight>
+            </TouchableHighlight> */}
           </View>
           <View />
         </View>

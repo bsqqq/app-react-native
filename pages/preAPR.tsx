@@ -1,10 +1,10 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, StyleSheet, Text } from 'react-native'
 
-export default function Checklist() {
+export default function preAPR() {
     return (
         <View style={style.container}>
-            <Text>Checklist.tsx</Text>
+            <Text>preAPR.tsx</Text>
         </View>
     )
 }
@@ -13,6 +13,6 @@ const style = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
     }
 })

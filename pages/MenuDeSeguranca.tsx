@@ -11,7 +11,7 @@ export default function MenuDeSeguranca() {
             <View style={styles.session}>
                 <Itens titulo="Inspeção" icone="shield" onPress={() => navigation.navigate('Inspecao')} />
                 <Itens titulo="Check-List" icone="check" onPress={() => navigation.navigate('Checklist')}/>
-                <Itens titulo="APR" icone="mic" onPress={() => navigation.navigate('APR')} />
+                <Itens titulo="APR" icone="mic" onPress={() => navigation.navigate('preAPR')} />
                 <Itens titulo="Laudo" icone="file" />
             </View>
         </SafeAreaView>
