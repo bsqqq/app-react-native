@@ -214,13 +214,12 @@ export default class PlayerRecorder extends React.Component<Props, State> {
     );
     this.sound = sound;
     const path = FileSystem.documentDirectory + 'audio/'
-    const fileUri = (jsonId: string) => path + `${jsonId}.m4a`
     const dirInfo = await FileSystem.getInfoAsync(path)
-    dirInfo.exists ? await FileSystem.makeDirectoryAsync(path, { intermediates: true }).then(() => console.log('diretorio de audio criado com sucesso')) : undefined
+    dirInfo.exists ? undefined : await FileSystem.makeDirectoryAsync(path, { intermediates: true }).then(() => console.log('diretorio de audio criado com sucesso'))
     const response = await fetch(info.uri)
     const blob = await response.blob()
     const storage = fb.storage()
-    await storage.ref().child(`/fotos-de-inspecao/lala/som.mpeg`).put(blob, { contentType: 'audio/mpeg' })
+    await storage.ref().child(`/audio-de-apr/lala/som.mpeg`).put(blob, { contentType: 'audio/mpeg' })
     // await FileSystem.downloadAsync(info.uri, FileSystem.documentDirectory + `${new Date().getTime()}.m4a`)
     this.setState({
       isLoading: false,
@@ -382,8 +381,8 @@ export default class PlayerRecorder extends React.Component<Props, State> {
             },
           ]}
         >
-          <Text style={[styles.textButton, { position: "absolute", top: 30 }]}>Aperte no microfone para iniciar a gravação, {"\n"}para terminar de gravar, aperte novamente no microfone.</Text>
           <View />
+            {/* <Text>Aperte aqui para começar a gravar.</Text> */}
           <View style={styles.recordingContainer}>
             <View />
             <TouchableHighlight
@@ -392,7 +391,7 @@ export default class PlayerRecorder extends React.Component<Props, State> {
               onPress={this._onRecordPressed}
               disabled={this.state.isLoading}
             >
-              <Image style={styles.image} source={Icons.RECORD_BUTTON.module} />
+              <Image style={styles.image} source={!this.state.isRecording ? Icons.RECORD_BUTTON.module : Icons.STOP_BUTTON.module} />
             </TouchableHighlight>
             <View style={styles.recordingDataContainer}>
               <View />
@@ -568,8 +567,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     alignSelf: "stretch",
-    minHeight: DEVICE_HEIGHT / 2.0,
-    maxHeight: DEVICE_HEIGHT / 2.0,
+    minHeight: DEVICE_HEIGHT / 1.0,
+    maxHeight: DEVICE_HEIGHT / 1.0,
   },
   recordingContainer: {
     flex: 1,

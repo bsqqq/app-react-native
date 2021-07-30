@@ -1,20 +1,16 @@
-import { useNavigation } from '@react-navigation/native';
 import React, { useContext } from 'react';
 import { SafeAreaView, StyleSheet, Text, View, Button } from 'react-native'
 import Itens from '../components/ItemMenu'
 import AuthContext from '../contexts/auth';
+import ConexaoContext from '../contexts/conexao';
 import { estouOnline } from './../utils/EstouOnline';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Menu() {
     estouOnline()
     const { signOut, user } = useContext(AuthContext)
+    const { conectado } = useContext(ConexaoContext)
     const navigation = useNavigation()
-    let status
-    try {
-        status = estouOnline()
-    } catch (error) {
-        alert(`Erro: Não foi possivel buscar informações para o uso do aplicativo, tente sair e entrar novamente, se a mensagem aparecer novamente, tente de novo.`)
-    }
     return (
         <SafeAreaView style={styles.container}>
             <Text style={{
@@ -31,12 +27,20 @@ export default function Menu() {
                 <Itens titulo="Obras" icone="briefcase" />
                 <Itens titulo="Manutenção" icone="tool" />
                 <Itens titulo="Frota" icone="flag" />
+                {
+                    !!conectado
+                        ? <Text style={{
+                            textAlign: 'center',
+                            fontWeight: 'bold',
+                            fontStyle: 'italic'
+                        }}> Status: Online </Text>
+                        : <Text style={{
+                            textAlign: 'center',
+                            fontWeight: 'bold',
+                            fontStyle: 'italic'
+                        }}> Status: Offline </Text>
+                }
             </View>
-            {
-                status
-                    ? <Text>Status: Online</Text>
-                    : <Text>Status: Offline</Text>
-            }
             <Button title="Sair" onPress={() => signOut()} />
         </SafeAreaView>
     )

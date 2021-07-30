@@ -1,5 +1,6 @@
 import React from 'react'
 import { View, StyleSheet, Text } from 'react-native'
+import APRContext from './../contexts/apr';
 
 export default function preAPR() {
     return (
