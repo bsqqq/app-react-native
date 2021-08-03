@@ -110,9 +110,11 @@ const NaoConformidades: React.FC = () => {
     }
 
     async function handleConfirmNaoConformidade() {
-        for (var i = 0; i < naoConformidadesRegistradas.length; i++)
+        for (var i = 0; i < naoConformidadesRegistradas.length; i++) {
             await MediaLibrary.createAssetAsync(naoConformidadesRegistradas[i])
-        setFotosInspecao(naoConformidadesRegistradas)
+            setFotosInspecao(naoConformidadesRegistradas[i])
+        }
+        console.log(`antes de mandar as fotos para o context = ${naoConformidadesRegistradas}`)
         navigation.navigate('TelaDePerguntas')
     }
 

@@ -22,7 +22,7 @@ interface objetoDeResposta {
 }
 
 const TelaDePerguntas: React.FC = () => {
-  const { ContratoId, ProcessoId, inspecaoId } = useContext(InspecaoContext)
+  const { ContratoId, ProcessoId, inspecaoId, setListaDeRespostaContext } = useContext(InspecaoContext)
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
@@ -52,6 +52,7 @@ const TelaDePerguntas: React.FC = () => {
           else
             objDeResp.push(respostaSim)
           setListaRespostas(objDeResp)
+          setListaDeRespostaContext(listaRespostas[listaRespostas.length - 1])
           console.log(objDeResp)
           console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
           break;
@@ -74,8 +75,9 @@ const TelaDePerguntas: React.FC = () => {
           setListaRespostas(objDeResp)
           setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.');
           setIndicePerguntaAtual(indicePerguntaAtual + 1);
+          setListaDeRespostaContext(listaRespostas[listaRespostas.length - 1])
           console.log(objDeResp)
-
+          console.log(`indice pergunta atual: ${indicePerguntaAtual}`)
           navigation.navigate('NaoConformidades')
           break;
         case 'n/a':
