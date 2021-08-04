@@ -42,7 +42,7 @@ const TelaDePerguntas: React.FC = () => {
             inspecaoId,
             perguntaId: listaPerguntas[indicePerguntaAtual].id,
             valorResposta: decisao,
-            status: 'ok'
+            status: 'ok',
           }
           setProximaPergunta(indicePerguntaAtual + 1 !== listaPerguntas.length ? listaPerguntas[indicePerguntaAtual + 1].pergunta : 'Inspeção finalizada.')
           setIndicePerguntaAtual(indicePerguntaAtual + 1)
@@ -62,7 +62,7 @@ const TelaDePerguntas: React.FC = () => {
             inspecaoId,
             perguntaId: listaPerguntas[indicePerguntaAtual].id,
             valorResposta: decisao,
-            status: 'pendente'
+            status: 'pendente',
           }
           var jaExisteRespostaa = objDeResp.find(objetoDeResposta => objetoDeResposta.perguntaId === respostaNao.perguntaId)
 

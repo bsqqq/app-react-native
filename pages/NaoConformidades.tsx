@@ -105,7 +105,7 @@ const NaoConformidades: React.FC = () => {
         setColabIdContext(Number(colabId ? colabId : 0))
         setColab('')
         setColabId(0)
-        setDates(`${date?.getDate()}/${date?.getMonth() + 1}`)
+        setDates(`${date?.getDate()}/${date?.getMonth() + 1}/${date?.getFullYear()}`)
         setModalVisible(false)
     }
 
@@ -245,7 +245,7 @@ const NaoConformidades: React.FC = () => {
                                                     options={colaboradores}
                                                 />
                                                 <Button title="selecionar o colaborador" onPress={() => setColaboradoresVisible(true)} />
-                                                <Text>{`Data estabelecida: ${date?.getDate() || ''}/${date?.getMonth() + 1 || ''}` || ''}</Text>
+                                                <Text>{`Data estabelecida: ${date?.getDate() || ''}/${date?.getMonth() + 1}/${date?.getFullYear()}` || ''}</Text>
                                                 <Button title="Inserir prazo" onPress={showDatepicker} />
                                                 {show && (
                                                     <DateTimePicker

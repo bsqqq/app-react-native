@@ -51,6 +51,7 @@ interface objetoDeResposta {
     perguntaId: number
     valorResposta: string
     status?: string
+    indiceDaFoto?: number
   }
 
 const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContextData)
@@ -95,11 +96,9 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     }
 
     async function setFotosInspecao(FotoURI: string) {
-        console.log("chegou no setFotosInspecao")
         const arrDeFotos = fotos
         arrDeFotos?.push(FotoURI)
         setFotos(arrDeFotos)
-        console.log(`as fotos: ${fotos}`)
         await AsyncStorage.setItem('@mais-parceria-app-fotos', JSON.stringify(fotos))
     }
 
@@ -163,9 +162,10 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                             hiperlink,
                             descricao: descricao[index] || "",
                             inspecaoId,
-                            respostaId,
+                            respostaId: arrNaoConformidadesIds[index],
                             colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
-                            prazoDeResolucao: prazoDasNaoConformidades[index] || ""
+                            prazoDeResolucao: prazoDasNaoConformidades[index] || "",
+
                         }
                         await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0 + index)}/${index}`).set(fotosDeInspecoes)
                     })
