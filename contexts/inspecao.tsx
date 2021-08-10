@@ -154,7 +154,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                     const arrayDeFotos: any[] = JSON.parse(fts)
                     const promises = arrayDeFotos.map(async (item: string, index: number) => {
                         const response = await fetch(item)
-                        var blob = await response.blob()
+                        var blob = await response.blob();
                         await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
                         var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
                         var fotosDeInspecoes: fotoDeInspecaoProps = {
