@@ -167,7 +167,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                             prazoDeResolucao: prazoDasNaoConformidades[index] || "",
 
                         }
-                        await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0 + index)}/${index}`).set(fotosDeInspecoes)
+                        await db.ref(`/fotos-de-inspecao/${(fotosDeInspecoes.id || 0 + index)}/${index}`).set(fotosDeInspecoes)
                     })
                     setColabId([])
                     setPrazoDasNaoConformidades([])
