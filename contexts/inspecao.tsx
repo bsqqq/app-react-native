@@ -158,7 +158,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                         await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
                         var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
                         var fotosDeInspecoes: fotoDeInspecaoProps = {
-                            id: (inspecaoId || 0 + index),
+                            id: (new Date().getTime() || 0 + index),
                             hiperlink,
                             descricao: descricao[index] || "",
                             inspecaoId,
