@@ -98,7 +98,6 @@ export default function Inspecao() {
           <Text style={style.buttonText}>+</Text>
         </TouchableOpacity>
       </View>
-      {/* <Text>Algumas inspeções não irão ser exibidas aqui caso elas tenham sido feitas durante esta sessão, será necessário estar online e entrar novamente para atualizar a lista</Text> */}
     </SafeAreaView>
   );
 }

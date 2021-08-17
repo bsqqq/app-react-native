@@ -1,6 +1,5 @@
 import React from 'react';
 import { createStackNavigator } from "@react-navigation/stack";
-
 import AudioRecPlay from '../pages/APR'
 import Menu from '../pages/Menu'
 import MenuDeSeguranca from '../pages/MenuDeSeguranca'
@@ -22,6 +21,7 @@ const AppRoutes: React.FC = () => (
             backgroundColor: 'white'
         },
     }}>
+        
         <AppStack.Screen 
             name="Menu"
             component={Menu}

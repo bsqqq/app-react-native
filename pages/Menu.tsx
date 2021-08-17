@@ -1,5 +1,11 @@
 import React, { useContext } from 'react';
-import { SafeAreaView, StyleSheet, Text, View, Button } from 'react-native'
+import {
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    View,
+    Button
+} from 'react-native'
 import Itens from '../components/ItemMenu'
 import AuthContext from '../contexts/auth';
 import ConexaoContext from '../contexts/conexao';
@@ -7,10 +13,10 @@ import { estouOnline } from './../utils/EstouOnline';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Menu() {
-    estouOnline()
     const { signOut, user } = useContext(AuthContext)
     const { conectado } = useContext(ConexaoContext)
     const navigation = useNavigation()
+    estouOnline()
     return (
         <SafeAreaView style={styles.container}>
             <Text style={{
@@ -18,8 +24,8 @@ export default function Menu() {
                 fontStyle: 'italic',
                 fontWeight: 'bold',
                 paddingTop: 20
-            }}
-            >Bem Vindo(a) {user?.name}
+            }}>
+                Bem Vindo(a) {user?.name}
             </Text>
             <Text>Menu Principal</Text>
             <View style={styles.session}>

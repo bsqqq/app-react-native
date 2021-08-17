@@ -28,7 +28,7 @@ export default async function atualizacoes() {
             await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(shotColaboradores)).then(() => console.log('colaboradores obtidos com sucesso.'))
             await fs.writeAsStringAsync(fileUri('processos'), JSON.stringify(shotProcessos)).then(() => console.log('processos obtidos com sucesso.'))
             await fs.writeAsStringAsync(fileUri('contratos'), JSON.stringify(shotContratos)).then(() => console.log('contratos obtidos com sucesso.'))
-            await fs.writeAsStringAsync(fileUri('inspecoes'), JSON.stringify(shotInspecoes)).then(() => console.log('inspeções obtidos com sucesso.'))
+            await fs.writeAsStringAsync(fileUri('inspecoes'), JSON.stringify(shotInspecoes)).then(() => { console.log('inspeções obtidos com sucesso.'); alert('Todos os dados foram baixados com sucesso.') })
         }
         getMunicipios()
         garantirDirExiste()

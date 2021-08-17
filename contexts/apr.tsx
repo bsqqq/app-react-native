@@ -1,12 +1,23 @@
-import React, { createContext, useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import netinfo from '@react-native-community/netinfo'
-import fb from '../services/firebase'
-import * as fs from 'expo-file-system'
+import React, { createContext, useState } from "react";
+import { APRProps } from "../pages/preAPR";
 
 interface APRContextProps {
-
+    setNewAPRContext(obj: APRProps): void
 }
 
 const APRContext = createContext<APRContextProps>({} as APRContextProps)
 export default APRContext
+
+export const APRProvider: React.FC = ({ children }) => {
+    const [apr, setApr] = useState<APRProps>()
+    
+    function setNewAPRContext(localApr: APRProps) {
+        console.log(localApr)
+        setApr(localApr)
+    }
+    return (
+        <APRContext.Provider value={{setNewAPRContext}}>
+            { children }
+        </APRContext.Provider>
+    )
+}

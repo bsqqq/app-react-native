@@ -13,7 +13,7 @@ interface fotoDeInspecaoProps {
     prazoDeResolucao: string | undefined
 }
 
-export interface InspecaoContextData {
+interface InspecaoContextData {
     id?: number | undefined
     NumeroDeInspecao: number | undefined
     DataEHoraDaInspecao: string | undefined

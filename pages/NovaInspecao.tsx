@@ -58,7 +58,7 @@ interface ColaboradoresProps {
     }
 }
 
-interface objetoDeInspecao {
+export interface objetoDeInspecao {
     id?: number | undefined,
     NumeroDeInspecao: number | undefined,
     DataEHoraDaInspecao: string | undefined,
@@ -105,10 +105,11 @@ export default function NovaInspecao() {
     var processos: ProcessosProps
     var contratos: ContratoProps = {}
     var municipios: any[]
+
     async function handleNewInspecao() {
         try {
             var controle = JSON.parse(await fs.readAsStringAsync(fileUri('numero-de-inspecao')))
-            var estouOnline = (await netinfo.fetch()).isConnected
+            var estouOnline = Boolean((await netinfo.fetch()).isConnected)
             var snap = estouOnline ? await db.ref('/controle/numero-de-inspecao').once('value') : undefined
             var shot = snap ? snap.exportVal() : undefined
             const newInspecao: objetoDeInspecao = {
@@ -127,10 +128,8 @@ export default function NovaInspecao() {
                 ContratoId: contratoId,
                 ProcessoId: processoId
             }
-            setProcessoContratoIdContextData(Number(processoId), Number(contratoId))
-            setInspecaoIdContextData(Number(newInspecao.id))
+            // garantir que todos os campos sejam preenchidos
             if (
-                // garantir que todos os campos sejam preenchidos
                 newInspecao?.Placa == undefined || newInspecao.Placa.length <= 0
                 && newInspecao?.EquipeId == undefined || Number(newInspecao.EquipeId?.length) <= 0
                 && newInspecao?.Localidade == undefined || Number(newInspecao.Localidade?.length) <= 0
@@ -142,6 +141,8 @@ export default function NovaInspecao() {
                 alert('Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
                 console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
             } else {
+                setProcessoContratoIdContextData(Number(processoId), Number(contratoId))
+                setInspecaoIdContextData(Number(newInspecao.id))
                 setNewInspecao(JSON.stringify(newInspecao))
                 setEquipeIdContext(newInspecao?.EquipeId)
                 navigation.navigate('TelaDePerguntas')
@@ -277,7 +278,6 @@ export default function NovaInspecao() {
                             onSelectedItemsChange={(selectedItems: number[]) => setEquipeId(selectedItems)}
                             searchInputPlaceholderText="Pesquisar..."
                             itemTextColor="blue"
-
                         />
 
                         <View style={{ flexDirection: 'row' }}>

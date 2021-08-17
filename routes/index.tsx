@@ -12,6 +12,7 @@ const routes: React.FC = () => {
             <ActivityIndicator size="large" color="#666" />
         </View>
     }
+    
     return signed ? <AppRoutes /> : <AuthRoutes />
 }
 

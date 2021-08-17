@@ -7,8 +7,6 @@ export async function estouOnline(): Promise<boolean> {
         conectado = Boolean(state.isConnected)
         if(conectado == true) {
             await atualizacoes()
-            .then(() => alert('Todos os dados foram baixados com sucesso.'))
-            .catch(() => alert('Erro: os dados não foram baixados corretamente, tente novamente saindo e entrando novamente no app.'))
         }
     })
     return conectado
