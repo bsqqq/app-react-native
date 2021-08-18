@@ -10,6 +10,7 @@ import NaoConformidades from './../pages/NaoConformidades';
 import InspecaoSelecionada from '../pages/InspecaoSelecionada';
 import Checklist from '../pages/Checklist';
 import preAPR from '../pages/preAPR';
+import ListaDeAPR from '../pages/ListaDeAPR';
 
 const AppStack = createStackNavigator()
 
@@ -70,6 +71,11 @@ const AppRoutes: React.FC = () => (
         <AppStack.Screen
             name="preAPR"
             component={preAPR}
+        />
+
+        <AppStack.Screen
+            name="ListaDeAPR"
+            component={ListaDeAPR}
         />
         
     </AppStack.Navigator>
