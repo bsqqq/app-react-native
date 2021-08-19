@@ -8,12 +8,12 @@ interface fotoDeInspecaoProps {
     hiperlink: string | undefined,
     descricao: string | undefined,
     inspecaoId: number | undefined,
-    respostaId: number | undefined,
+    respostaId?: number | undefined,
     colaboradorId: number | undefined,
     prazoDeResolucao: string | undefined
 }
 
-interface InspecaoContextData {
+export interface InspecaoContextData {
     id?: number | undefined
     NumeroDeInspecao: number | undefined
     DataEHoraDaInspecao: string | undefined
@@ -52,7 +52,7 @@ interface objetoDeResposta {
     valorResposta: string
     status?: string
     indiceDaFoto?: number
-  }
+}
 
 const InspecaoContext = createContext<InspecaoContextData>({} as InspecaoContextData)
 export default InspecaoContext
@@ -137,74 +137,51 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         arr.push(obj)
         setArrDeRespostas(arr)
     }
-
-    async function finishInspecao() {
-        // esta função vai escrever tudo no banco de dados.
+    async function upload() {
         const db = fb.database()
         const storage = fb.storage()
         var snap = await db.ref('/controle/numero-de-inspecao').once('value')
         var shot = snap.exportVal()
+        await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
+        await db.ref('/controle/numero-de-inspecao').set(Number(shot) + 1)
+        await db.ref(`/respostas/${inspecaoId}`).set(arrDeRespostas)
+        const fts: string = String(await AsyncStorage.getItem('@mais-parceria-app-fotos'))
+        const arrayDeFotos: any[] = JSON.parse(fts)
+        const promises = arrayDeFotos.map(async (item: string, index: number) => {
+            const response = await fetch(item)
+            var blob = await response.blob();
+            await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
+            var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
+            var fotosDeInspecoes: fotoDeInspecaoProps = {
+                id: new Date().getTime() || 0 + index,
+                hiperlink,
+                descricao: descricao[index] || "",
+                inspecaoId,
+                // respostaId: arrNaoConformidadesIds.length < arrayDeFotos.length ?  : arrNaoConformidadesIds[index],
+                colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
+                prazoDeResolucao: prazoDasNaoConformidades[index] || "",
+            }
+            await db.ref(`/fotos-de-inspecao/${(fotosDeInspecoes.id || 0 + index)}`).set(fotosDeInspecoes)
+        })
+        setColabId([])
+        setPrazoDasNaoConformidades([])
+        setDescricao([])
+        setArrDeRespostas([])
+        await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
+        fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
+    }
+
+    async function finishInspecao() {
+        // esta função vai escrever tudo no banco de dados.
         try {
             netinfo.fetch().then(async state => {
                 if (state.isConnected == true) {
-                    await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
-                    await db.ref('/controle/numero-de-inspecao').set(Number(shot) + 1)
-                    await db.ref(`/respostas/${inspecaoId}`).set(arrDeRespostas)
-                    const fts: string = String(await AsyncStorage.getItem('@mais-parceria-app-fotos'))
-                    const arrayDeFotos: any[] = JSON.parse(fts)
-                    const promises = arrayDeFotos.map(async (item: string, index: number) => {
-                        const response = await fetch(item)
-                        var blob = await response.blob();
-                        await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
-                        var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
-                        var fotosDeInspecoes: fotoDeInspecaoProps = {
-                            id: (new Date().getTime() || 0 + index),
-                            hiperlink,
-                            descricao: descricao[index] || "",
-                            inspecaoId,
-                            respostaId: arrNaoConformidadesIds[index],
-                            colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
-                            prazoDeResolucao: prazoDasNaoConformidades[index] || "",
-
-                        }
-                        await db.ref(`/fotos-de-inspecao/${(fotosDeInspecoes.id || 0 + index)}`).set(fotosDeInspecoes)
-                    })
-                    setColabId([])
-                    setPrazoDasNaoConformidades([])
-                    setDescricao([])
-                    setArrDeRespostas([])
-                    await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
-                    fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
+                    upload()
                 } else {
                     alert('AVISO: Atualmente o dispositivo se encontra offline, se caso não for possível enviar as inspeções normalmente para o servidor até o primeiro momento que se encontrar online, tente contactar todos os envolvidos sobre qualquer Não Conformidade, prazo, responsável, etc... as fotos são salvas automaticamente no álbum do dispositivo. Informe também ao desenvolvedor (Vinicius) sobre o caso para uma solução em breve...')
                     netinfo.addEventListener(async state => {
                         if (state.isConnected == true) {
-                            var snap = await db.ref('/controle/numero-de-inspecao').once('value')
-                            var shot = snap.exportVal()
-                            await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
-                            await db.ref('/controle/numero-de-inspecao').set(Number(shot + 1))
-                            const fts: string | null = await AsyncStorage.getItem('@mais-parceria-app-fotos')
-                            const arrayDeFts = JSON.parse(String(fts))
-                            const promises = arrayDeFts.map(async (item: string, index: number) => {
-                                const response = await fetch(item)
-                                var blob = await response.blob()
-                                await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
-                                var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
-                                await db.ref(`/fotos-de-inspecao/${(inspecaoId || 0) + index}`).set({
-                                    id: (inspecaoId || 0) + index,
-                                    hiperlink,
-                                    descricao: descricao[index] || "",
-                                    inspecaoId,
-                                    respostaId,
-                                    colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
-                                    prazoDeResolucao: prazoDasNaoConformidades[index] || ""
-                                })
-                            })
-                            setColabId([])
-                            setPrazoDasNaoConformidades([])
-                            setDescricao([])
-                            await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
-                            fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
+                            upload()
                         }
                     })
                 }

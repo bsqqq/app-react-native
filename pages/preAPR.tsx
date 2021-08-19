@@ -52,10 +52,11 @@ export interface APRProps {
     OT_OS_SI: number,
     ProcessoId: number,
     ContratoId: number,
-    EquipeId: Array<number>,
+    EquipeId: Array<number> | undefined,
     UsuarioId: number,
     CoordenadaX: number,
-    CoordenadaY: number
+    CoordenadaY: number,
+    hiperlink?: string
 }
 
 export default function preAPR() {

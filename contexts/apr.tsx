@@ -2,7 +2,8 @@ import React, { createContext, useState } from "react";
 import { APRProps } from "../pages/preAPR";
 
 interface APRContextProps {
-    setNewAPRContext(obj: APRProps): void
+    setNewAPRContext(obj: APRProps): void,
+    apr: APRProps | undefined
 }
 
 const APRContext = createContext<APRContextProps>({} as APRContextProps)
@@ -16,7 +17,7 @@ export const APRProvider: React.FC = ({ children }) => {
         setApr(localApr)
     }
     return (
-        <APRContext.Provider value={{setNewAPRContext}}>
+        <APRContext.Provider value={{setNewAPRContext, apr}}>
             { children }
         </APRContext.Provider>
     )

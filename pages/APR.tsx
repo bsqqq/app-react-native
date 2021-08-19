@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   Dimensions,
   Image,
@@ -12,132 +12,87 @@ import * as FileSystem from "expo-file-system";
 import * as Font from "expo-font";
 import * as Icons from "../components/Icons";
 import fb from '../services/firebase'
+import { useNavigation } from '@react-navigation/native';
+import APRContext from "../contexts/apr";
+import Botao from '../components/NextButton'
+import { APRProps } from "./preAPR";
 
 const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = Dimensions.get("window");
 const BACKGROUND_COLOR = "white";
 const LIVE_COLOR = "#FF0000";
 const DISABLED_OPACITY = 0.3;
-// const RATE_SCALE = 3.0;
 
-type Props = {};
+export default function PlayerRecorder() {
+  let recording: Audio.Recording | null;
+  let sound: Audio.Sound | null;
+  const recordingSettings: Audio.RecordingOptions = Audio.RECORDING_OPTIONS_PRESET_LOW_QUALITY;
+  const [haveRecordingPermissions, setHaveRecordingPermissions] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isPlaybackAllowed, setIsPlaybackAllowed] = useState<boolean>(false)
+  const [muted, setMuted] = useState<boolean>(false)
+  const [soundPosition, setSoundPosition] = useState<number>(0)
+  const [soundDuration, setSoundDuration] = useState<number>(0)
+  const [recordingDuration, setRecordingDuration] = useState<number>(0)
+  const [shouldPlay, setShouldPlay] = useState<boolean>(false)
+  const [isPlaying, setIsPlaying] = useState<boolean>(false)
+  const [isRecording, setIsRecording] = useState<boolean>(false)
+  const [fontLoaded, setFontLoaded] = useState<boolean>(false)
+  const { apr } = useContext(APRContext)
+  const navigation = useNavigation()
 
-type State = {
-  haveRecordingPermissions: boolean;
-  isLoading: boolean;
-  isPlaybackAllowed: boolean;
-  muted: boolean;
-  soundPosition: number | null;
-  soundDuration: number | null;
-  recordingDuration: number | null;
-  shouldPlay: boolean;
-  isPlaying: boolean;
-  isRecording: boolean;
-  fontLoaded: boolean;
-  shouldCorrectPitch: boolean;
-  volume: number;
-  rate: number; 
-};
-
-export default class PlayerRecorder extends React.Component<Props, State> {
-  private recording: Audio.Recording | null;
-  private sound: Audio.Sound | null;
-  // private isSeeking: boolean;
-  // private shouldPlayAtEndOfSeek: boolean;
-  private readonly recordingSettings: Audio.RecordingOptions;
-
-  constructor(props: Props) {
-    super(props);
-    this.recording = null;
-    this.sound = null;
-    // this.isSeeking = false;
-    // this.shouldPlayAtEndOfSeek = false;
-    this.state = {
-      haveRecordingPermissions: false,
-      isLoading: false,
-      isPlaybackAllowed: false,
-      muted: false,
-      soundPosition: null,
-      soundDuration: null,
-      recordingDuration: null,
-      shouldPlay: false,
-      isPlaying: false,
-      isRecording: false,
-      fontLoaded: false,
-      shouldCorrectPitch: true,
-      volume: 1.0,
-      rate: 1.0,
-    };
-    this.recordingSettings = Audio.RECORDING_OPTIONS_PRESET_LOW_QUALITY;
-
-  }
   // quando o componente for carregado...
-  componentDidMount() {
+  useEffect(() => {
     (async () => {
       await Font.loadAsync({
         "cutive-mono-regular": require("../assets/fonts/CutiveMono-Regular.ttf"),
       });
-      this.setState({ fontLoaded: true });
+      setFontLoaded(true)
     })();
-    this._askForPermissions();
-  }
+    _askForPermissions();
+  })
   // pedir por permissões
-  private _askForPermissions = async () => {
+  const _askForPermissions = async () => {
     const response = await Audio.requestPermissionsAsync();
-    this.setState({
-      haveRecordingPermissions: response.status === "granted",
-    });
+    setHaveRecordingPermissions(true)
   };
   // atualizar tela para o status do som
-  private _updateScreenForSoundStatus = (status: AVPlaybackStatus) => {
+  const _updateScreenForSoundStatus = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
-      this.setState({
-        soundDuration: status.durationMillis ?? null,
-        soundPosition: status.positionMillis,
-        shouldPlay: status.shouldPlay,
-        isPlaying: status.isPlaying,
-        rate: status.rate,
-        muted: status.isMuted,
-        volume: status.volume,
-        shouldCorrectPitch: status.shouldCorrectPitch,
-        isPlaybackAllowed: true,
-      });
+      setSoundDuration(Number(status.durationMillis))
+      setSoundPosition(status.positionMillis)
+      setShouldPlay(status.shouldPlay)
+      setIsPlaying(status.isPlaying)
+      setMuted(status.isMuted)
+      setIsPlaybackAllowed(true)
     } else {
-      this.setState({
-        soundDuration: null,
-        soundPosition: null,
-        isPlaybackAllowed: false,
-      });
+      setSoundDuration(0)
+      setSoundPosition(0)
+      setIsPlaybackAllowed(false)
       if (status.error) {
         console.log(`FATAL PLAYER ERROR: ${status.error}`);
       }
     }
   };
   // atualizar status na tela para a gravação
-  private _updateScreenForRecordingStatus = (status: Audio.RecordingStatus) => {
+  const _updateScreenForRecordingStatus = (status: Audio.RecordingStatus) => {
     if (status.canRecord) {
-      this.setState({
-        isRecording: status.isRecording,
-        recordingDuration: status.durationMillis,
-      });
+      setIsRecording(status.isRecording)
+      setRecordingDuration(status.durationMillis)
     } else if (status.isDoneRecording) {
-      this.setState({
-        isRecording: false,
-        recordingDuration: status.durationMillis,
-      });
-      if (!this.state.isLoading) {
-        this._stopRecordingAndEnablePlayback();
+      setIsRecording(false)
+      setRecordingDuration(status.durationMillis)
+      if (!isLoading) {
+        _stopRecordingAndEnablePlayback();
       }
     }
   };
   // Parar playback e começar a gravar
-  private async _stopPlaybackAndBeginRecording() {
-    this.setState({
-      isLoading: true,
-    });
-    if (this.sound !== null) {
-      await this.sound.unloadAsync();
-      this.sound.setOnPlaybackStatusUpdate(null);
-      this.sound = null;
+  async function _stopPlaybackAndBeginRecording() {
+    setIsLoading(true)
+    if (sound !== null) {
+      await sound.unloadAsync();
+      sound.setOnPlaybackStatusUpdate(null);
+      sound = null;
     }
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: true,
@@ -148,31 +103,27 @@ export default class PlayerRecorder extends React.Component<Props, State> {
       playThroughEarpieceAndroid: false,
       staysActiveInBackground: true,
     });
-    if (this.recording !== null) {
-      this.recording.setOnRecordingStatusUpdate(null);
-      this.recording = null;
+    let recording = new Audio.Recording();
+    if (recording !== null) {
+      recording.setOnRecordingStatusUpdate(null);
+      // recording = null;
     }
 
-    const recording = new Audio.Recording();
-    await recording.prepareToRecordAsync(this.recordingSettings);
-    recording.setOnRecordingStatusUpdate(this._updateScreenForRecordingStatus);
+    await recording.prepareToRecordAsync(recordingSettings);
+    recording.setOnRecordingStatusUpdate(_updateScreenForRecordingStatus);
 
-    this.recording = recording;
-    await this.recording.startAsync(); // Will call this._updateScreenForRecordingStatus to update the screen.
-    this.setState({
-      isLoading: false,
-    });
+    recording = recording;
+    await recording.startAsync(); // Will call _updateScreenForRecordingStatus to update the screen.
+    setIsLoading(false)
   }
   // Parar de gravar e ativar playback
-  private async _stopRecordingAndEnablePlayback() {
-    this.setState({
-      isLoading: true,
-    });
-    if (!this.recording) {
+  async function _stopRecordingAndEnablePlayback() {
+    setIsLoading(true)
+    if (!recording) {
       return;
     }
     try {
-      await this.recording.stopAndUnloadAsync();
+      await recording.stopAndUnloadAsync();
     } catch (error) {
       /* No android, chamar esta funcão antes da captura de qualquer dado
       pode causar um erro onde dirá que nenhum dado foi capturado pois
@@ -185,12 +136,10 @@ export default class PlayerRecorder extends React.Component<Props, State> {
       } else {
         console.log("STOP ERROR: ", error.code, error.name, error.message);
       }
-      this.setState({
-        isLoading: false,
-      });
+      setIsLoading(false)
       return;
     }
-    const info = await FileSystem.getInfoAsync(this.recording.getURI() || "");
+    const info = await FileSystem.getInfoAsync(recording.getURI() || "");
     info.uri
     console.log(`FILE INFO: ${JSON.stringify(info)}`);
     await Audio.setAudioModeAsync({
@@ -202,118 +151,52 @@ export default class PlayerRecorder extends React.Component<Props, State> {
       playThroughEarpieceAndroid: false,
       staysActiveInBackground: true,
     });
-    const { sound } = await this.recording.createNewLoadedSoundAsync(
+    let { sound } = await recording.createNewLoadedSoundAsync(
       {
         isLooping: true,
-        isMuted: this.state.muted,
-        volume: this.state.volume,
-        rate: this.state.rate,
-        shouldCorrectPitch: this.state.shouldCorrectPitch,
+        isMuted: muted,
       },
-      this._updateScreenForSoundStatus
+      _updateScreenForSoundStatus
     );
-    this.sound = sound;
+    sound = sound;
     const path = FileSystem.documentDirectory + 'audio/'
     const dirInfo = await FileSystem.getInfoAsync(path)
     dirInfo.exists ? undefined : await FileSystem.makeDirectoryAsync(path, { intermediates: true }).then(() => console.log('diretorio de audio criado com sucesso'))
+    setIsLoading(false)
+  }
+  async function _uploadSoundToStorage() {
+    const info = await FileSystem.getInfoAsync(recording?.getURI() || "");
     const response = await fetch(info.uri)
     const blob = await response.blob()
     const storage = fb.storage()
-    await storage.ref().child(`/audio-de-apr/lala/som.mpeg`).put(blob, { contentType: 'audio/mpeg' })
-    // await FileSystem.downloadAsync(info.uri, FileSystem.documentDirectory + `${new Date().getTime()}.m4a`)
-    this.setState({
-      isLoading: false,
-    });
+    const db = fb.database()
+    await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).put(blob, { contentType: 'audio/mpeg' })
+    const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).getDownloadURL()
+    const APRData: APRProps = {
+      ContratoId: Number(apr?.ContratoId),
+      ProcessoId: Number(apr?.ProcessoId),
+      UsuarioId: Number(apr?.UsuarioId),
+      EquipeId: apr?.EquipeId,
+      OT_OS_SI: Number(apr?.OT_OS_SI),
+      DataHoraAPR: String(apr?.DataHoraAPR),
+      CoordenadaX: Number(apr?.CoordenadaX),
+      CoordenadaY: Number(apr?.CoordenadaY),
+      id: Number(apr?.id),
+      hiperlink: audioLink
+    }
+    await db.ref(`/APR/${APRData.id}`).set(APRData)
+    navigation.navigate('ListaDeAPR')
   }
   // quando o botao de gravar for pressionado
-  private _onRecordPressed = () => {
-    if (this.state.isRecording) {
-      this._stopRecordingAndEnablePlayback();
+  const _onRecordPressed = () => {
+    if (isRecording) {
+      _stopRecordingAndEnablePlayback();
     } else {
-      this._stopPlaybackAndBeginRecording();
+      _stopPlaybackAndBeginRecording();
     }
   };
-  // quando o botao de pausa/play for pressionado
-  // private _onPlayPausePressed = () => {
-  //   if (this.sound != null) {
-  //     if (this.state.isPlaying) {
-  //       this.sound.pauseAsync();
-  //     } else {
-  //       this.sound.playAsync();
-  //     }
-  //   }
-  // };
-  // // quando o stop for pressionado
-  // private _onStopPressed = () => {
-  //   if (this.sound != null) {
-  //     this.sound.stopAsync();
-  //   }
-  // };
-  // // quando o mute for pressionado
-  // private _onMutePressed = () => {
-  //   if (this.sound != null) {
-  //     this.sound.setIsMutedAsync(!this.state.muted);
-  //   }
-  // };
-  // quando ajustar o volume
-  // private _onVolumeSliderValueChange = (value: number) => {
-  //   if (this.sound != null) {
-  //     this.sound.setVolumeAsync(value);
-  //   }
-  // };
-  // // setar a velocidade do audio
-  // private _trySetRate = async (rate: number, shouldCorrectPitch: boolean): Promise<void> => {
-  //   if (this.sound != null) {
-  //     try {
-  //       await this.sound.setRateAsync(rate, shouldCorrectPitch);
-  //     } catch (error) {
-  //       console.log(error)
-  //       // Rate changing could not be performed, possibly because the client's Android API is too old.
-  //     }
-  //   }
-  // };
-  // colocando a velocidade no maximo
-  // private _onRateSliderSlidingComplete = async (value: number) => {
-  //   this._trySetRate(value * RATE_SCALE, this.state.shouldCorrectPitch);
-  // };
-  // // se o botao de correção de tonalidade for pressionado
-  // private _onPitchCorrectionPressed = () => {
-  //   this._trySetRate(this.state.rate, !this.state.shouldCorrectPitch);
-  // };
-  // // quando o slider mudar o valor manualmente
-  // private _onSeekSliderValueChange = (value: number) => {
-  //   if (this.sound != null && !this.isSeeking) {
-  //     this.isSeeking = true;
-  //     this.shouldPlayAtEndOfSeek = this.state.shouldPlay;
-  //     this.sound.pauseAsync();
-  //   }
-  // };
-  // quando o slide de audio chegar ao fim
-  // private _onSeekSliderSlidingComplete = async (value: number) => {
-  //   if (this.sound != null) {
-  //     this.isSeeking = false;
-  //     const seekPosition = value * (this.state.soundDuration || 0);
-  //     if (this.shouldPlayAtEndOfSeek) {
-  //       // this.sound.playFromPositionAsync(seekPosition);
-  //       this.sound.pauseAsync()
-  //     } else {
-  //       this.sound.setPositionAsync(seekPosition);
-  //     }
-  //   }
-  // };
-  // pegar a posição do slider
-  // private _getSeekSliderPosition() {
-  //   if (
-  //     this.sound != null &&
-  //     this.state.soundPosition != null &&
-  //     this.state.soundDuration != null
-  //   ) {
-  //     return this.state.soundPosition / this.state.soundDuration;
-  //   }
-  //   return 0;
-  // }
-  // pegar o tempo do audio
-  private _getMMSSFromMillis(millis: number) {
+  
+  const _getMMSSFromMillis = (millis: number) => {
     const totalSeconds = millis / 1000;
     const seconds = Math.floor(totalSeconds % 60);
     const minutes = Math.floor(totalSeconds / 60);
@@ -327,219 +210,121 @@ export default class PlayerRecorder extends React.Component<Props, State> {
     };
     return padWithZero(minutes) + ":" + padWithZero(seconds);
   }
-  // mostrar o tempo atual do audio / tempo do audio completo
-  // private _getPlaybackTimestamp() {
-  //   if (
-  //     this.sound != null &&
-  //     this.state.soundPosition != null &&
-  //     this.state.soundDuration != null
-  //   ) {
-  //     return `${this._getMMSSFromMillis(
-  //       this.state.soundPosition
-  //     )} / ${this._getMMSSFromMillis(this.state.soundDuration)}`;
-  //   }
-  //   return "";
-  // }
-  // pegar o tempo de gravação
-  private _getRecordingTimestamp() {
-    if (this.state.recordingDuration != null) {
-      return `${this._getMMSSFromMillis(this.state.recordingDuration)}`;
+
+  const _getRecordingTimestamp = () => {
+    if (recordingDuration != null) {
+      return `${_getMMSSFromMillis(recordingDuration)}`;
     }
-    return `${this._getMMSSFromMillis(0)}`;
+    return `${_getMMSSFromMillis(0)}`;
   }
 
-  render() {
-    if (!this.state.fontLoaded) {
-      return <View style={styles.emptyContainer} />;
-    }
-    // senão tiver permissão para gravar o audio
-    if (!this.state.haveRecordingPermissions) {
-      return (
-        <View style={styles.container}>
-          <View />
-          <Text
-            style={[
-              styles.noPermissionsText,
-              { fontFamily: "cutive-mono-regular" },
-            ]}
-          >
-            You must enable audio recording permissions in order to use this
-            app.
-          </Text>
-          <View />
-        </View>
-      );
-    }
-
+  // render() {
+  if (!fontLoaded) {
+    return <View style={styles.emptyContainer} />;
+  }
+  // senão tiver permissão para gravar o audio
+  if (!haveRecordingPermissions) {
     return (
       <View style={styles.container}>
-        <View
+        <View />
+        <Text
           style={[
-            styles.halfScreenContainer,
-            {
-              opacity: this.state.isLoading ? DISABLED_OPACITY : 1.0,
-            },
+            styles.noPermissionsText,
+            { fontFamily: "cutive-mono-regular" },
           ]}
         >
-          <View />
-            {/* <Text>Aperte aqui para começar a gravar.</Text> */}
-          <View style={styles.recordingContainer}>
-            <View />
-            <TouchableHighlight
-              underlayColor={BACKGROUND_COLOR}
-              style={styles.wrapper}
-              onPress={this._onRecordPressed}
-              disabled={this.state.isLoading}
-            >
-              <Image style={styles.image} source={!this.state.isRecording ? Icons.RECORD_BUTTON.module : Icons.STOP_BUTTON.module} />
-            </TouchableHighlight>
-            <View style={styles.recordingDataContainer}>
-              <View />
-              <Text
-                style={[styles.liveText, { fontFamily: "cutive-mono-regular" }]}
-              >
-                {this.state.isRecording ? "LIVE" : ""}
-              </Text>
-              <View style={styles.recordingDataRowContainer}>
-                <Image
-                  style={[
-                    styles.image,
-                    { opacity: this.state.isRecording ? 1.0 : 0.0 },
-                  ]}
-                  source={Icons.RECORDING.module}
-                />
-                <Text
-                  style={[
-                    styles.recordingTimestamp,
-                    { fontFamily: "cutive-mono-regular" },
-                  ]}
-                >
-                  {this._getRecordingTimestamp()}
-                </Text>
-              </View>
-              <View />
-            </View>
-            <View />
-          </View>
-          <View />
-        </View>
-        <View
-          style={[
-            styles.halfScreenContainer,
-            {
-              opacity:
-                !this.state.isPlaybackAllowed || this.state.isLoading
-                  ? DISABLED_OPACITY
-                  : 1.0,
-            },
-          ]}
-        >
-          <View />
-          {/* <View style={styles.playbackContainer}>
-            <Slider
-              style={styles.playbackSlider}
-              trackImage={Icons.TRACK_1.module}
-              thumbImage={Icons.THUMB_1.module}
-              value={this._getSeekSliderPosition()}
-              onValueChange={this._onSeekSliderValueChange}
-              onSlidingComplete={this._onSeekSliderSlidingComplete}
-              disabled={!this.state.isPlaybackAllowed || this.state.isLoading}
-            />
-            <Text
-              style={[
-                styles.playbackTimestamp,
-                { fontFamily: "cutive-mono-regular" },
-              ]}
-            >
-              {this._getPlaybackTimestamp()}
-            </Text>
-          </View> */}
-          <View
-            style={[styles.buttonsContainerBase, styles.buttonsContainerTopRow]}
-          >
-            {/* <View style={styles.volumeContainer}>
-              <TouchableHighlight
-                underlayColor={BACKGROUND_COLOR}
-                style={styles.wrapper}
-                onPress={this._onMutePressed}
-                disabled={!this.state.isPlaybackAllowed || this.state.isLoading}
-              >
-                <Image
-                  style={styles.image}
-                  source={
-                    this.state.muted
-                      ? Icons.MUTED_BUTTON.module
-                      : Icons.UNMUTED_BUTTON.module
-                  }
-                />
-              </TouchableHighlight>
-              <Slider
-                style={styles.volumeSlider}
-                trackImage={Icons.TRACK_1.module}
-                thumbImage={Icons.THUMB_2.module}
-                value={1}
-                onValueChange={this._onVolumeSliderValueChange}
-                disabled={!this.state.isPlaybackAllowed || this.state.isLoading}
-              />
-            </View> */}
-            <View style={styles.playStopContainer}>
-              {/* <TouchableHighlight
-                underlayColor={BACKGROUND_COLOR}
-                style={styles.wrapper}
-                onPress={this._onPlayPausePressed}
-                disabled={!this.state.isPlaybackAllowed || this.state.isLoading}
-              >
-                <Image
-                  style={styles.image}
-                  source={
-                    this.state.isPlaying
-                      ? Icons.PAUSE_BUTTON.module
-                      : Icons.PLAY_BUTTON.module
-                  }
-                />
-              </TouchableHighlight> */}
-              {/* <TouchableHighlight
-                underlayColor={BACKGROUND_COLOR}
-                style={styles.wrapper}
-                onPress={this._onStopPressed}
-                disabled={!this.state.isPlaybackAllowed || this.state.isLoading}
-              >
-                <Image style={styles.image} source={Icons.STOP_BUTTON.module} />
-              </TouchableHighlight> */}
-            </View>
-            <View />
-          </View>
-          <View
-            style={[
-              styles.buttonsContainerBase,
-              styles.buttonsContainerBottomRow,
-            ]}
-          >
-            {/* <Text style={styles.timestamp}>Velocidade:</Text>
-            <Slider
-              style={styles.rateSlider}
-              trackImage={Icons.TRACK_1.module}
-              thumbImage={Icons.THUMB_1.module}
-              value={this.state.rate / RATE_SCALE}
-              onSlidingComplete={this._onRateSliderSlidingComplete}
-              disabled={!this.state.isPlaybackAllowed || this.state.isLoading}
-            />
-            <TouchableHighlight
-              underlayColor={BACKGROUND_COLOR}
-              style={styles.wrapper}
-              onPress={this._onPitchCorrectionPressed}
-              disabled={!this.state.isPlaybackAllowed || this.state.isLoading}
-            >
-              <Text style={[{ fontFamily: "cutive-mono-regular" }]}>
-                PC: {this.state.shouldCorrectPitch ? "sim" : "não"}
-              </Text>
-            </TouchableHighlight> */}
-          </View>
-          <View />
-        </View>
+          You must enable audio recording permissions in order to use this
+          app.
+        </Text>
+        <View />
       </View>
     );
   }
+
+  return (
+    <View style={styles.container}>
+      <View
+        style={[
+          styles.halfScreenContainer,
+          {
+            opacity: isLoading ? DISABLED_OPACITY : 1.0,
+          },
+        ]}
+      >
+        <View />
+        {/* <Text>Aperte aqui para começar a gravar.</Text> */}
+        <View style={styles.recordingContainer}>
+          <View />
+          <TouchableHighlight
+            underlayColor={BACKGROUND_COLOR}
+            style={styles.wrapper}
+            onPress={_onRecordPressed}
+            disabled={isLoading}
+          >
+            <Image style={styles.image} source={!isRecording ? Icons.RECORD_BUTTON.module : Icons.STOP_BUTTON.module} />
+          </TouchableHighlight>
+          <View style={styles.recordingDataContainer}>
+            <View />
+            <Text
+              style={[styles.liveText, { fontFamily: "cutive-mono-regular" }]}
+            >
+              {isRecording ? "LIVE" : ""}
+            </Text>
+            <View style={styles.recordingDataRowContainer}>
+              <Image
+                style={[
+                  styles.image,
+                  { opacity: isRecording ? 1.0 : 0.0 },
+                ]}
+                source={Icons.RECORDING.module}
+              />
+              <Text
+                style={[
+                  styles.recordingTimestamp,
+                  { fontFamily: "cutive-mono-regular" },
+                ]}
+              >
+                {_getRecordingTimestamp()}
+              </Text>
+            </View>
+            <View />
+          </View>
+          <View />
+        </View>
+        <Botao texto="Enviar" onPress={() => _uploadSoundToStorage().then(() => alert('feito'))} />
+        <View />
+      </View>
+      <View
+        style={[
+          styles.halfScreenContainer,
+          {
+            opacity:
+              !isPlaybackAllowed || isLoading
+                ? DISABLED_OPACITY
+                : 1.0,
+          },
+        ]}
+      >
+        <View />
+        <View
+          style={[styles.buttonsContainerBase, styles.buttonsContainerTopRow]}
+        >
+          <View style={styles.playStopContainer}>
+          </View>
+          <View />
+        </View>
+        <View
+          style={[
+            styles.buttonsContainerBase,
+            styles.buttonsContainerBottomRow,
+          ]}
+        >
+        </View>
+        <View />
+      </View>
+    </View>
+  );
+  // }
 }
 
 const styles = StyleSheet.create({
