@@ -6,13 +6,13 @@ export default async function atualizacoes() {
     try {
         const path = fs.documentDirectory + 'json/'
         const fileUri = (jsonId: string) => path + `${jsonId}.json`
-        if (!await fs.readAsStringAsync(fileUri('perguntas-de-seguranca'))
-            || !await fs.readAsStringAsync(fileUri('numero-de-inspecao'))
-            || !await fs.readAsStringAsync(fileUri('colaboradores'))
-            || !await fs.readAsStringAsync(fileUri('processos'))
-            || !await fs.readAsStringAsync(fileUri('contratos'))
-            || !await fs.readAsStringAsync(fileUri('inspecoes'))
-            || !await fs.readAsStringAsync(fileUri('APRs'))
+        if (!!await fs.readAsStringAsync(fileUri('perguntas-de-seguranca'))
+            || !!await fs.readAsStringAsync(fileUri('numero-de-inspecao'))
+            || !!await fs.readAsStringAsync(fileUri('colaboradores'))
+            || !!await fs.readAsStringAsync(fileUri('processos'))
+            || !!await fs.readAsStringAsync(fileUri('contratos'))
+            || !!await fs.readAsStringAsync(fileUri('inspecoes'))
+            || !!await fs.readAsStringAsync(fileUri('APRs'))
         ) {
             const db = fb.database()
             const snapPerguntasDeSeguranca = await db.ref('/perguntas-de-seguranca').once('value')
@@ -38,7 +38,7 @@ export default async function atualizacoes() {
                 await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(shotColaboradores)).then(() => console.log('colaboradores obtidos com sucesso.'))
                 await fs.writeAsStringAsync(fileUri('processos'), JSON.stringify(shotProcessos)).then(() => console.log('processos obtidos com sucesso.'))
                 await fs.writeAsStringAsync(fileUri('contratos'), JSON.stringify(shotContratos)).then(() => console.log('contratos obtidos com sucesso.'))
-                await fs.writeAsStringAsync(fileUri('APRs'), JSON.stringify(shotAPRs)).then(() => console.log('APRs obtidos com sucesso.'))
+                await fs.writeAsStringAsync(fileUri('APRs'), JSON.stringify(shotAPRs)).then(() => console.log('APRs obtidos com sucesso.')).catch(() => console.log('não foi possivel buscar as APR´s'))
                 await fs.writeAsStringAsync(fileUri('inspecoes'), JSON.stringify(shotInspecoes)).then(() => { console.log('inspeções obtidos com sucesso.'); alert('Todos os dados foram baixados com sucesso.') })
             }
             getMunicipios()

@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 
 export interface itemInspecaoProps extends TouchableOpacityProps {
     DataEHoraDaInspecao: string | undefined,
-    NumeroDeInspecao: number | undefined,
+    NumeroDeInspecao?: number | undefined,
     OT_OS_SI: number | null | undefined,
     Inspetor: string | null | undefined,
     ContratoId: number | string | undefined,

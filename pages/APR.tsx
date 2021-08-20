@@ -23,10 +23,11 @@ const LIVE_COLOR = "#FF0000";
 const DISABLED_OPACITY = 0.3;
 
 export default function PlayerRecorder() {
-  let recording: Audio.Recording | null;
-  let sound: Audio.Sound | null;
+  // let recording: Audio.Recording | null;
   const recordingSettings: Audio.RecordingOptions = Audio.RECORDING_OPTIONS_PRESET_LOW_QUALITY;
   const [haveRecordingPermissions, setHaveRecordingPermissions] = useState<boolean>(false)
+  const [recording, setRecording] = useState<Audio.Recording | null>(null)
+  const [sound, setSound] = useState<Audio.Sound | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isPlaybackAllowed, setIsPlaybackAllowed] = useState<boolean>(false)
   const [muted, setMuted] = useState<boolean>(false)
@@ -92,7 +93,7 @@ export default function PlayerRecorder() {
     if (sound !== null) {
       await sound.unloadAsync();
       sound.setOnPlaybackStatusUpdate(null);
-      sound = null;
+      setSound(null)
     }
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: true,
@@ -103,21 +104,22 @@ export default function PlayerRecorder() {
       playThroughEarpieceAndroid: false,
       staysActiveInBackground: true,
     });
-    let recording = new Audio.Recording();
+    const recording = new Audio.Recording();
     if (recording !== null) {
       recording.setOnRecordingStatusUpdate(null);
-      // recording = null;
+      setRecording(null)
     }
 
     await recording.prepareToRecordAsync(recordingSettings);
     recording.setOnRecordingStatusUpdate(_updateScreenForRecordingStatus);
 
-    recording = recording;
+    setRecording(recording)
     await recording.startAsync(); // Will call _updateScreenForRecordingStatus to update the screen.
     setIsLoading(false)
   }
   // Parar de gravar e ativar playback
   async function _stopRecordingAndEnablePlayback() {
+    console.log(recording)
     setIsLoading(true)
     if (!recording) {
       return;
@@ -163,6 +165,7 @@ export default function PlayerRecorder() {
     const dirInfo = await FileSystem.getInfoAsync(path)
     dirInfo.exists ? undefined : await FileSystem.makeDirectoryAsync(path, { intermediates: true }).then(() => console.log('diretorio de audio criado com sucesso'))
     setIsLoading(false)
+    setSound(null)
   }
   async function _uploadSoundToStorage() {
     const info = await FileSystem.getInfoAsync(recording?.getURI() || "");

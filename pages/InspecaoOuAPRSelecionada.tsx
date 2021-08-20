@@ -8,8 +8,9 @@ export default function InspecaoSelecionada() {
     const db = fb.database()
     useEffect(() => {
         async function getInspecoes() {
-            const snap = await db.ref('/inspecoes').once('value')
-            const shot = snap.exportVal()
+            const snapInspecoes = await db.ref(`/inspecoes/${routes.params?.key}`).once('value')
+            const snapAPRs = await db.ref(`/APR/${routes.params?.key}`).once('value')
+            const shot = snapInspecoes.exportVal() ? snapInspecoes.exportVal() : snapAPRs.exportVal()
             const keys = Object.keys(shot)
             keys.forEach(key => {
                 console.log(Number(key) == Number(routes.params?.key) ? shot[key] : '')
@@ -20,7 +21,7 @@ export default function InspecaoSelecionada() {
 
     return (
         <View style={style.container}>
-            <Text>InspecaoSelecionada.tsx</Text>
+            <Text>InspecaoOuAPRSelecionada.tsx</Text>
             <Text>id: {routes.params?.key}</Text>
         </View>
     )

@@ -30,9 +30,9 @@ export default function Inspecao() {
     async function getInspecoes() {
       const snap = await db.ref('/inspecoes').once('value')
       const shot = snap.exportVal()
-      const fsInspecoes = (await netinfo.fetch()).isConnected ? shot : JSON.parse(await fs.readAsStringAsync(fileUri('inspecoes')))
+      const inspecoesRecebidas = (await netinfo.fetch()).isConnected ? shot : JSON.parse(await fs.readAsStringAsync(fileUri('inspecoes')))
       const arrayDeTratamento: Array<InspecaoContextData> = [];
-      inspecoesKeys = Object.keys(fsInspecoes);
+      inspecoesKeys = Object.keys(inspecoesRecebidas);
 
       const fsContratos = JSON.parse(await fs.readAsStringAsync(fileUri('contratos')))
       const arrayDeContratos: Array<any> = [];
@@ -49,7 +49,7 @@ export default function Inspecao() {
       });
 
       inspecoesKeys.forEach(key => {
-        var tal = fsInspecoes[key];
+        var tal = inspecoesRecebidas[key];
         if (tal.InspetorId === user?.id) {
           var contratoEncontrado = arrayDeContratos.find(contrato => {
             var contratoEncontrado = Number(contrato.id) === Number(tal.ContratoId);
@@ -71,6 +71,7 @@ export default function Inspecao() {
   return (
     <SafeAreaView style={style.container}>
       <ScrollView>
+      <Text>Lista de Inspeções</Text>
         {inspecoes.length > 0 ? inspecoes?.map(inspecao => {
           return (
             <ItemInspecao

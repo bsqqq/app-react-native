@@ -1,13 +1,90 @@
-import React, { } from 'react'
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native'
+import React, { useEffect, useState, useContext } from 'react'
+import { Text, View, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native'
 import { useNavigation } from "@react-navigation/native";
-
+import ItemAPR from '../components/itemInspecao'
+import netinfo from '@react-native-community/netinfo'
+import { APRProps } from './preAPR'
+import fb from '../services/firebase'
+import * as fs from 'expo-file-system'
+import AuthContext from './../contexts/auth';
 
 export default function ListaDeAPR() {
+    const [aprs, setAprs] = useState<Array<APRProps>>([])
+    var path = fs.documentDirectory + 'json/'
+    const fileUri = (jsonId: string) => path + `${jsonId}.json`
+    const { user } = useContext(AuthContext)
+    useEffect(() => {
+        async function getAPRInfo() {
+            try {
+                const arrayDeAPRs: Array<APRProps> = []
+                const db = fb.database()
+                const snap = await db.ref('/APR').once('value')
+                const shot = snap.exportVal()
+                const APRsRecebidas = (await netinfo.fetch()).isConnected ? shot : JSON.parse(await fs.readAsStringAsync(fileUri('APRs')))
+                const aprKeys: string[] = Object.keys(APRsRecebidas)
+                var contratosKeys: string[];
+                var processosKeys: string[];
+
+                const fsContratos = JSON.parse(await fs.readAsStringAsync(fileUri('contratos')))
+                const arrayDeContratos: Array<any> = [];
+                contratosKeys = Object.keys(fsContratos);
+                contratosKeys.forEach(key => {
+                    arrayDeContratos.push(fsContratos[key]);
+                });
+
+                const fsProcessos = JSON.parse(await fs.readAsStringAsync(fileUri('processos')))
+                const arrayDeProcessos: Array<any> = [];
+                processosKeys = Object.keys(fsProcessos);
+                processosKeys.forEach(key => {
+                    arrayDeProcessos.push(fsProcessos[key]);
+                });
+
+                aprKeys.forEach(key => {
+                    var apr = APRsRecebidas[key]
+                    if (apr.UsuarioId === user.id) {
+                        var contratoEncontrado = arrayDeContratos.find(contrato => {
+                            var contratoEncontrado = Number(contrato.id) === Number(apr.ContratoId);
+                            return contratoEncontrado;
+                        });
+                        var ProcessoEncontrado = arrayDeProcessos.find(processo => {
+                            var processoEncontrado = Number(processo.id) === Number(apr.ProcessoId);
+                            return processoEncontrado;
+                        });
+                        apr.ContratoId = contratoEncontrado ? contratoEncontrado.nome : "-";
+                        apr.ProcessoId = ProcessoEncontrado ? ProcessoEncontrado.nome : "-";
+                        arrayDeAPRs.push(apr);
+                    }
+                })
+                setAprs(arrayDeAPRs)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        getAPRInfo()
+    }, [])
     const navigation = useNavigation()
     return (
-        <View style={style.container}>
-            <Text>ListaDeAPR.tsx</Text>
+        <SafeAreaView style={style.container}>
+            <ScrollView>
+                <Text>Lista de APR</Text>
+                {aprs.length > 0 ? aprs.map(item => {
+                    return (
+                        <ItemAPR
+                            DataEHoraDaInspecao={item.DataHoraAPR}
+                            // NumeroDeInspecao={item.NumeroDeInspecao}
+                            OT_OS_SI={item.OT_OS_SI}
+                            Inspetor={null}
+                            ContratoId={item.ContratoId}
+                            ProcessoId={item.ProcessoId}
+                            key={item.id}
+                            id={item.id}
+                        />
+                    )
+                }) : <Text style={{
+                    alignItems: "center",
+                    justifyContent: "center"
+                }}> Não foram encontrados inspeções para este usuário. </Text>}
+            </ScrollView>
             <View style={style.buttonPosition}>
                 <TouchableOpacity
                     style={style.button}
@@ -16,7 +93,7 @@ export default function ListaDeAPR() {
                     <Text style={style.buttonText}>+</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -34,16 +111,16 @@ const style = StyleSheet.create({
         borderRadius: 40,
         height: 76,
         width: 76,
-      },
-      buttonText: {
+    },
+    buttonText: {
         color: "white",
         fontSize: 35,
         paddingHorizontal: 21,
-      },
-      buttonPosition: {
+    },
+    buttonPosition: {
         position: "absolute",
         alignSelf: "flex-end",
         bottom: 20,
         right: 20,
-      },
+    },
 })

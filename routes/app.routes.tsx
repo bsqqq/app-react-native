@@ -7,7 +7,7 @@ import Inspecao from '../pages/Inspecao';
 import NovaInspecao from '../pages/NovaInspecao';
 import TelaDePerguntas from '../pages/telaDePerguntas'
 import NaoConformidades from './../pages/NaoConformidades';
-import InspecaoSelecionada from '../pages/InspecaoSelecionada';
+import InspecaoOuAPRSelecionada from '../pages/InspecaoOuAPRSelecionada';
 import Checklist from '../pages/Checklist';
 import preAPR from '../pages/preAPR';
 import ListaDeAPR from '../pages/ListaDeAPR';
@@ -60,7 +60,7 @@ const AppRoutes: React.FC = () => (
 
         <AppStack.Screen
             name="InspecaoSelecionada"
-            component={InspecaoSelecionada}
+            component={InspecaoOuAPRSelecionada}
         />
 
         <AppStack.Screen
