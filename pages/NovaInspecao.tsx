@@ -59,14 +59,14 @@ interface ColaboradoresProps {
 }
 
 export interface objetoDeInspecao {
-    id?: number | undefined,
+    id: number | undefined,
     NumeroDeInspecao: number | undefined,
     DataEHoraDaInspecao: string | undefined,
     OT_OS_SI: number | undefined,
-    MunicipioId: string | number | undefined,
-    Localidade: string | undefined,
-    CoordenadaX: string | number | undefined
-    CoordenadaY: string | number | undefined,
+    MunicipioId: number | undefined,
+    Localidade?: string | undefined,
+    CoordenadaX: number | undefined
+    CoordenadaY: number | undefined,
     Inspetor: string | undefined,
     InspetorId: number | undefined,
     Placa: string | undefined,
@@ -88,11 +88,11 @@ export default function NovaInspecao() {
     const [contratoVisible, setContratoVisible] = useState(false)
     const [processoVisible, setProcessoVisible] = useState(false)
     const [municipioId, setMunicipioId] = useState<number>()
-    const [contratoId, setContratoId] = useState<number>()
-    const [processoId, setProcessoId] = useState<number>()
-    const [localidade, setLocalidade] = useState<string>()
+    const [contratoId, setContratoId] = useState<number>(0)
+    const [processoId, setProcessoId] = useState<number>(0)
+    // const [localidade, setLocalidade] = useState<string>()
+    const [equipeId, setEquipeId] = useState<number[]>([])
     const [municipio, setMunicipio] = useState<string>()
-    const [equipeId, setEquipeId] = useState<number[]>()
     const [processo, setProcesso] = useState<string>()
     const [contrato, setContrato] = useState<string>()
     const [dataHora, setDataHora] = useState<string>()
@@ -102,8 +102,8 @@ export default function NovaInspecao() {
     const navigation = useNavigation()
     const db = fb.database()
     var colaboradores: ColaboradoresProps
-    var processos: ProcessosProps
     var contratos: ContratoProps = {}
+    var processos: ProcessosProps
     var municipios: any[]
 
     async function handleNewInspecao() {
@@ -118,7 +118,7 @@ export default function NovaInspecao() {
                 DataEHoraDaInspecao: dataHora,
                 OT_OS_SI: OtOsSi,
                 MunicipioId: municipioId,
-                Localidade: localidade,
+                // Localidade: localidade,
                 CoordenadaX: location?.coords.latitude,
                 CoordenadaY: location?.coords.longitude,
                 Inspetor: user?.name,
@@ -129,23 +129,21 @@ export default function NovaInspecao() {
                 ProcessoId: processoId
             }
             // garantir que todos os campos sejam preenchidos
-            if (
-                newInspecao?.Placa == undefined || newInspecao.Placa.length == 0
-                && newInspecao?.EquipeId == undefined || Number(newInspecao.EquipeId?.length) == 0
-                && newInspecao?.Localidade == undefined || Number(newInspecao.Localidade?.length) == 0
-                && newInspecao?.ContratoId == undefined || Number(newInspecao.ContratoId?.toString()) == 0
-                && newInspecao?.ProcessoId == undefined || Number(newInspecao.ProcessoId?.toString()) == 0
-                && newInspecao?.MunicipioId == undefined || Number(newInspecao.MunicipioId?.toString()) == 0
-                && newInspecao?.OT_OS_SI == undefined || Number(newInspecao.OT_OS_SI?.toString().length) == 0
-            ) {
-                alert('Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
-                console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
-            } else {
+            const keys = Object.keys(newInspecao)
+            let flag = keys.find(item => {
+                // retorna o primeiro item da newInspecao que estiver vazio
+                return !newInspecao[item]
+            })
+            if (!flag) {
                 setProcessoContratoIdContextData(Number(processoId), Number(contratoId))
                 setInspecaoIdContextData(Number(newInspecao.id))
                 setNewInspecao(JSON.stringify(newInspecao))
                 setEquipeIdContext(newInspecao?.EquipeId)
                 navigation.navigate('TelaDePerguntas')
+                return
+            } else {
+                alert(`Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?`)
+                console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
             }
         } catch (error) {
             console.log(error)
@@ -177,10 +175,10 @@ export default function NovaInspecao() {
 
         (async (): Promise<void> => {
             municipios = JSON.parse(await fs.readAsStringAsync(fileUri('municipios')))
-            setMunicipiosState(municipios)
             processos = JSON.parse(await fs.readAsStringAsync(fileUri('processos')))
-            setProcessosState(processos)
             contratos = JSON.parse(await fs.readAsStringAsync(fileUri('contratos')))
+            setMunicipiosState(municipios)
+            setProcessosState(processos)
             setContratosState(contratos)
         })()
     }, [])
@@ -255,12 +253,12 @@ export default function NovaInspecao() {
                             options={municipioFormatado}
                         />
 
-                        <Text style={styles.titulo}>Bairro / Localidade:</Text>
+                        {/* <Text style={styles.titulo}>Bairro / Localidade:</Text>
                         <TextInput
                             style={styles.input}
                             keyboardType='default'
                             onChangeText={value => setLocalidade(value)}
-                        />
+                        /> */}
 
                         <Text style={styles.titulo}>Placa do carro:</Text>
                         <TextInput

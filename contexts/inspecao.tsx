@@ -147,27 +147,28 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         await db.ref(`/respostas/${inspecaoId}`).set(arrDeRespostas)
         const fts: string = String(await AsyncStorage.getItem('@mais-parceria-app-fotos'))
         const arrayDeFotos: any[] = JSON.parse(fts)
-        const promises = arrayDeFotos.map(async (item: string, index: number) => {
-            const response = await fetch(item)
-            var blob = await response.blob();
-            await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
-            var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
-            var fotosDeInspecoes: fotoDeInspecaoProps = {
-                id: new Date().getTime() || 0 + index,
-                hiperlink,
-                descricao: descricao[index] || "",
-                inspecaoId,
-                // respostaId: arrNaoConformidadesIds.length < arrayDeFotos.length ?  : arrNaoConformidadesIds[index],
-                colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
-                prazoDeResolucao: prazoDasNaoConformidades[index] || "",
-            }
-            await db.ref(`/fotos-de-inspecao/${(fotosDeInspecoes.id || 0 + index)}`).set(fotosDeInspecoes)
-        })
+        if (arrayDeFotos.length > 0) {
+            const promises = arrayDeFotos.map(async (item: string, index: number) => {
+                const response = await fetch(item)
+                var blob = await response.blob();
+                await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
+                var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
+                var fotosDeInspecoes: fotoDeInspecaoProps = {
+                    id: new Date().getTime() || 0 + index,
+                    hiperlink,
+                    descricao: descricao[index] || "",
+                    inspecaoId,
+                    colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
+                    prazoDeResolucao: prazoDasNaoConformidades[index] || "",
+                }
+                await db.ref(`/fotos-de-inspecao/${(fotosDeInspecoes.id || 0 + index)}`).set(fotosDeInspecoes)
+                await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
+            })
+        }
         setColabId([])
         setPrazoDasNaoConformidades([])
         setDescricao([])
         setArrDeRespostas([])
-        await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
         fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
     }
 

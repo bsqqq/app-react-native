@@ -134,16 +134,6 @@ export default function preAPR() {
     })
 
     function newAPR() {
-        if (
-            Number(OtOsSi?.toString().length) == 0
-            || Number(contratoId?.toString().length) == 0
-            || Number(processoId?.toString().length) == 0
-            || equipeId.length == 0
-            || !user.id
-        ) {
-            alert("Algum dos campos acima não foram preenchidos, por favor verifique e tente novamente.")
-            return false
-        }
         const objetoDeAPR: APRProps = {
             id: new Date().getTime(),
             DataHoraAPR: String(dataHora),
@@ -155,9 +145,18 @@ export default function preAPR() {
             CoordenadaX: Number(location?.coords.latitude),
             CoordenadaY: Number(location?.coords.longitude)
         }
-        setNewAPRContext(objetoDeAPR)
-        navigation.navigate("APR")
-        return true
+        const keys = Object.keys(objetoDeAPR)
+        let flag = keys.find(item => {
+            return !objetoDeAPR[item]
+        })
+        if (!flag) {
+            setNewAPRContext(objetoDeAPR)
+            navigation.navigate("APR")
+            return true
+        } else {
+            alert("Algum dos campos acima não foram preenchidos, por favor verifique e tente novamente.")
+            return false
+        }
     }
 
     return (

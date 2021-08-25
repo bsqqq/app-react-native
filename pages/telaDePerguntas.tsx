@@ -165,19 +165,19 @@ const TelaDePerguntas: React.FC = () => {
         <View>
           {
             indicePerguntaAtual + 1 <= listaPerguntas.length
-              ? <Text style={{}}>Pergunta {indicePerguntaAtual + 1} de {listaPerguntas.length}:</Text>
+              ? <Text style={{fontSize: 20}}>Pergunta {indicePerguntaAtual + 1} de {listaPerguntas.length}:</Text>
               : undefined
           }
         </View>
-        <Text style={{ textAlign: 'center' }}>{proximaPergunta}</Text>
+        <Text style={{ textAlign: 'center', fontSize: 30 }}>{proximaPergunta}</Text>
       </View>
       <View style={style.container}>
         <View style={style.containerHorizontal}>
           <View style={style.buttonContainer}>
-            <Button title="Sim" onPress={() => handleNextQuestion('sim')} disabled={disabled} />
+            <Button title="Conforme" onPress={() => handleNextQuestion('sim')} disabled={disabled} />
           </View>
           <View style={style.buttonContainer}>
-            <Button title="Não" onPress={() => handleNextQuestion('nao')} disabled={disabled} />
+            <Button title="Não Conforme" onPress={() => handleNextQuestion('nao')} disabled={disabled} />
           </View>
           <View style={style.buttonContainer}>
             <Button title="N/A" onPress={() => handleNextQuestion('n/a')} disabled={disabled} />
@@ -202,7 +202,7 @@ const style = StyleSheet.create({
   },
   containerHorizontal: {
     flexDirection: 'row',
-    marginHorizontal: 80,
+    marginHorizontal: 10,
     position: 'absolute',
     top: 20
   },
@@ -213,8 +213,8 @@ const style = StyleSheet.create({
   campoDePergunta: {
     borderWidth: 5,
     borderRadius: 10,
-    paddingVertical: Dimensions.get('window').height * 0.1,
-    paddingHorizontal: Dimensions.get('window').width * 0.25,
+    paddingVertical: Dimensions.get('window').height * 0.05,
+    paddingHorizontal: Dimensions.get('window').width * 0.1,
     marginTop: 60,
     marginHorizontal: 25,
     maxWidth: 400,
