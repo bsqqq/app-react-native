@@ -13,6 +13,7 @@ export default function ListaDeAPR() {
     var path = fs.documentDirectory + 'json/'
     const fileUri = (jsonId: string) => path + `${jsonId}.json`
     const { user } = useContext(AuthContext)
+    const navigation = useNavigation()
     useEffect(() => {
         async function getAPRInfo() {
             try {
@@ -62,7 +63,7 @@ export default function ListaDeAPR() {
         }
         getAPRInfo()
     }, [])
-    const navigation = useNavigation()
+    
     return (
         <SafeAreaView style={style.container}>
             <ScrollView>
@@ -71,7 +72,6 @@ export default function ListaDeAPR() {
                     return (
                         <ItemAPR
                             DataEHoraDaInspecao={item.DataHoraAPR}
-                            // NumeroDeInspecao={item.NumeroDeInspecao}
                             OT_OS_SI={item.OT_OS_SI}
                             Inspetor={null}
                             ContratoId={item.ContratoId}
@@ -83,7 +83,7 @@ export default function ListaDeAPR() {
                 }) : <Text style={{
                     alignItems: "center",
                     justifyContent: "center"
-                }}> Não foram encontrados inspeções para este usuário. </Text>}
+                }}> Não foram encontrados APR's para este usuário. </Text>}
             </ScrollView>
             <View style={style.buttonPosition}>
                 <TouchableOpacity

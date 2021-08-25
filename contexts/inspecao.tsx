@@ -176,12 +176,12 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         try {
             netinfo.fetch().then(async state => {
                 if (state.isConnected == true) {
-                    upload()
+                    await upload()
                 } else {
                     alert('AVISO: Atualmente o dispositivo se encontra offline, se caso não for possível enviar as inspeções normalmente para o servidor até o primeiro momento que se encontrar online, tente contactar todos os envolvidos sobre qualquer Não Conformidade, prazo, responsável, etc... as fotos são salvas automaticamente no álbum do dispositivo. Informe também ao desenvolvedor (Vinicius) sobre o caso para uma solução em breve...')
                     netinfo.addEventListener(async state => {
                         if (state.isConnected == true) {
-                            upload()
+                            await upload()
                         }
                     })
                 }

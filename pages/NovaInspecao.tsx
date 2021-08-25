@@ -130,13 +130,13 @@ export default function NovaInspecao() {
             }
             // garantir que todos os campos sejam preenchidos
             if (
-                newInspecao?.Placa == undefined || newInspecao.Placa.length <= 0
-                && newInspecao?.EquipeId == undefined || Number(newInspecao.EquipeId?.length) <= 0
-                && newInspecao?.Localidade == undefined || Number(newInspecao.Localidade?.length) <= 0
-                && newInspecao?.ContratoId == undefined || Number(newInspecao.ContratoId?.toString()) <= 0
-                && newInspecao?.ProcessoId == undefined || Number(newInspecao.ProcessoId?.toString()) <= 0
-                && newInspecao?.MunicipioId == undefined || Number(newInspecao.MunicipioId?.toString()) <= 0
-                && newInspecao?.OT_OS_SI == undefined || Number(newInspecao.OT_OS_SI?.toString().length) <= 0
+                newInspecao?.Placa == undefined || newInspecao.Placa.length == 0
+                && newInspecao?.EquipeId == undefined || Number(newInspecao.EquipeId?.length) == 0
+                && newInspecao?.Localidade == undefined || Number(newInspecao.Localidade?.length) == 0
+                && newInspecao?.ContratoId == undefined || Number(newInspecao.ContratoId?.toString()) == 0
+                && newInspecao?.ProcessoId == undefined || Number(newInspecao.ProcessoId?.toString()) == 0
+                && newInspecao?.MunicipioId == undefined || Number(newInspecao.MunicipioId?.toString()) == 0
+                && newInspecao?.OT_OS_SI == undefined || Number(newInspecao.OT_OS_SI?.toString().length) == 0
             ) {
                 alert('Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')
                 console.log('Erro: Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?')

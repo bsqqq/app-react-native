@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import APRContext from "../contexts/apr";
 import Botao from '../components/NextButton'
 import { APRProps } from "./preAPR";
+import netinfo from '@react-native-community/netinfo';
 
 const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = Dimensions.get("window");
 const BACKGROUND_COLOR = "white";
@@ -23,21 +24,16 @@ const LIVE_COLOR = "#FF0000";
 const DISABLED_OPACITY = 0.3;
 
 export default function PlayerRecorder() {
-  // let recording: Audio.Recording | null;
   const recordingSettings: Audio.RecordingOptions = Audio.RECORDING_OPTIONS_PRESET_LOW_QUALITY;
   const [haveRecordingPermissions, setHaveRecordingPermissions] = useState<boolean>(false)
-  const [recording, setRecording] = useState<Audio.Recording | null>(null)
-  const [sound, setSound] = useState<Audio.Sound | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isPlaybackAllowed, setIsPlaybackAllowed] = useState<boolean>(false)
-  const [muted, setMuted] = useState<boolean>(false)
-  const [soundPosition, setSoundPosition] = useState<number>(0)
-  const [soundDuration, setSoundDuration] = useState<number>(0)
+  const [recording, setRecording] = useState<Audio.Recording | null>(null)
   const [recordingDuration, setRecordingDuration] = useState<number>(0)
-  const [shouldPlay, setShouldPlay] = useState<boolean>(false)
-  const [isPlaying, setIsPlaying] = useState<boolean>(false)
   const [isRecording, setIsRecording] = useState<boolean>(false)
   const [fontLoaded, setFontLoaded] = useState<boolean>(false)
+  const [sound, setSound] = useState<Audio.Sound | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [muted, setMuted] = useState<boolean>(false)
   const { apr } = useContext(APRContext)
   const navigation = useNavigation()
 
@@ -59,15 +55,9 @@ export default function PlayerRecorder() {
   // atualizar tela para o status do som
   const _updateScreenForSoundStatus = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
-      setSoundDuration(Number(status.durationMillis))
-      setSoundPosition(status.positionMillis)
-      setShouldPlay(status.shouldPlay)
-      setIsPlaying(status.isPlaying)
       setMuted(status.isMuted)
       setIsPlaybackAllowed(true)
     } else {
-      setSoundDuration(0)
-      setSoundPosition(0)
       setIsPlaybackAllowed(false)
       if (status.error) {
         console.log(`FATAL PLAYER ERROR: ${status.error}`);
@@ -168,27 +158,55 @@ export default function PlayerRecorder() {
     setSound(null)
   }
   async function _uploadSoundToStorage() {
-    const info = await FileSystem.getInfoAsync(recording?.getURI() || "");
-    const response = await fetch(info.uri)
-    const blob = await response.blob()
-    const storage = fb.storage()
-    const db = fb.database()
-    await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).put(blob, { contentType: 'audio/mpeg' })
-    const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).getDownloadURL()
-    const APRData: APRProps = {
-      ContratoId: Number(apr?.ContratoId),
-      ProcessoId: Number(apr?.ProcessoId),
-      UsuarioId: Number(apr?.UsuarioId),
-      EquipeId: apr?.EquipeId,
-      OT_OS_SI: Number(apr?.OT_OS_SI),
-      DataHoraAPR: String(apr?.DataHoraAPR),
-      CoordenadaX: Number(apr?.CoordenadaX),
-      CoordenadaY: Number(apr?.CoordenadaY),
-      id: Number(apr?.id),
-      hiperlink: audioLink
+    if ((await netinfo.fetch()).isConnected) {
+      const info = await FileSystem.getInfoAsync(recording?.getURI() || "");
+      const response = await fetch(info.uri)
+      const blob = await response.blob()
+      const storage = fb.storage()
+      const db = fb.database()
+      await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).put(blob, { contentType: 'audio/mp3' })
+      const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).getDownloadURL()
+      const APRData: APRProps = {
+        ContratoId: Number(apr?.ContratoId),
+        ProcessoId: Number(apr?.ProcessoId),
+        UsuarioId: Number(apr?.UsuarioId),
+        EquipeId: apr?.EquipeId,
+        OT_OS_SI: Number(apr?.OT_OS_SI),
+        DataHoraAPR: String(apr?.DataHoraAPR),
+        CoordenadaX: Number(apr?.CoordenadaX),
+        CoordenadaY: Number(apr?.CoordenadaY),
+        id: Number(apr?.id),
+        hiperlink: audioLink
+      }
+      await db.ref(`/APR/${APRData.id}`).set(APRData)
+      navigation.navigate('ListaDeAPR')
+    } else {
+      netinfo.addEventListener(async state => {
+        if (state.isConnected) {
+          const info = await FileSystem.getInfoAsync(recording?.getURI() || "");
+          const response = await fetch(info.uri)
+          const blob = await response.blob()
+          const storage = fb.storage()
+          const db = fb.database()
+          await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).put(blob, { contentType: 'audio/mpeg' })
+          const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).getDownloadURL()
+          const APRData: APRProps = {
+            ContratoId: Number(apr?.ContratoId),
+            ProcessoId: Number(apr?.ProcessoId),
+            UsuarioId: Number(apr?.UsuarioId),
+            EquipeId: apr?.EquipeId,
+            OT_OS_SI: Number(apr?.OT_OS_SI),
+            DataHoraAPR: String(apr?.DataHoraAPR),
+            CoordenadaX: Number(apr?.CoordenadaX),
+            CoordenadaY: Number(apr?.CoordenadaY),
+            id: Number(apr?.id),
+            hiperlink: audioLink
+          }
+          await db.ref(`/APR/${APRData.id}`).set(APRData)
+          navigation.navigate('ListaDeAPR')
+        }
+      })
     }
-    await db.ref(`/APR/${APRData.id}`).set(APRData)
-    navigation.navigate('ListaDeAPR')
   }
   // quando o botao de gravar for pressionado
   const _onRecordPressed = () => {
@@ -198,12 +216,11 @@ export default function PlayerRecorder() {
       _stopPlaybackAndBeginRecording();
     }
   };
-  
+
   const _getMMSSFromMillis = (millis: number) => {
     const totalSeconds = millis / 1000;
     const seconds = Math.floor(totalSeconds % 60);
     const minutes = Math.floor(totalSeconds / 60);
-
     const padWithZero = (number: number) => {
       const string = number.toString();
       if (number < 10) {
@@ -221,7 +238,6 @@ export default function PlayerRecorder() {
     return `${_getMMSSFromMillis(0)}`;
   }
 
-  // render() {
   if (!fontLoaded) {
     return <View style={styles.emptyContainer} />;
   }
@@ -260,7 +276,7 @@ export default function PlayerRecorder() {
           <View />
           <TouchableHighlight
             underlayColor={BACKGROUND_COLOR}
-            style={styles.wrapper}
+            // style={styles.wrapper}
             onPress={_onRecordPressed}
             disabled={isLoading}
           >
@@ -294,7 +310,7 @@ export default function PlayerRecorder() {
           </View>
           <View />
         </View>
-        <Botao texto="Enviar" onPress={() => _uploadSoundToStorage().then(() => alert('feito'))} />
+        <Botao texto="Enviar" onPress={() => _uploadSoundToStorage().then(() => alert('APR enviada com sucesso.'))} />
         <View />
       </View>
       <View
@@ -327,7 +343,6 @@ export default function PlayerRecorder() {
       </View>
     </View>
   );
-  // }
 }
 
 const styles = StyleSheet.create({
@@ -348,7 +363,7 @@ const styles = StyleSheet.create({
   noPermissionsText: {
     textAlign: "center",
   },
-  wrapper: {},
+  // wrapper: {},
   halfScreenContainer: {
     flex: 1,
     flexDirection: "column",

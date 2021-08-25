@@ -15,15 +15,18 @@ export interface itemInspecaoProps extends TouchableOpacityProps {
 const itemInspecao = ({ ...tudo }: itemInspecaoProps) => {
     const navigation = useNavigation()
     return (
-        <TouchableOpacity activeOpacity={0.1} style={style.cards} onPress={() => navigation.navigate('InspecaoSelecionada', { key: tudo.id })}>
+        <TouchableOpacity activeOpacity={0.1} style={style.cards} onPress={() => navigation.navigate('InspecaoOuAPRSelecionada', { key: tudo.id })}>
             <View style={style.textAlign}>
                 <Text>Data: </Text>
                 <Text>{tudo.DataEHoraDaInspecao}</Text>
             </View>
-            <View style={style.textAlign}>
-                <Text>Nº de Inspeção: </Text>
-                <Text>{tudo.NumeroDeInspecao}</Text>
-            </View>
+            {tudo.NumeroDeInspecao
+                ? <View style={style.textAlign}>
+                    <Text>Nº de Inspeção: </Text>
+                    <Text>{tudo.NumeroDeInspecao}</Text>
+                </View>
+                : undefined}
+
             <View style={style.textAlign}>
                 <Text>OT / OS / SI: </Text>
                 <Text>{tudo.OT_OS_SI}</Text>

@@ -135,10 +135,10 @@ export default function preAPR() {
 
     function newAPR() {
         if (
-            Number(OtOsSi?.toString().length) <= 0
-            || Number(contratoId?.toString().length) <= 0
-            || Number(processoId?.toString().length) <= 0
-            || equipeId.length < 0
+            Number(OtOsSi?.toString().length) == 0
+            || Number(contratoId?.toString().length) == 0
+            || Number(processoId?.toString().length) == 0
+            || equipeId.length == 0
             || !user.id
         ) {
             alert("Algum dos campos acima não foram preenchidos, por favor verifique e tente novamente.")

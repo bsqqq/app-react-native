@@ -59,7 +59,7 @@ const AppRoutes: React.FC = () => (
         />
 
         <AppStack.Screen
-            name="InspecaoSelecionada"
+            name="InspecaoOuAPRSelecionada"
             component={InspecaoOuAPRSelecionada}
         />
 
