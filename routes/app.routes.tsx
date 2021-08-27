@@ -7,10 +7,11 @@ import Inspecao from '../pages/Inspecao';
 import NovaInspecao from '../pages/NovaInspecao';
 import TelaDePerguntas from '../pages/telaDePerguntas'
 import NaoConformidades from './../pages/NaoConformidades';
-import InspecaoOuAPRSelecionada from '../pages/InspecaoOuAPRSelecionada';
+import APRSelecionada from '../pages/APRSelecionada';
 import Checklist from '../pages/Checklist';
 import preAPR from '../pages/preAPR';
 import ListaDeAPR from '../pages/ListaDeAPR';
+import InspecaoSelecionada from '../pages/InspecaoSelecionada';
 
 const AppStack = createStackNavigator()
 
@@ -59,8 +60,8 @@ const AppRoutes: React.FC = () => (
         />
 
         <AppStack.Screen
-            name="InspecaoOuAPRSelecionada"
-            component={InspecaoOuAPRSelecionada}
+            name="APRSelecionada"
+            component={APRSelecionada}
         />
 
         <AppStack.Screen
@@ -76,6 +77,11 @@ const AppRoutes: React.FC = () => (
         <AppStack.Screen
             name="ListaDeAPR"
             component={ListaDeAPR}
+        />
+
+        <AppStack.Screen
+            name="InspecaoSelecionada"
+            component={InspecaoSelecionada}
         />
         
     </AppStack.Navigator>

@@ -78,6 +78,7 @@ export default function ListaDeAPR() {
                             ProcessoId={item.ProcessoId}
                             key={item.id}
                             id={item.id}
+                            redirect="APRSelecionada"
                         />
                     )
                 }) : <Text style={{

@@ -83,6 +83,7 @@ export default function Inspecao() {
               ContratoId={inspecao.ContratoId}
               ProcessoId={inspecao.ProcessoId}
               key={inspecao.id}
+              redirect="InspecaoSelecionada"
             />
           );
         }) : <Text style={{

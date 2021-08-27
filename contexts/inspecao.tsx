@@ -134,63 +134,68 @@ export const InspecaoProvider: React.FC = ({ children }) => {
 
     function setListaDeRespostaContext(obj: objetoDeResposta) {
         const arr: objetoDeResposta[] = arrDeRespostas
-        arr.push(obj)
+        const indexEncontrado = arrDeRespostas.findIndex(resposta => {
+            return resposta.perguntaId === obj.perguntaId
+        })
+        if (indexEncontrado != -1) {
+            arr[indexEncontrado] = obj
+        } else {
+            arr.push(obj)
+        }
         setArrDeRespostas(arr)
     }
     async function upload() {
-        const db = fb.database()
-        const storage = fb.storage()
-        var snap = await db.ref('/controle/numero-de-inspecao').once('value')
-        var shot = snap.exportVal()
-        await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
-        await db.ref('/controle/numero-de-inspecao').set(Number(shot) + 1)
-        await db.ref(`/respostas/${inspecaoId}`).set(arrDeRespostas)
-        const fts: string = String(await AsyncStorage.getItem('@mais-parceria-app-fotos'))
-        const arrayDeFotos: any[] = JSON.parse(fts)
-        if (arrayDeFotos.length > 0) {
-            const promises = arrayDeFotos.map(async (item: string, index: number) => {
-                const response = await fetch(item)
-                var blob = await response.blob();
-                await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
-                var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
-                var fotosDeInspecoes: fotoDeInspecaoProps = {
-                    id: new Date().getTime() || 0 + index,
-                    hiperlink,
-                    descricao: descricao[index] || "",
-                    inspecaoId,
-                    colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
-                    prazoDeResolucao: prazoDasNaoConformidades[index] || "",
-                }
-                await db.ref(`/fotos-de-inspecao/${(fotosDeInspecoes.id || 0 + index)}`).set(fotosDeInspecoes)
-                await Promise.all(promises).then(() => alert('Inspeção enviada com sucesso!'))
-            })
+        try {
+            const db = fb.database()
+            const storage = fb.storage()
+            var snap = await db.ref('/controle/numero-de-inspecao').once('value')
+            var shot = snap.exportVal()
+            await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
+            await db.ref('/controle/numero-de-inspecao').set(Number(shot) + 1)
+            await db.ref(`/respostas/${inspecaoId}`).set(arrDeRespostas)
+            const fts: string = String(await AsyncStorage.getItem('@mais-parceria-app-fotos'))
+            const arrayDeFotos: any[] = JSON.parse(fts || "")
+            if (arrayDeFotos?.length > 0) {
+                const promises = arrayDeFotos?.map(async (item: string, index: number) => {
+                    const response = await fetch(item)
+                    var blob = await response.blob();
+                    await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
+                    var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
+                    var fotosDeInspecoes: fotoDeInspecaoProps = {
+                        id: new Date().getTime() || 0 + index,
+                        hiperlink,
+                        descricao: descricao[index] || "",
+                        inspecaoId,
+                        colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
+                        prazoDeResolucao: prazoDasNaoConformidades[index] || "",
+                    }
+                    await db.ref(`/fotos-de-inspecao/${(fotosDeInspecoes.id || 0 + index)}`).set(fotosDeInspecoes)
+                    await Promise.all(promises).then(() => alert('Foto(s) enviada(s) com sucesso!'))
+                })
+            }
+            setColabId([])
+            setPrazoDasNaoConformidades([])
+            setDescricao([])
+            setArrDeRespostas([])
+            fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => alert(`Inspeção enviada com sucesso`)) : console.log('não existe fotos para apagar')
+        } catch (error) {
+            console.log(error)
         }
-        setColabId([])
-        setPrazoDasNaoConformidades([])
-        setDescricao([])
-        setArrDeRespostas([])
-        fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => console.log(`Fotos apagadas`)) : console.log('não existe fotos para apagar')
     }
 
     async function finishInspecao() {
         // esta função vai escrever tudo no banco de dados.
-        try {
-            netinfo.fetch().then(async state => {
-                if (state.isConnected == true) {
-                    await upload()
-                } else {
-                    alert('AVISO: Atualmente o dispositivo se encontra offline, se caso não for possível enviar as inspeções normalmente para o servidor até o primeiro momento que se encontrar online, tente contactar todos os envolvidos sobre qualquer Não Conformidade, prazo, responsável, etc... as fotos são salvas automaticamente no álbum do dispositivo. Informe também ao desenvolvedor (Vinicius) sobre o caso para uma solução em breve...')
-                    netinfo.addEventListener(async state => {
-                        if (state.isConnected == true) {
-                            await upload()
-                        }
-                    })
-                }
-            })
-        } catch (error) {
-            alert(error)
-            console.log(error)
-        }
+        netinfo.fetch().then(async state => {
+            if (state.isConnected == true) {
+                await upload()
+            } else {
+                netinfo.addEventListener(async state => {
+                    if (state.isConnected == true) {
+                        await upload()
+                    }
+                })
+            }
+        })
     }
     return (
         <InspecaoContext.Provider

@@ -90,7 +90,6 @@ export default function NovaInspecao() {
     const [municipioId, setMunicipioId] = useState<number>()
     const [contratoId, setContratoId] = useState<number>(0)
     const [processoId, setProcessoId] = useState<number>(0)
-    // const [localidade, setLocalidade] = useState<string>()
     const [equipeId, setEquipeId] = useState<number[]>([])
     const [municipio, setMunicipio] = useState<string>()
     const [processo, setProcesso] = useState<string>()
@@ -118,7 +117,6 @@ export default function NovaInspecao() {
                 DataEHoraDaInspecao: dataHora,
                 OT_OS_SI: OtOsSi,
                 MunicipioId: municipioId,
-                // Localidade: localidade,
                 CoordenadaX: location?.coords.latitude,
                 CoordenadaY: location?.coords.longitude,
                 Inspetor: user?.name,

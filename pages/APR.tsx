@@ -30,8 +30,8 @@ export default function PlayerRecorder() {
   const [recording, setRecording] = useState<Audio.Recording | null>(null)
   const [recordingDuration, setRecordingDuration] = useState<number>(0)
   const [isRecording, setIsRecording] = useState<boolean>(false)
-  const [fontLoaded, setFontLoaded] = useState<boolean>(false)
   const [sound, setSound] = useState<Audio.Sound | null>(null)
+  const [fontLoaded, setFontLoaded] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [muted, setMuted] = useState<boolean>(false)
   const { apr } = useContext(APRContext)
@@ -104,7 +104,7 @@ export default function PlayerRecorder() {
     recording.setOnRecordingStatusUpdate(_updateScreenForRecordingStatus);
 
     setRecording(recording)
-    await recording.startAsync(); // Will call _updateScreenForRecordingStatus to update the screen.
+    await recording.startAsync();
     setIsLoading(false)
   }
   // Parar de gravar e ativar playback
@@ -117,9 +117,6 @@ export default function PlayerRecorder() {
     try {
       await recording.stopAndUnloadAsync();
     } catch (error) {
-      /* No android, chamar esta funcão antes da captura de qualquer dado
-      pode causar um erro onde dirá que nenhum dado foi capturado pois
-      não o tempo de gravação não atingiu o limite de tempo necessário */
       if (error.code === "E_AUDIO_NODATA") {
         console.log(
           `Stop was called too quickly, no data has yet been received (${error.message})`
@@ -164,8 +161,8 @@ export default function PlayerRecorder() {
       const blob = await response.blob()
       const storage = fb.storage()
       const db = fb.database()
-      await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).put(blob, { contentType: 'audio/mp3' })
-      const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).getDownloadURL()
+      await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.wav`).put(blob, { contentType: 'audio/wav' })
+      const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.wav`).getDownloadURL()
       const APRData: APRProps = {
         ContratoId: Number(apr?.ContratoId),
         ProcessoId: Number(apr?.ProcessoId),
@@ -239,8 +236,10 @@ export default function PlayerRecorder() {
   }
 
   if (!fontLoaded) {
+    // se a fonte nao for carregada
     return <View style={styles.emptyContainer} />;
   }
+
   // senão tiver permissão para gravar o audio
   if (!haveRecordingPermissions) {
     return (

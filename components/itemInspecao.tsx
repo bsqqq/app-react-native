@@ -9,13 +9,14 @@ export interface itemInspecaoProps extends TouchableOpacityProps {
     Inspetor: string | null | undefined,
     ContratoId: number | string | undefined,
     ProcessoId: number | string | undefined,
-    id: number | undefined
+    id: number | undefined,
+    redirect: string
 }
 
 const itemInspecao = ({ ...tudo }: itemInspecaoProps) => {
     const navigation = useNavigation()
     return (
-        <TouchableOpacity activeOpacity={0.1} style={style.cards} onPress={() => navigation.navigate('InspecaoOuAPRSelecionada', { key: tudo.id })}>
+        <TouchableOpacity activeOpacity={0.1} style={style.cards} onPress={() => navigation.navigate(tudo.redirect, { key: tudo.id, OT_OS_SI: tudo.OT_OS_SI })}>
             <View style={style.textAlign}>
                 <Text>Data: </Text>
                 <Text>{tudo.DataEHoraDaInspecao}</Text>
