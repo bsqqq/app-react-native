@@ -2,7 +2,7 @@ import Constants from 'expo-constants'
 import axios, { AxiosResponse, AxiosInstance } from 'axios'
 
 const authentication: AxiosInstance = axios.create({
-    baseURL: Constants.manifest.extra?.REACT_APP_API_URL
+    baseURL: Constants.manifest?.extra?.REACT_APP_API_URL
 })
 
 export default authentication

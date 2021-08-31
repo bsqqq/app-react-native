@@ -35,11 +35,11 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   async function signIn(cpf: string, senha: string) {
     const response = await auth.signIn(cpf, senha);
-    setUser(response?.user);
+    await fb.auth().signInWithCustomToken(response?.token);
     api.defaults.headers["Authorization"] = `Bearer ${response?.token}`;
     await AsyncStorage.setItem("@mais-parceria:user", JSON.stringify(response?.user));
     await AsyncStorage.setItem("@mais-parceria:token", String(response?.token));
-    await fb.auth().signInWithCustomToken(response?.token);
+    setUser(response?.user);
   }
 
   async function signOut() {

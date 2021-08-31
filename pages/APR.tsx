@@ -24,7 +24,7 @@ const LIVE_COLOR = "#FF0000";
 const DISABLED_OPACITY = 0.3;
 
 export default function PlayerRecorder() {
-  const recordingSettings: Audio.RecordingOptions = Audio.RECORDING_OPTIONS_PRESET_LOW_QUALITY;
+  const recordingSettings: Audio.RecordingOptions = Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY;
   const [haveRecordingPermissions, setHaveRecordingPermissions] = useState<boolean>(false)
   const [isPlaybackAllowed, setIsPlaybackAllowed] = useState<boolean>(false)
   const [recording, setRecording] = useState<Audio.Recording | null>(null)
@@ -46,6 +46,12 @@ export default function PlayerRecorder() {
       setFontLoaded(true)
     })();
     _askForPermissions();
+    function cleanUp() {
+      sound?.unloadAsync()
+      sound?.stopAsync()
+      console.log('chamou?')
+    }
+    return cleanUp()
   })
   // pedir por permissões
   const _askForPermissions = async () => {
@@ -161,8 +167,8 @@ export default function PlayerRecorder() {
       const blob = await response.blob()
       const storage = fb.storage()
       const db = fb.database()
-      await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.wav`).put(blob, { contentType: 'audio/wav' })
-      const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.wav`).getDownloadURL()
+      await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}`).put(blob)
+      const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}`).getDownloadURL()
       const APRData: APRProps = {
         ContratoId: Number(apr?.ContratoId),
         ProcessoId: Number(apr?.ProcessoId),
