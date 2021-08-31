@@ -92,7 +92,7 @@ export default function preAPR() {
             if (status !== 'granted') {
                 return;
             }
-            let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
+            let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Lowest });
             setLocation(location);
             colaboradores = JSON.parse(await fs.readAsStringAsync(fileUri('colaboradores')))
             const keys: string[] = Object.keys(colaboradores)

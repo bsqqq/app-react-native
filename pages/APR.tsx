@@ -24,7 +24,7 @@ const LIVE_COLOR = "#FF0000";
 const DISABLED_OPACITY = 0.3;
 
 export default function PlayerRecorder() {
-  const recordingSettings: Audio.RecordingOptions = Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY;
+  const recordingSettings: Audio.RecordingOptions = Audio.RECORDING_OPTIONS_PRESET_LOW_QUALITY;
   const [haveRecordingPermissions, setHaveRecordingPermissions] = useState<boolean>(false)
   const [isPlaybackAllowed, setIsPlaybackAllowed] = useState<boolean>(false)
   const [recording, setRecording] = useState<Audio.Recording | null>(null)
@@ -46,12 +46,6 @@ export default function PlayerRecorder() {
       setFontLoaded(true)
     })();
     _askForPermissions();
-    function cleanUp() {
-      sound?.unloadAsync()
-      sound?.stopAsync()
-      console.log('chamou?')
-    }
-    return cleanUp()
   })
   // pedir por permissões
   const _askForPermissions = async () => {
@@ -115,7 +109,7 @@ export default function PlayerRecorder() {
   }
   // Parar de gravar e ativar playback
   async function _stopRecordingAndEnablePlayback() {
-    console.log(recording)
+    // console.log(recording)
     setIsLoading(true)
     if (!recording) {
       return;
@@ -123,14 +117,14 @@ export default function PlayerRecorder() {
     try {
       await recording.stopAndUnloadAsync();
     } catch (error) {
+
       if (error.code === "E_AUDIO_NODATA") {
-        console.log(
-          `Stop was called too quickly, no data has yet been received (${error.message})`
-        );
+        console.log(`Stop was called too quickly, no data has yet been received (${error.message})`);
         alert('Parou a gravação muito rápido, não foi possível salvar nenhum dado.')
       } else {
         console.log("STOP ERROR: ", error.code, error.name, error.message);
       }
+
       setIsLoading(false)
       return;
     }
@@ -160,29 +154,30 @@ export default function PlayerRecorder() {
     setIsLoading(false)
     setSound(null)
   }
+
   async function _uploadSoundToStorage() {
     if ((await netinfo.fetch()).isConnected) {
-      const info = await FileSystem.getInfoAsync(recording?.getURI() || "");
-      const response = await fetch(info.uri)
-      const blob = await response.blob()
-      const storage = fb.storage()
-      const db = fb.database()
-      await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}`).put(blob)
-      const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}`).getDownloadURL()
-      const APRData: APRProps = {
-        ContratoId: Number(apr?.ContratoId),
-        ProcessoId: Number(apr?.ProcessoId),
-        UsuarioId: Number(apr?.UsuarioId),
-        EquipeId: apr?.EquipeId,
-        OT_OS_SI: Number(apr?.OT_OS_SI),
-        DataHoraAPR: String(apr?.DataHoraAPR),
-        CoordenadaX: Number(apr?.CoordenadaX),
-        CoordenadaY: Number(apr?.CoordenadaY),
-        id: Number(apr?.id),
-        hiperlink: audioLink
-      }
-      await db.ref(`/APR/${APRData.id}`).set(APRData)
-      navigation.navigate('ListaDeAPR')
+        const info = await FileSystem.getInfoAsync(recording?.getURI() || "");
+        const response = await fetch(info.uri)
+        const blob = await response.blob()
+        const storage = fb.storage()
+        const db = fb.database()
+        await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}`).put(blob, { contentType: 'audio/*' })
+        const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}`).getDownloadURL()
+        const APRData: APRProps = {
+          ContratoId: Number(apr?.ContratoId),
+          ProcessoId: Number(apr?.ProcessoId),
+          UsuarioId: Number(apr?.UsuarioId),
+          EquipeId: apr?.EquipeId,
+          OT_OS_SI: Number(apr?.OT_OS_SI),
+          DataHoraAPR: String(apr?.DataHoraAPR),
+          CoordenadaX: Number(apr?.CoordenadaX),
+          CoordenadaY: Number(apr?.CoordenadaY),
+          hiperlink: audioLink,
+          id: Number(apr?.id)
+        }
+        await db.ref(`/APR/${APRData.id}`).set(APRData)
+        navigation.navigate('ListaDeAPR')
     } else {
       netinfo.addEventListener(async state => {
         if (state.isConnected) {
@@ -191,8 +186,8 @@ export default function PlayerRecorder() {
           const blob = await response.blob()
           const storage = fb.storage()
           const db = fb.database()
-          await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).put(blob, { contentType: 'audio/mpeg' })
-          const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}.mpeg`).getDownloadURL()
+          await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}`).put(blob)
+          const audioLink = await storage.ref().child(`/audio-de-apr/${apr?.OT_OS_SI}/${apr?.id}`).getDownloadURL()
           const APRData: APRProps = {
             ContratoId: Number(apr?.ContratoId),
             ProcessoId: Number(apr?.ProcessoId),
@@ -315,7 +310,7 @@ export default function PlayerRecorder() {
           </View>
           <View />
         </View>
-        <Botao texto="Enviar" onPress={() => _uploadSoundToStorage().then(() => alert('APR enviada com sucesso.'))} />
+        <Botao texto="Enviar" onPress={() => _uploadSoundToStorage().then(() => alert('APR enviada com sucesso.'))} disabled={recording !== null && recording._isDoneRecording ? false : true}/>
         <View />
       </View>
       <View
