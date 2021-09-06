@@ -21,9 +21,9 @@ import MultiSelect from 'expo-multiple-select'
 import netinfo from '@react-native-community/netinfo';
 import fb from '../services/firebase'
 
-interface ProcessosProps {
+interface ProcessosContratosProps {
     [index: string]: {
-        id: number,
+        id: number | string,
         nome: string,
     }
 }
@@ -80,8 +80,8 @@ export default function NovaInspecao() {
     var path = fs.documentDirectory + 'json/'
     const fileUri = (jsonId: string) => path + `${jsonId}.json`
     const [colaboradoresFormatados, setColaboradoresFormatados] = useState<MultiProps[]>([])
-    const [processosState, setProcessosState] = useState<ProcessosProps>({})
-    const [contratosState, setContratosState] = useState<ContratoProps>({})
+    const [processosState, setProcessosState] = useState<ProcessosContratosProps>({})
+    const [contratosState, setContratosState] = useState<ProcessosContratosProps>({})
     const [location, setLocation] = useState<Location.LocationObject>()
     const [municipiosState, setMunicipiosState] = useState<any[]>()
     const [municipioVisible, setMunicipioVisible] = useState(false)
@@ -102,7 +102,7 @@ export default function NovaInspecao() {
     const db = fb.database()
     var colaboradores: ColaboradoresProps
     var contratos: ContratoProps = {}
-    var processos: ProcessosProps
+    var processos: ProcessosContratosProps
     var municipios: any[]
 
     async function handleNewInspecao() {
@@ -160,6 +160,9 @@ export default function NovaInspecao() {
             }
             let location = await Location.getCurrentPositionAsync({ accuracy: 1 });
             setLocation(location);
+        })();
+
+        (async (): Promise<void> => {
             colaboradores = JSON.parse(await fs.readAsStringAsync(fileUri('colaboradores')))
             const keys: string[] = Object.keys(colaboradores)
             keys.forEach(item => {
@@ -169,9 +172,6 @@ export default function NovaInspecao() {
                 })
             })
             setColaboradoresFormatados(colaboradoresFormatadosPreState)
-        })();
-
-        (async (): Promise<void> => {
             municipios = JSON.parse(await fs.readAsStringAsync(fileUri('municipios')))
             processos = JSON.parse(await fs.readAsStringAsync(fileUri('processos')))
             contratos = JSON.parse(await fs.readAsStringAsync(fileUri('contratos')))
@@ -189,7 +189,7 @@ export default function NovaInspecao() {
         })
     })
 
-    const processosTipados: ProcessosProps = processosState
+    const processosTipados: ProcessosContratosProps = processosState
     let processosFormatados: ModalFilterPickerOption[] = []
     const chaves: string[] = Object.keys(processosTipados)
     chaves.forEach(item => {
@@ -199,7 +199,7 @@ export default function NovaInspecao() {
         })
     })
 
-    const contratosTipados: ContratoProps = contratosState
+    const contratosTipados: ProcessosContratosProps = contratosState
     let contratosFormatados: ModalFilterPickerOption[] = []
     const keys: string[] = Object.keys(contratosTipados)
     keys?.forEach(item => {
@@ -272,7 +272,7 @@ export default function NovaInspecao() {
                             uniqueKey="id"
                             selectedItems={equipeId}
                             onSelectedItemsChange={(selectedItems: number[]) => setEquipeId(selectedItems)}
-                            searchInputPlaceholderText="Pesquisar..."
+                            searchInputPlaceholderText="Buscar colaboradores..."
                             itemTextColor="blue"
                         />
 

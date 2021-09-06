@@ -4,7 +4,7 @@ import { StyleSheet, Text, View, Button } from 'react-native'
 import fb from '../services/firebase'
 import { Audio } from 'expo-av'
 
-export default function InspecaoOuAPRSelecionada() {
+export default function APRSelecionada() {
     const [sound, setSound] = useState<Audio.Sound>()
     const routes = useRoute()
     const db = fb.database()
@@ -29,7 +29,6 @@ export default function InspecaoOuAPRSelecionada() {
                     const { sound } = await Audio.Sound.createAsync(source, {}, null, true)
                     setSound(sound)
                     await sound.playAsync()
-                    // await sound.unloadAsync()
                 }
             }
         }

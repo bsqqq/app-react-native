@@ -85,6 +85,7 @@ export default function PlayerRecorder() {
       sound.setOnPlaybackStatusUpdate(null);
       setSound(null)
     }
+
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: true,
       interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
@@ -94,7 +95,9 @@ export default function PlayerRecorder() {
       playThroughEarpieceAndroid: false,
       staysActiveInBackground: true,
     });
+
     const recording = new Audio.Recording();
+
     if (recording !== null) {
       recording.setOnRecordingStatusUpdate(null);
       setRecording(null)
@@ -102,9 +105,9 @@ export default function PlayerRecorder() {
 
     await recording.prepareToRecordAsync(recordingSettings);
     recording.setOnRecordingStatusUpdate(_updateScreenForRecordingStatus);
-
     setRecording(recording)
     await recording.startAsync();
+    
     setIsLoading(false)
   }
   // Parar de gravar e ativar playback
@@ -124,7 +127,6 @@ export default function PlayerRecorder() {
       } else {
         console.log("STOP ERROR: ", error.code, error.name, error.message);
       }
-
       setIsLoading(false)
       return;
     }
@@ -177,7 +179,7 @@ export default function PlayerRecorder() {
           id: Number(apr?.id)
         }
         await db.ref(`/APR/${APRData.id}`).set(APRData)
-        navigation.navigate('ListaDeAPR')
+        navigation.navigate('MenuDeSeguranca')
     } else {
       netinfo.addEventListener(async state => {
         if (state.isConnected) {

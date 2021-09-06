@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import netinfo from '@react-native-community/netinfo'
 import fb from '../services/firebase'
 
-interface fotoDeInspecaoProps {
+type fotoDeInspecaoProps = {
     id: number | undefined,
     hiperlink: string | undefined,
     descricao: string | undefined,
@@ -45,7 +45,7 @@ export interface InspecaoContextData {
     setDates(date: string): void
 }
 
-interface objetoDeResposta {
+type objetoDeResposta = {
     respostaId: number
     inspecaoId: number | undefined
     perguntaId: number

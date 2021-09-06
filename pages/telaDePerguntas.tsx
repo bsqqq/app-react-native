@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { View, Text, StyleSheet, Button, Dimensions } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import InspecaoContext from '../contexts/inspecao'
 import Buttom from '../components/NextButton'
 import * as fs from 'expo-file-system'
@@ -13,7 +13,7 @@ interface objetoDePergunta {
   id: number
 }
 
-interface objetoDeResposta {
+type objetoDeResposta = {
   inspecaoId: number | undefined
   valorResposta: string
   perguntaId: number
@@ -31,6 +31,7 @@ const TelaDePerguntas: React.FC = () => {
   const [disabled, setDisabled] = useState(false)
   const navigation = useNavigation()
   var objDeResp: objetoDeResposta[]
+  const routes = useRoute()
 
   function handleNextQuestion(decisao: string) {
     objDeResp = listaRespostas
@@ -105,11 +106,6 @@ const TelaDePerguntas: React.FC = () => {
     }
   }
 
-  function handleEnvioDeInspecao() {
-    finishInspecao()
-    navigation.navigate('Inspecao')
-  }
-
   function goBack() {
     setProximaPergunta(listaPerguntas[indicePerguntaAtual - 1].pergunta)
     setIndicePerguntaAtual(indicePerguntaAtual - 1)
@@ -122,11 +118,16 @@ const TelaDePerguntas: React.FC = () => {
     setIndicePerguntaAtual(indicePerguntaAtual + 1)
   }
 
+  function handleEnvioDeInspecao() {
+    finishInspecao()
+    navigation.navigate('MenuDeSeguranca')
+  }
+
   useEffect(() => {
     async function getPerguntas() {
       var path = fs.documentDirectory + 'json/'
       const fileUri = (jsonId: string): string => path + `${jsonId}.json`
-      const perguntasJSON = JSON.parse(await fs.readAsStringAsync(fileUri('perguntas-de-seguranca')))
+      const perguntasJSON = JSON.parse(routes.params?.key !== 0 ? await fs.readAsStringAsync(fileUri('perguntas-de-seguranca')) : await fs.readAsStringAsync(fileUri('perguntas-de-checklist')))
       if (perguntasJSON) {
         const keys = Object.keys(perguntasJSON)
         let perguntas: objetoDePergunta[] = []

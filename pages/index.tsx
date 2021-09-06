@@ -84,7 +84,6 @@ export default function Login() {
         </SafeAreaView>
     )
 }
-// matricula: 001745
 const style = StyleSheet.create({
     container: {
         flex: 1,
