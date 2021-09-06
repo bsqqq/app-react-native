@@ -168,8 +168,9 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                         inspecaoId,
                         colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
                         prazoDeResolucao: prazoDasNaoConformidades[index] || "",
+                        respostaId: arrDeRespostas[index].respostaId
                     }
-                    await db.ref(`/fotos-de-inspecao/${(fotosDeInspecoes.id || 0 + index)}`).set(fotosDeInspecoes)
+                    await db.ref(`/fotos-de-inspecao/${fotosDeInspecoes.id}`).set(fotosDeInspecoes)
                     await Promise.all(promises).then(() => alert('Foto(s) enviada(s) com sucesso!'))
                 })
             }
@@ -187,11 +188,11 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         // esta função vai escrever tudo no banco de dados.
         netinfo.fetch().then(async state => {
             if (state.isConnected == true) {
-                await upload()
+                upload()
             } else {
                 netinfo.addEventListener(async state => {
                     if (state.isConnected == true) {
-                        await upload()
+                        upload()
                     }
                 })
             }

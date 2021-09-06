@@ -65,7 +65,6 @@ const TelaDePerguntas: React.FC = () => {
             status: 'pendente',
           }
           var jaExisteRespostaa = objDeResp.find(objetoDeResposta => objetoDeResposta.perguntaId === respostaNao.perguntaId)
-
           if (jaExisteRespostaa != undefined)
             objDeResp[objDeResp.indexOf(jaExisteRespostaa)] = respostaNao
           else {
@@ -106,7 +105,7 @@ const TelaDePerguntas: React.FC = () => {
     }
   }
 
-  function handleEnvioDeInspecao() { 
+  function handleEnvioDeInspecao() {
     finishInspecao()
     navigation.navigate('Inspecao')
   }
@@ -165,7 +164,7 @@ const TelaDePerguntas: React.FC = () => {
         <View>
           {
             indicePerguntaAtual + 1 <= listaPerguntas.length
-              ? <Text style={{fontSize: 20}}>Pergunta {indicePerguntaAtual + 1} de {listaPerguntas.length}:</Text>
+              ? <Text style={{ fontSize: 20 }}>Pergunta {indicePerguntaAtual + 1} de {listaPerguntas.length}:</Text>
               : undefined
           }
         </View>
@@ -218,7 +217,7 @@ const style = StyleSheet.create({
     marginTop: 60,
     marginHorizontal: 25,
     maxWidth: 400,
-    justifyContent: 'center', 
+    justifyContent: 'center',
     alignItems: 'center',
     textAlign: 'center',
     // alignSelf: 'center',
