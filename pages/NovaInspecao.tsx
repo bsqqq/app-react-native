@@ -17,7 +17,7 @@ import InspecaoContext from '../contexts/inspecao'
 import { useNavigation } from '@react-navigation/native'
 import * as Location from 'expo-location'
 import AuthContext from '../contexts/auth'
-import MultiSelect from 'expo-multiple-select'
+import MultiSelect from 'react-native-multiple-select'
 import netinfo from '@react-native-community/netinfo';
 import fb from '../services/firebase'
 
@@ -137,7 +137,7 @@ export default function NovaInspecao() {
                 setInspecaoIdContextData(Number(newInspecao.id))
                 setNewInspecao(JSON.stringify(newInspecao))
                 setEquipeIdContext(newInspecao?.EquipeId)
-                navigation.navigate('TelaDePerguntas')
+                navigation.navigate('TelaDePerguntas', { key: "inspecao" })
                 return
             } else {
                 alert(`Algum campo possivelmente está vazio, você esqueceu de preencher algum campo?`)
@@ -333,10 +333,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'flex-start',
+        // alignItems: 'flex-start',
         paddingHorizontal: 30,
         marginTop: 100,
-        maxHeight: Dimensions.get('screen').height * 0.6
+        maxHeight: Dimensions.get('screen').height * 0.55,
+        // backgroundColor: '#f9f9f9'
     },
     titulo: {
         fontSize: 20,
@@ -348,7 +349,8 @@ const styles = StyleSheet.create({
         paddingVertical: 3,
         width: Dimensions.get('window').width - 60,
         marginBottom: 20,
-        fontStyle: 'italic'
+        fontStyle: 'italic',
+        paddingLeft: 10
     },
     centralizarBotao: {
         flex: 1,

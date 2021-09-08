@@ -32,6 +32,8 @@ export interface InspecaoContextData {
     descricao: string[] | undefined
     colabId: number[] | undefined
     respostaId: number | undefined
+    checklist: boolean | undefined
+    setChecklistContext(isChecklist: boolean): void
     setProcessoContratoIdContextData(IdProcesso: number, idContrato: number): void
     setListaDeRespostaContext(obj: objetoDeResposta): void
     setInspecaoIdContextData(inspecaoId: number): void
@@ -73,13 +75,14 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     const [ProcessoId, setProcessoId] = useState<number>()
     const [inspecaoId, setInspecaoId] = useState<number>()
     const [Inspecao, setInspecao] = useState<string>()
-    const [descricao, setDescricao] = useState<string[]>([])
+    const [descricao, setDescricao] = useState<Array<string>>([])
     const [respostaId, setRespostaId] = useState<number>()
     const [colabId, setColabId] = useState<number[]>([])
     const [prazoDasNaoConformidades, setPrazoDasNaoConformidades] = useState<string[]>([])
     const [arrNaoConformidadesIds, setArrNaoConformidadesIds] = useState<number[]>([])
     const [arrDeRespostas, setArrDeRespostas] = useState<objetoDeResposta[]>([])
     const [fotos, setFotos] = useState<string[]>([])
+    const [checklist, setChecklist] = useState<boolean>(false)
 
     function setProcessoContratoIdContextData(processoId: number, contratoId: number) {
         setProcessoId(processoId)
@@ -97,8 +100,10 @@ export const InspecaoProvider: React.FC = ({ children }) => {
 
     async function setFotosInspecao(FotoURI: string) {
         const arrDeFotos = fotos
-        arrDeFotos?.push(FotoURI)
+        arrDeFotos.push(FotoURI)
         setFotos(arrDeFotos)
+        console.log(`quantidade de fotos a serem enviadas: ${fotos.length}`)
+        console.log(`quantidade de respostas para ser enviadas: ${arrDeRespostas.length}`)
         await AsyncStorage.setItem('@mais-parceria-app-fotos', JSON.stringify(fotos))
     }
 
@@ -131,7 +136,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         arrDeDates.push(dates)
         setPrazoDasNaoConformidades(arrDeDates)
     }
-
+    
     function setListaDeRespostaContext(obj: objetoDeResposta) {
         const arr: objetoDeResposta[] = arrDeRespostas
         const indexEncontrado = arrDeRespostas.findIndex(resposta => {
@@ -144,43 +149,53 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         }
         setArrDeRespostas(arr)
     }
+
+    function setChecklistContext(isChecklist: boolean) {
+        setChecklist(isChecklist)
+    }
+
     async function upload() {
-        try {
-            const db = fb.database()
-            const storage = fb.storage()
-            var snap = await db.ref('/controle/numero-de-inspecao').once('value')
-            var shot = snap.exportVal()
-            await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
-            await db.ref('/controle/numero-de-inspecao').set(Number(shot) + 1)
-            await db.ref(`/respostas/${inspecaoId}`).set(arrDeRespostas)
-            const fts: string = String(await AsyncStorage.getItem('@mais-parceria-app-fotos'))
-            const arrayDeFotos: any[] = JSON.parse(fts || "")
-            if (arrayDeFotos?.length > 0) {
-                const promises = arrayDeFotos?.map(async (item: string, index: number) => {
-                    const response = await fetch(item)
-                    var blob = await response.blob();
-                    await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob)
-                    var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL()
-                    var fotosDeInspecoes: fotoDeInspecaoProps = {
-                        id: new Date().getTime() || 0 + index,
-                        hiperlink,
-                        descricao: descricao[index] || "",
-                        inspecaoId,
-                        colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
-                        prazoDeResolucao: prazoDasNaoConformidades[index] || "",
-                        respostaId: arrDeRespostas[index].respostaId
-                    }
-                    await db.ref(`/fotos-de-inspecao/${fotosDeInspecoes.id}`).set(fotosDeInspecoes)
-                    await Promise.all(promises).then(() => alert('Foto(s) enviada(s) com sucesso!'))
-                })
+        if (checklist == true) {
+            // tratar o envio de checklist
+        } else {
+            try {
+                const db = fb.database()
+                const storage = fb.storage()
+                var snap = await db.ref('/controle/numero-de-inspecao').once('value')
+                var shot = snap.exportVal()
+                await db.ref(`/inspecoes/${inspecaoId}`).set(JSON.parse(String(Inspecao)))
+                await db.ref('/controle/numero-de-inspecao').set(Number(shot) + 1)
+                await db.ref(`/respostas/${inspecaoId}`).set(arrDeRespostas)
+                const fts: string = String(await AsyncStorage.getItem('@mais-parceria-app-fotos'))
+                const arrayDeFotos: any[] = JSON.parse(fts || "")
+                if (arrayDeFotos?.length > 0) {
+                    const promises = arrayDeFotos?.map(async (item: string, index: number) => {
+                        const response = await fetch(item);
+                        var blob = await response.blob();
+                        await storage.ref().child(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).put(blob);
+                        var hiperlink = await storage.ref(`/fotos-de-inspecao/${inspecaoId}/${index}.jpg`).getDownloadURL();
+                        var fotosDeInspecoes: fotoDeInspecaoProps = {
+                            id: new Date().getTime(),
+                            hiperlink,
+                            descricao: descricao[index] || "",
+                            inspecaoId,
+                            colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
+                            prazoDeResolucao: prazoDasNaoConformidades[index] || "",
+                            respostaId: arrDeRespostas[index].respostaId ? arrDeRespostas[index].respostaId : 0
+                        };
+                        await db.ref(`/fotos-de-inspecao/${fotosDeInspecoes.id}`).set(fotosDeInspecoes);
+                        await Promise.all(promises).then(() => alert('Foto(s) enviada(s) com sucesso!'));
+                    })
+                }
+                setColabId([])
+                setPrazoDasNaoConformidades([])
+                setDescricao([])
+                setArrDeRespostas([])
+                setFotos([])
+                fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => alert(`Inspeção enviada com sucesso`)) : console.log('não existe fotos para apagar')
+            } catch (error) {
+                console.log(error)
             }
-            setColabId([])
-            setPrazoDasNaoConformidades([])
-            setDescricao([])
-            setArrDeRespostas([])
-            fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => alert(`Inspeção enviada com sucesso`)) : console.log('não existe fotos para apagar')
-        } catch (error) {
-            console.log(error)
         }
     }
 
@@ -229,7 +244,9 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                 setRespId,
                 respostaId,
                 setDates,
-                setListaDeRespostaContext
+                setListaDeRespostaContext,
+                checklist,
+                setChecklistContext
             }}>
             {children}
         </InspecaoContext.Provider>

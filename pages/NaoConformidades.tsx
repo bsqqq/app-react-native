@@ -44,7 +44,9 @@ const NaoConformidades: React.FC = () => {
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
     const navigation = useNavigation()
+    const arrDesc: string[] = []
     var camera: Camera
+
 
     useEffect(() => {
         (async () => {

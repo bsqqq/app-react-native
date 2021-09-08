@@ -10,7 +10,7 @@ import {
     TextInput,
     Button
 } from 'react-native'
-import MultiSelect from 'expo-multiple-select'
+import MultiSelect from 'react-native-multiple-select'
 import FilterPicker, { ModalFilterPickerOption } from 'react-native-modal-filter-picker'
 import * as fs from 'expo-file-system'
 import Botao from '../components/NextButton'
@@ -64,13 +64,11 @@ export default function Checklist() {
     var contratos: ProcessosContratosProps = {}
     var processos: ProcessosContratosProps
     const navigation = useNavigation()
-    let colaboradoresFormatadosPreState: MultiProps[] = []
-
-    const arrayTeste: MultiProps[] = [{ id: '1', name: 'a' }, { id: '2', name: 'b' }, { id: '3', name: 'c' }]
+    const date = new Date()
+    
     useEffect(() => {
-        const date = new Date()
+        let colaboradoresFormatadosPreState: MultiProps[] = []
         setDataHora(`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${new Date().toLocaleTimeString()}`);
-
         (async (): Promise<void> => {
             colaboradores = JSON.parse(await fs.readAsStringAsync(fileUri('colaboradores')))
             const keys: string[] = Object.keys(colaboradores)
@@ -109,7 +107,7 @@ export default function Checklist() {
     })
 
     function handleNewChecklist() {
-        navigation.navigate('TelaDePerguntas', { key: 0 })
+        navigation.navigate('TelaDePerguntas', { key: "checklist" })
     }
 
     return (
@@ -127,12 +125,13 @@ export default function Checklist() {
 
                         <Text style={styles.titulo}>Equipe:</Text>
                         <MultiSelect
-                            items={arrayTeste}
+                            items={colaboradoresFormatados}
                             uniqueKey="id"
                             selectedItems={equipeId}
                             onSelectedItemsChange={(selectedItems: number[]) => setEquipeId(selectedItems)}
                             searchInputPlaceholderText="Buscar colaboradores..."
                             itemTextColor="blue"
+                            
                         />
 
                         <View style={{ flexDirection: 'row' }}>
@@ -192,10 +191,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'flex-start',
-        paddingHorizontal: 20,
+        paddingHorizontal: 15,
         marginTop: 100,
-        maxHeight: Dimensions.get('screen').height * 0.6
+        maxHeight: Dimensions.get('screen').height * 0.65
     },
     titulo: {
         fontSize: 20,
@@ -207,7 +205,8 @@ const styles = StyleSheet.create({
         paddingVertical: 3,
         width: Dimensions.get('window').width - 60,
         marginBottom: 20,
-        fontStyle: 'italic'
+        fontStyle: 'italic',
+        paddingLeft: 10
     },
     centralizarBotao: {
         flex: 1,

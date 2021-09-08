@@ -22,7 +22,7 @@ type objetoDeResposta = {
 }
 
 const TelaDePerguntas: React.FC = () => {
-  const { ContratoId, ProcessoId, inspecaoId, setListaDeRespostaContext } = useContext(InspecaoContext)
+  const { ContratoId, ProcessoId, inspecaoId, setListaDeRespostaContext, setChecklistContext } = useContext(InspecaoContext)
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
@@ -119,6 +119,11 @@ const TelaDePerguntas: React.FC = () => {
   }
 
   function handleEnvioDeInspecao() {
+    if (routes.params?.key == "inspecao") {
+      setChecklistContext(false)
+    } else {
+      setChecklistContext(true)
+    }
     finishInspecao()
     navigation.navigate('MenuDeSeguranca')
   }
