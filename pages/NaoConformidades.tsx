@@ -275,7 +275,6 @@ const NaoConformidades: React.FC = () => {
                     }}>
                     {naoConformidadesRegistradas.map((item, key) => {
                         return (
-                            <>
                                 <Image
                                     source={{ uri: item }}
                                     style={{
@@ -286,15 +285,6 @@ const NaoConformidades: React.FC = () => {
                                     }}
                                     key={key}
                                 />
-                                {/* <FontAwesome
-                                    name='window-close'
-                                    size={25}
-                                    color='#cf1818'
-                                    onPress={() => setNaoConformidadesRegistradas(naoConformidadesRegistradas.splice(naoConformidadesRegistradas.indexOf(naoConformidadesRegistradas[key]), 1))}
-                                    key={key + 1}
-                                    style={{position: 'absolute'}}
-                                /> */}
-                            </>
                         )
                     })}
                 </View>

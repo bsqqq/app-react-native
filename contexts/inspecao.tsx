@@ -158,6 +158,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         if (checklist == true) {
             // tratar o envio de checklist
         } else {
+            // envio de inspeção/nao conformidades
             try {
                 const db = fb.database()
                 const storage = fb.storage()
@@ -181,8 +182,9 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                             inspecaoId,
                             colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
                             prazoDeResolucao: prazoDasNaoConformidades[index] || "",
-                            respostaId: arrDeRespostas[index].respostaId ? arrDeRespostas[index].respostaId : 0
+                            respostaId: arrNaoConformidadesIds[index] ? arrNaoConformidadesIds[index] : 0
                         };
+                        console.log(fotosDeInspecoes.respostaId)
                         await db.ref(`/fotos-de-inspecao/${fotosDeInspecoes.id}`).set(fotosDeInspecoes);
                         await Promise.all(promises).then(() => alert('Foto(s) enviada(s) com sucesso!'));
                     })
@@ -192,6 +194,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
                 setDescricao([])
                 setArrDeRespostas([])
                 setFotos([])
+                setArrNaoConformidadesIds([])
                 fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => alert(`Inspeção enviada com sucesso`)) : console.log('não existe fotos para apagar')
             } catch (error) {
                 console.log(error)
