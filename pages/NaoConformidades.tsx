@@ -28,7 +28,7 @@ import * as fs from 'expo-file-system'
 import DateTimePicker from '@react-native-community/datetimepicker'
 
 const NaoConformidades: React.FC = () => {
-    const { setFotosInspecao, setDescricaoContext, setColabIdContext, setDates } = useContext(InspecaoContext)
+    const { setFotosInspecao, setDescricaoContext, setColabIdContext, setDates, setRespId, respostaId } = useContext(InspecaoContext)
     const [naoConformidadesRegistradas, setNaoConformidadesRegistradas] = useState<Array<string>>([])
     const [colaboradores, setColaboradores] = useState<ModalFilterPickerOption[]>([])
     const [colaboradoresVisible, setColaboradoresVisible] = useState<boolean>(false)
@@ -44,9 +44,7 @@ const NaoConformidades: React.FC = () => {
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
     const navigation = useNavigation()
-    const arrDesc: string[] = []
     var camera: Camera
-
 
     useEffect(() => {
         (async () => {
@@ -109,6 +107,7 @@ const NaoConformidades: React.FC = () => {
         setColabId(0)
         setDates(`${date?.getDate()}/${date?.getMonth() + 1}/${date?.getFullYear()}`)
         setModalVisible(false)
+        setRespId(Number(respostaId))
     }
 
     async function handleConfirmNaoConformidade() {
