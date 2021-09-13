@@ -1,7 +1,8 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useState, useContext } from 'react'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import netinfo from '@react-native-community/netinfo'
 import fb from '../services/firebase'
+import ChecklistContext from './checklist';
 
 type fotoDeInspecaoProps = {
     id: number | undefined,
@@ -83,6 +84,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
     const [arrDeRespostas, setArrDeRespostas] = useState<objetoDeResposta[]>([])
     const [fotos, setFotos] = useState<string[]>([])
     const [checklist, setChecklist] = useState<boolean>(false)
+    const { checklistData } = useContext(ChecklistContext)
 
     function setProcessoContratoIdContextData(processoId: number, contratoId: number) {
         setProcessoId(processoId)
@@ -136,7 +138,7 @@ export const InspecaoProvider: React.FC = ({ children }) => {
         arrDeDates.push(dates)
         setPrazoDasNaoConformidades(arrDeDates)
     }
-    
+
     function setListaDeRespostaContext(obj: objetoDeResposta) {
         const arr: objetoDeResposta[] = arrDeRespostas
         const indexEncontrado = arrDeRespostas.findIndex(resposta => {
@@ -156,9 +158,47 @@ export const InspecaoProvider: React.FC = ({ children }) => {
 
     async function upload() {
         if (checklist == true) {
-            // tratar o envio de checklist
+            // envio de checklist
+            try {
+                console.log('enviando a checklist e suas respostas...')
+                const db = fb.database()
+                const storage = fb.storage()
+                await db.ref(`/checklist/${checklistData?.id}`).set(checklistData)
+                await db.ref(`/respostas/${checklistData?.id}`).set(arrDeRespostas)
+                const fts: string = String(await AsyncStorage.getItem('@mais-parceria-app-fotos'))
+                const arrayDeFotos: any[] = JSON.parse(fts || "")
+                if (arrayDeFotos?.length > 0) {
+                    const promises = arrayDeFotos?.map(async (item: string, index: number) => {
+                        const response = await fetch(item);
+                        var blob = await response.blob();
+                        await storage.ref().child(`/fotos-de-checklist/${inspecaoId}/${index}.jpg`).put(blob);
+                        var hiperlink = await storage.ref(`/fotos-de-checklist/${inspecaoId}/${index}.jpg`).getDownloadURL();
+                        var fotosDeChecklist: fotoDeInspecaoProps = {
+                            id: new Date().getTime(),
+                            hiperlink,
+                            descricao: descricao[index] || "",
+                            inspecaoId,
+                            colaboradorId: colabId[index] !== 0 ? colabId[index] : 0,
+                            prazoDeResolucao: prazoDasNaoConformidades[index] || "",
+                            respostaId: arrNaoConformidadesIds[index] ? arrNaoConformidadesIds[index] : 0
+                        };
+                        console.log(fotosDeChecklist.respostaId)
+                        await db.ref(`/fotos-de-checklist/${fotosDeChecklist.id}`).set(fotosDeChecklist);
+                        await Promise.all(promises).then(() => alert('Foto(s) enviada(s) com sucesso!'));
+                    })
+                }
+                setColabId([])
+                setPrazoDasNaoConformidades([])
+                setDescricao([])
+                setArrDeRespostas([])
+                setFotos([])
+                setArrNaoConformidadesIds([])
+                fts ? await AsyncStorage.removeItem('@mais-parceria-app-fotos', () => alert(`Inspeção enviada com sucesso`)) : console.log('não existe fotos para apagar')
+            } catch (error) {
+                console.log(error)
+            }
         } else {
-            // envio de inspeção/nao conformidades
+            // envio de inspeção
             try {
                 const db = fb.database()
                 const storage = fb.storage()

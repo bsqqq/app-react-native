@@ -76,9 +76,9 @@ export interface objetoDeInspecao {
 }
 
 export default function NovaInspecao() {
-    const { setProcessoContratoIdContextData, setInspecaoIdContextData, setNewInspecao, setEquipeIdContext } = useContext(InspecaoContext)
     var path = fs.documentDirectory + 'json/'
     const fileUri = (jsonId: string) => path + `${jsonId}.json`
+    const { setProcessoContratoIdContextData, setInspecaoIdContextData, setNewInspecao, setEquipeIdContext } = useContext(InspecaoContext)
     const [colaboradoresFormatados, setColaboradoresFormatados] = useState<MultiProps[]>([])
     const [processosState, setProcessosState] = useState<ProcessosContratosProps>({})
     const [contratosState, setContratosState] = useState<ProcessosContratosProps>({})
@@ -100,9 +100,9 @@ export default function NovaInspecao() {
     const { user } = useContext(AuthContext)
     const navigation = useNavigation()
     const db = fb.database()
+    var processos: ProcessosContratosProps
     var colaboradores: ColaboradoresProps
     var contratos: ContratoProps = {}
-    var processos: ProcessosContratosProps
     var municipios: any[]
 
     async function handleNewInspecao() {
@@ -333,11 +333,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        // alignItems: 'flex-start',
         paddingHorizontal: 30,
         marginTop: 100,
         maxHeight: Dimensions.get('screen').height * 0.55,
-        // backgroundColor: '#f9f9f9'
     },
     titulo: {
         fontSize: 20,

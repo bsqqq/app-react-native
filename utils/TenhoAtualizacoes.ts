@@ -8,6 +8,7 @@ export default async function atualizacoes() {
         const fileUri = (jsonId: string) => path + `${jsonId}.json`
             const db = fb.database()
             const snapPerguntasDeSeguranca = await db.ref('/perguntas-de-seguranca').once('value')
+            const snapPerguntasDeChecklist = await db.ref('/perguntas-de-checklist').once('value')
             const snapControle = await db.ref('/controle/numero-de-inspecao').once('value')
             const snapColaboradores = await db.ref('/colaboradores').once('value')
             const snapProcessos = await db.ref('/processos').once('value')
@@ -15,6 +16,7 @@ export default async function atualizacoes() {
             const snapContratos = await db.ref('/empresas').once('value')
             const snapAPRs = await db.ref('/APR').once('value')
             const shotPerguntasDeSeguranca = snapPerguntasDeSeguranca.exportVal()
+            const shotPerguntasDeChecklist = snapPerguntasDeChecklist.exportVal()
             const shotColaboradores = snapColaboradores.exportVal()
             const shotContratos = snapContratos.exportVal()
             const shotProcessos = snapProcessos.exportVal()
@@ -26,6 +28,7 @@ export default async function atualizacoes() {
                 if (!dirInfo.exists)
                     await fs.makeDirectoryAsync(path, { intermediates: true })
                 await fs.writeAsStringAsync(fileUri('perguntas-de-seguranca'), JSON.stringify(shotPerguntasDeSeguranca)).then(() => console.log('perguntas de segurança obtidos com sucesso.'))
+                await fs.writeAsStringAsync(fileUri('perguntas-de-checklist'), JSON.stringify(shotPerguntasDeChecklist)).then(() => console.log('perguntas de checklist obtidos com sucesso.'))
                 await fs.writeAsStringAsync(fileUri('numero-de-inspecao'), JSON.stringify(shotControle)).then(() => console.log('numero de inspeção obtido com sucesso.'))
                 await fs.writeAsStringAsync(fileUri('colaboradores'), JSON.stringify(shotColaboradores)).then(() => console.log('colaboradores obtidos com sucesso.'))
                 await fs.writeAsStringAsync(fileUri('processos'), JSON.stringify(shotProcessos)).then(() => console.log('processos obtidos com sucesso.'))

@@ -5,7 +5,7 @@ import InspecaoContext from '../contexts/inspecao'
 import Buttom from '../components/NextButton'
 import * as fs from 'expo-file-system'
 
-interface objetoDePergunta {
+type objetoDePergunta = {
   processosId: Array<number>
   contratosId: Array<number>
   pergunta: string
@@ -22,11 +22,10 @@ type objetoDeResposta = {
 }
 
 const TelaDePerguntas: React.FC = () => {
-  const { ContratoId, ProcessoId, inspecaoId, setListaDeRespostaContext, setChecklistContext } = useContext(InspecaoContext)
+  const { ContratoId, ProcessoId, inspecaoId, setListaDeRespostaContext, setChecklistContext, finishInspecao, setRespId } = useContext(InspecaoContext)
   const [listaPerguntas, setListaPerguntas] = useState<Array<objetoDePergunta>>([])
   const [listaRespostas, setListaRespostas] = useState<Array<objetoDeResposta>>([])
   const [indicePerguntaAtual, setIndicePerguntaAtual] = useState<number>(0)
-  const { finishInspecao, setRespId } = useContext(InspecaoContext)
   const [proximaPergunta, setProximaPergunta] = useState<string>()
   const [disabled, setDisabled] = useState(false)
   const navigation = useNavigation()
@@ -120,8 +119,10 @@ const TelaDePerguntas: React.FC = () => {
 
   function handleEnvioDeInspecao() {
     if (routes.params?.key == "inspecao") {
+      console.log('é uma inspeção')
       setChecklistContext(false)
     } else {
+      console.log('é um checklist')
       setChecklistContext(true)
     }
     finishInspecao()
@@ -132,7 +133,8 @@ const TelaDePerguntas: React.FC = () => {
     async function getPerguntas() {
       var path = fs.documentDirectory + 'json/'
       const fileUri = (jsonId: string): string => path + `${jsonId}.json`
-      const perguntasJSON = JSON.parse(routes.params?.key !== 0 ? await fs.readAsStringAsync(fileUri('perguntas-de-seguranca')) : await fs.readAsStringAsync(fileUri('perguntas-de-checklist')))
+      const perguntasJSON = JSON.parse(routes.params?.key === 'inspecao' ? await fs.readAsStringAsync(fileUri('perguntas-de-seguranca')) : await fs.readAsStringAsync(fileUri('perguntas-de-checklist')))
+      console.log(perguntasJSON)
       if (perguntasJSON) {
         const keys = Object.keys(perguntasJSON)
         let perguntas: objetoDePergunta[] = []
@@ -226,7 +228,6 @@ const style = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     textAlign: 'center',
-    // alignSelf: 'center',
     fontWeight: 'bold'
   }
 })

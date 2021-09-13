@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import {
     View,
     Text,
@@ -15,6 +15,7 @@ import FilterPicker, { ModalFilterPickerOption } from 'react-native-modal-filter
 import * as fs from 'expo-file-system'
 import Botao from '../components/NextButton'
 import { useNavigation } from '@react-navigation/native'
+import ChecklistContext from '../contexts/checklist'
 
 interface MultiProps {
     id: string,
@@ -46,6 +47,14 @@ interface ColaboradoresProps {
     }
 }
 
+type checklistProps = {
+    id: number,
+    equipeId: number[] | undefined,
+    processoId: number,
+    contratoId: number,
+    dataHora: string
+}
+
 export default function Checklist() {
     var path = fs.documentDirectory + 'json/'
     const fileUri = (jsonId: string) => path + `${jsonId}.json`
@@ -60,12 +69,13 @@ export default function Checklist() {
     const [contrato, setContrato] = useState<string>()
     const [processosState, setProcessosState] = useState<ProcessosContratosProps>({})
     const [contratosState, setContratosState] = useState<ProcessosContratosProps>({})
+    const { setChecklistDataContext } = useContext(ChecklistContext)
     var colaboradores: ColaboradoresProps
     var contratos: ProcessosContratosProps = {}
     var processos: ProcessosContratosProps
     const navigation = useNavigation()
     const date = new Date()
-    
+
     useEffect(() => {
         let colaboradoresFormatadosPreState: MultiProps[] = []
         setDataHora(`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${new Date().toLocaleTimeString()}`);
@@ -107,20 +117,39 @@ export default function Checklist() {
     })
 
     function handleNewChecklist() {
-        navigation.navigate('TelaDePerguntas', { key: "checklist" })
+        console.log('entrou no handleNewChecklist()')
+        const objDeChecklist: checklistProps = {
+            id: new Date().getTime(),
+            contratoId: Number(contratoId),
+            processoId: Number(processoId),
+            dataHora: String(dataHora),
+            equipeId
+        }
+        const keys = Object.keys(objDeChecklist)
+        const campoVazio = keys.find(key => {
+            return !objDeChecklist[key]
+        })
+        if (!campoVazio) {
+            console.log('nenhum campo vazio, passando o objeto de checklist para o context e indo para a tela de perguntas')
+            setChecklistDataContext(objDeChecklist)
+            navigation.navigate('TelaDePerguntas', { key: "checklist" })
+        }
+        else {
+            alert('Algum campo possivelmente está vazio, por favor verifique novamente.')
+            return
+        }
     }
 
     return (
         <>
             <KeyboardAvoidingView behavior={Platform.OS === 'android' ? 'padding' : 'height'} style={styles.container} >
-                <ScrollView>
+                <ScrollView >
                     <View style={styles.container}>
                         <Text style={styles.titulo}>Data e hora do check-list:</Text>
                         <TextInput
                             style={styles.input}
                             value={dataHora}
                             editable={false}
-                            onChangeText={value => setDataHora(value)}
                         />
 
                         <Text style={styles.titulo}>Equipe:</Text>
@@ -131,7 +160,7 @@ export default function Checklist() {
                             onSelectedItemsChange={(selectedItems: number[]) => setEquipeId(selectedItems)}
                             searchInputPlaceholderText="Buscar colaboradores..."
                             itemTextColor="blue"
-                            
+
                         />
 
                         <View style={{ flexDirection: 'row' }}>
@@ -191,9 +220,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
+        // alignItems: 'center',
         paddingHorizontal: 15,
-        marginTop: 100,
-        maxHeight: Dimensions.get('screen').height * 0.65
+        marginTop: 50,
+        maxHeight: Dimensions.get('screen').height,
     },
     titulo: {
         fontSize: 20,
